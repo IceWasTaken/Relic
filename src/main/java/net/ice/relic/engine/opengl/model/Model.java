@@ -1,6 +1,5 @@
 package net.ice.relic.engine.opengl.model;
 
-import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
 import java.nio.IntBuffer;
@@ -15,8 +14,6 @@ public class Model {
     private final List<Mesh> meshes = new ArrayList<>();
 
     public Model(String path, int flags) {
-
-
         AIScene scene = aiImportFile(path, flags);
 
         if (scene == null || (scene.mFlags() & AI_SCENE_FLAGS_INCOMPLETE) != 0 || scene.mRootNode() == null) {
@@ -25,8 +22,6 @@ public class Model {
 
         processNode(scene.mRootNode(), scene);
     }
-
-
 
     private void processNode(AINode node, AIScene scene) {
         int numMeshes = node.mNumMeshes();
@@ -44,13 +39,14 @@ public class Model {
     }
 
     private Mesh processMesh(AIMesh mesh, AIScene scene) {
-
         List<Float> vertices = new ArrayList<>();
         List<Integer> indices = new ArrayList<>();
 
         int textureId = -1;
         int emissiveTextureId = -1;
+        int normalTextureID = -1;
         boolean hasEmissiveMap = false;
+
         float emissiveStrength = 1.0f;
         float[] emissiveColor = new float[] {1.0f, 1.0f, 1.0f};
 
@@ -93,11 +89,12 @@ public class Model {
         }
 
         float[] strength = new float[1];
-        if (Assimp.aiGetMaterialFloatArray(material, "$mat.gltf.emissiveStrength", aiTextureType_NONE, 0, strength, new int[]{1}) == 0) {
+        if (aiGetMaterialFloatArray(material, AI_MATKEY_EMISSIVE_INTENSITY, aiTextureType_NONE, 0, strength, new int[]{1}) == 0) {
             emissiveStrength = strength[0];
         }
 
         AIString path = AIString.calloc();
+
         if (aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null) == 0) {
             String texPath = "models/" + path.dataString();
             textureId = TextureLoader.loadTexture(texPath);
@@ -110,7 +107,13 @@ public class Model {
             emissiveTextureId = TextureLoader.loadTexture(texPath);
         }
 
-        return new Mesh(vertices, indices, textureId, emissiveStrength, emissiveColor, hasEmissiveMap, emissiveTextureId);
+        path = AIString.calloc();
+        if (aiGetMaterialTexture(material, aiTextureType_NORMALS, 0, path, (IntBuffer) null, null, null, null, null, null) == 0) {
+            String texPath = "models/" + path.dataString();
+            normalTextureID = TextureLoader.loadTexture(texPath);
+        }
+
+        return new Mesh(vertices, indices, textureId, emissiveStrength, emissiveColor, hasEmissiveMap, emissiveTextureId, normalTextureID);
     }
 
     public void render(int shaderProgram) {

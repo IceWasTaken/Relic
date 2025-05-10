@@ -23,13 +23,15 @@ public class ShaderBuilder {
     public int build() {
         int program = glCreateProgram();
 
-        String vertexCode = injectModules(vertexBase);
-        String fragmentCode = injectModules(fragmentBase);
+        String vertexCode = injectVertexModules(vertexBase);
+        String fragmentCode = injectFragmentModules(fragmentBase);
 
         Logger.debug(fragmentCode);
 
+
         int vert = compileShader(vertexCode, GL_VERTEX_SHADER);
         int frag = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
+
 
         glAttachShader(program, vert);
         glAttachShader(program, frag);
@@ -46,20 +48,34 @@ public class ShaderBuilder {
     private int compileShader(String code, int type) {
         int shader = glCreateShader(type);
         glShaderSource(shader, code);
-        Logger.debug(code);
 
         glCompileShader(shader);
         ShaderUtil.validateShader(shader, (type == GL_VERTEX_SHADER ? "Vertex" : "Fragment"));
         return shader;
     }
 
-    private String injectModules(String base) {
-        StringBuilder injected = new StringBuilder();
-        injected.append("#version 330 core\n");
+    private String injectVertexModules(String base) {
+        StringBuilder injected = new StringBuilder("#version 330 core\n");
         for (ShaderModule module : modules) {
-            injected.append("// MODULE: ").append(module.getName()).append("\n");
-            injected.append(module.getCode()).append("\n");
+            String code = module.getVertexCode();
+            if (!code.isEmpty()) {
+                injected.append("// MODULE: ").append(module.getName()).append(" (Vertex)\n");
+                injected.append(code).append("\n");
+            }
         }
+        injected.append(base);
+        return injected.toString();
+    }
+
+    private String injectFragmentModules(String base) {
+        StringBuilder injected = new StringBuilder("#version 330 core\n");
+//        for (ShaderModule module : modules) {
+//            String code = module.getFragmentCode();
+//            if (!code.isEmpty()) {
+//                injected.append("// MODULE: ").append(module.getName()).append(" (Fragment)\n");
+//                injected.append(code).append("\n");
+//            }
+//        }
         injected.append(base);
         return injected.toString();
     }

@@ -8,6 +8,7 @@ import net.ice.relic.engine.opengl.shader.ShaderBuilder;
 import net.ice.relic.engine.opengl.shader.ShaderModule;
 import net.ice.relic.engine.opengl.shader.module.EmissiveModule;
 import net.ice.relic.engine.opengl.shader.module.LightingModule;
+import net.ice.relic.engine.opengl.shader.module.NormalModule;
 import net.ice.relic.engine.opengl.shader.module.TexturingModule;
 import net.ice.relic.engine.test.DebugOverlayNew;
 import org.joml.Matrix4f;
@@ -33,6 +34,7 @@ public class RelicGL implements Relic {
     private DebugOverlayNew debugOverlay;
     private ModelRenderer cubeRenderer;
     private ModelRenderer planeRenderer;
+    private ModelRenderer testRenderer;
     private PhysicsWorld physicsWorld;
 
     private RigidBody cubeBody;
@@ -48,10 +50,13 @@ public class RelicGL implements Relic {
         this.debugOverlay = new DebugOverlayNew(window);
         this.cubeRenderer = new ModelRenderer("models/cube.glb", DEFAULT_FLAGS);
         this.planeRenderer = new ModelRenderer("models/plane.glb", DEFAULT_FLAGS);
+        this.testRenderer = new ModelRenderer("models/EmissiveStrengthTest.gltf", DEFAULT_FLAGS);
+
         this.physicsWorld = new PhysicsWorld();
 
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_CULL_FACE);
         glfwSwapInterval(1);
 
         glfwSetFramebufferSizeCallback(window.getWindowHandle(), (windowHandle, width, height) -> {
@@ -81,7 +86,8 @@ public class RelicGL implements Relic {
         List<ShaderModule> modules = List.of(
                 new LightingModule(),
                 new TexturingModule(),
-                new EmissiveModule()
+                new EmissiveModule(),
+                new NormalModule()
         );
 
         String vertexBase = readShaderFile("modelVertexBase.glsl");
@@ -104,18 +110,31 @@ public class RelicGL implements Relic {
                 camera.newFrame();
                 camera.update(window.getClock());
 
-                // Step physics world
                 physicsWorld.step(deltaTime);
 
-                Logger.info("Cube Position: {}", cubeBody.position);
-
-                // === OpenGL Rendering Setup ===
                 glViewport(0, 0, window.getWidth(), window.getHeight());
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glClearColor(0.6f, 0.7f, 0.8f, 1.0f);
 
                 glUseProgram(modelShader);
+
+                List<EmissiveLight> emissiveLights = List.of(
+                        new EmissiveLight(new Vector3f(0, 1, 0), new Vector3f(0.0f, 0.5f, 1.0f), 3.0f)
+                );
+
+                glUseProgram(modelShader);
+                glUniform1i(glGetUniformLocation(modelShader, "emissiveLightCount"), emissiveLights.size());
+
+                for (int i = 0; i < emissiveLights.size(); i++) {
+                    EmissiveLight light = emissiveLights.get(i);
+                    glUniform3f(glGetUniformLocation(modelShader, "emissiveLightPos[" + i + "]"),
+                            light.position.x, light.position.y, light.position.z);
+                    glUniform3f(glGetUniformLocation(modelShader, "emissiveLightColor[" + i + "]"),
+                            light.color.x, light.color.y, light.color.z);
+                    glUniform1f(glGetUniformLocation(modelShader, "emissiveLightStrength[" + i + "]"), light.strength);
+                }
+
 
                 try (MemoryStack stack = stackPush()) {
                     FloatBuffer modelBuffer = stack.mallocFloat(16);
@@ -138,14 +157,16 @@ public class RelicGL implements Relic {
                             .rotate(cubeBody.rotation)
                             .scale(1.0f);
                     glUniformMatrix4fv(modelLoc, false, cubeMatrix.get(modelBuffer));
-                    cubeRenderer.render(modelShader);
+                    //cubeRenderer.render(modelShader);
 
                     // === Plane ===
                     Matrix4f planeMatrix = new Matrix4f()
                             .translate(groundBody.position)
                             .scale(1.0f);
                     glUniformMatrix4fv(modelLoc, false, planeMatrix.get(modelBuffer));
-                    planeRenderer.render(modelShader);
+                    //planeRenderer.render(modelShader);
+
+                    testRenderer.render(modelShader);
                 }
 
                 debugOverlay.render(window, camera);

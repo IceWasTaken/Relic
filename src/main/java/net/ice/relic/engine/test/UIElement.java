@@ -69,12 +69,13 @@ public abstract class UIElement {
             glPopMatrix();
 
             glEnable(GL_DEPTH_TEST);
-            glDisable(GL_BLEND);
+            //glDisable(GL_BLEND);
 
             glMatrixMode(GL_MODELVIEW);
             glPopMatrix();
             glMatrixMode(GL_PROJECTION);
             glPopMatrix();
+
         }
     }
 

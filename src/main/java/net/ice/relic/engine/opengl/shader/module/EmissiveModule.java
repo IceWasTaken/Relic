@@ -7,7 +7,17 @@ import static net.ice.relic.engine.util.IOUtil.readShaderFile;
 public class EmissiveModule implements ShaderModule {
 
     @Override
-    public String getCode() {
+    public String getName() {
+        return "emissive";
+    }
+
+    @Override
+    public String getVertexCode() {
+        return "";
+    }
+
+    @Override
+    public String getFragmentCode() {
         return readShaderFile("emissive.glsl");
     }
 }

@@ -10,6 +10,7 @@ import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class Mesh {
+
     private final int vaoId;
     private final int vboId;
     private final int eboId;
@@ -19,14 +20,16 @@ public class Mesh {
     private final float[] emissiveColor;
     private final boolean hasEmissiveMap;
     private final int emissiveTextureId;
+    private final int normalTextureID;
 
-    public Mesh(List<Float> vertices, List<Integer> indices, int textureId, float emissiveStrength, float[] emissiveColor, boolean hasEmissiveMap, int emissiveTextureId) {
+    public Mesh(List<Float> vertices, List<Integer> indices, int textureId, float emissiveStrength, float[] emissiveColor, boolean hasEmissiveMap, int emissiveTextureId, int normalTextureID) {
         this.vertexCount = indices.size();
         this.textureId = textureId;
         this.emissiveStrength = emissiveStrength;
         this.emissiveColor = emissiveColor;
         this.hasEmissiveMap = hasEmissiveMap;
         this.emissiveTextureId = emissiveTextureId;
+        this.normalTextureID = normalTextureID;
 
         vaoId = glGenVertexArrays();
         glBindVertexArray(vaoId);
@@ -75,10 +78,16 @@ public class Mesh {
             glBindTexture(GL_TEXTURE_2D, emissiveTextureId);
         }
 
+        if (normalTextureID != -1) {
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, normalTextureID);
+        }
+
         glUniform1f(glGetUniformLocation(shaderProgramId, "emissiveStrength"), emissiveStrength);
         glUniform3f(glGetUniformLocation(shaderProgramId, "emissiveColor"), emissiveColor[0], emissiveColor[1], emissiveColor[2]);
         glUniform1i(glGetUniformLocation(shaderProgramId, "hasEmissiveMap"), hasEmissiveMap ? 1 : 0);
-        glUniform1i(glGetUniformLocation(shaderProgramId, "emissiveMap"), 1); // GL_TEXTURE1
+        glUniform1i(glGetUniformLocation(shaderProgramId, "emissiveMap"), 1);
+        glUniform1i(glGetUniformLocation(shaderProgramId, "normalMap"), 2);
 
         glBindVertexArray(vaoId);
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
@@ -87,6 +96,7 @@ public class Mesh {
         // Unbind textures
         if (textureId != -1) glBindTexture(GL_TEXTURE_2D, 0);
         if (emissiveTextureId != -1) glBindTexture(GL_TEXTURE_2D, 0);
+        if (normalTextureID != -1) glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     public void cleanup() {
@@ -95,6 +105,12 @@ public class Mesh {
         glDeleteVertexArrays(vaoId);
         if (textureId != -1) {
             glDeleteTextures(textureId);
+        }
+        if (emissiveTextureId != -1) {
+            glDeleteTextures(emissiveTextureId);
+        }
+        if (normalTextureID != -1) {
+            glDeleteTextures(normalTextureID);
         }
     }
 }

@@ -1,25 +1,23 @@
 package net.ice.relic.engine.opengl.shader.module;
 
 import net.ice.relic.engine.opengl.shader.ShaderModule;
-import net.ice.relic.engine.util.IOUtil;
 
 import static net.ice.relic.engine.util.IOUtil.readShaderFile;
 
-public class TexturingModule implements ShaderModule {
-
+public class NormalModule implements ShaderModule {
 
     @Override
     public String getName() {
-        return "texturing";
+        return "normal";
     }
 
     @Override
     public String getVertexCode() {
-        return readShaderFile("texturing.glsl");
+        return readShaderFile("normal.glsl");
     }
 
     @Override
     public String getFragmentCode() {
-        return readShaderFile("texturing.glsl");
+        return "";
     }
 }
