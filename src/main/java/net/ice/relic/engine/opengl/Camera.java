@@ -16,9 +16,9 @@ public class Camera {
     public Matrix4f viewMatrix = new Matrix4f();
     public Matrix4f projectionMatrix = new Matrix4f();
 
-    private Vector3f position = new Vector3f(0,2,5);
-    private Quaternionf orientation = new Quaternionf();
-    private Window window;
+    private final Vector3f position = new Vector3f(0,2,5);
+    private final Quaternionf orientation = new Quaternionf();
+    private final Window window;
 
     public Camera(Window window) {
         this.window = window;

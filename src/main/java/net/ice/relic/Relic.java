@@ -8,8 +8,8 @@ import java.io.IOException;
 
 public class Relic {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         EngineConfig config = EngineConfig.getInstance();
-        new Window(720,720,"", new RelicGL());
+        new Window(720,720,"Relic", new RelicGL());
     }
 }

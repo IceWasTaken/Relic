@@ -2,10 +2,8 @@ package net.ice.relic.engine.opengl;
 
 import net.ice.relic.engine.Relic;
 import net.ice.relic.engine.Window;
-import net.ice.relic.engine.common.*;
 import net.ice.relic.engine.common.event.EventManager;
 import net.ice.relic.engine.opengl.model.ModelRenderer;
-import net.ice.relic.engine.opengl.shader.Shader;
 import net.ice.relic.engine.opengl.shader.ShaderBuilder;
 import net.ice.relic.engine.opengl.shader.ShaderModule;
 import net.ice.relic.engine.opengl.shader.module.EmissiveModule;
@@ -22,7 +20,6 @@ import java.util.List;
 
 import static net.ice.relic.engine.opengl.model.Model.DEFAULT_FLAGS;
 import static net.ice.relic.engine.util.IOUtil.readShaderFile;
-import static net.ice.relic.engine.util.ShaderUtil.validateLink;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -36,13 +33,10 @@ public class RelicGL implements Relic {
     private DebugOverlayNew debugOverlay;
     private ModelRenderer cubeRenderer;
     private ModelRenderer planeRenderer;
+    private PhysicsWorld physicsWorld;
 
-    AABB ground = new AABB(
-            new Vector3f(-1000, -0.1f, -1000),
-            new Vector3f(1000, 0, 1000)
-    );
-
-    RigidBody cubeBody = new RigidBody(1.0f, new Vector3f(0, 5, 0));
+    private RigidBody cubeBody;
+    private RigidBody groundBody;
 
     private int modelShader;
 
@@ -54,17 +48,11 @@ public class RelicGL implements Relic {
         this.debugOverlay = new DebugOverlayNew(window);
         this.cubeRenderer = new ModelRenderer("models/cube.glb", DEFAULT_FLAGS);
         this.planeRenderer = new ModelRenderer("models/plane.glb", DEFAULT_FLAGS);
-
+        this.physicsWorld = new PhysicsWorld();
 
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-//        glEnable(GL_CULL_FACE);
-//        glCullFace(GL_BACK);
-//        glFrontFace(GL_CCW);
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
         glfwSwapInterval(1);
-
 
         glfwSetFramebufferSizeCallback(window.getWindowHandle(), (windowHandle, width, height) -> {
             if (width > 0 && height > 0) {
@@ -77,6 +65,15 @@ public class RelicGL implements Relic {
         if (glfwGetCurrentContext() != window.getWindowHandle()) {
             throw new RuntimeException("Failed to set OpenGL context.");
         }
+
+        // Setup physics bodies
+        cubeBody = new RigidBody(1.0f, new Vector3f(0, 5, 0));
+        groundBody = new RigidBody(0.0f, new Vector3f(0, -0.1f, 0));
+        groundBody.setStatic(true);
+        groundBody.size = 2000.0f; // Large size to match AABB ground
+
+        physicsWorld.addBody(cubeBody);
+        physicsWorld.addBody(groundBody);
     }
 
     @Override
@@ -102,28 +99,15 @@ public class RelicGL implements Relic {
                 glfwPollEvents();
 
                 window.getClock().updateTime();
+                float deltaTime = window.getClock().getDeltaTime();
+
                 camera.newFrame();
                 camera.update(window.getClock());
 
-                // Apply gravity
-                cubeBody.applyForce(new Vector3f(0, -9.81f * cubeBody.mass, 0));
-                cubeBody.update(window.getClock().getDeltaTime());
+                // Step physics world
+                physicsWorld.step(deltaTime);
 
-                AABB cubeBox = cubeBody.getAABB();
-                if (cubeBox.intersects(ground)) {
-                    // Collision resolution: snap to top of ground
-                    cubeBody.position.y = ground.getMax().y + cubeBody.size / 2f;
-
-                    // Simple bounce (reverse Y velocity with damping)
-                    if (cubeBody.velocity.y < 0) {
-                        cubeBody.velocity.y *= -0.5f; // damping factor
-                    }
-
-                    // Optional: zero small velocities
-                    if (Math.abs(cubeBody.velocity.y) < 0.1f) {
-                        cubeBody.velocity.y = 0;
-                    }
-                }
+                Logger.info("Cube Position: {}", cubeBody.position);
 
                 // === OpenGL Rendering Setup ===
                 glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -136,7 +120,6 @@ public class RelicGL implements Relic {
                 try (MemoryStack stack = stackPush()) {
                     FloatBuffer modelBuffer = stack.mallocFloat(16);
 
-                    // Shared Uniforms
                     glUniformMatrix4fv(glGetUniformLocation(modelShader, "view"), false, camera.getViewMatrix().get(stack.mallocFloat(16)));
                     glUniformMatrix4fv(glGetUniformLocation(modelShader, "projection"), false, camera.getProjectionMatrix().get(stack.mallocFloat(16)));
 
@@ -153,16 +136,14 @@ public class RelicGL implements Relic {
                     Matrix4f cubeMatrix = new Matrix4f()
                             .translate(cubeBody.position)
                             .rotate(cubeBody.rotation)
-                            .scale(1.0f); // Adjust depending on cube size
-
+                            .scale(1.0f);
                     glUniformMatrix4fv(modelLoc, false, cubeMatrix.get(modelBuffer));
                     cubeRenderer.render(modelShader);
 
                     // === Plane ===
                     Matrix4f planeMatrix = new Matrix4f()
-                            .translate(0, 0, 0) // Adjust if needed
-                            .scale(1.0f); // Adjust scale to match plane size
-
+                            .translate(groundBody.position)
+                            .scale(1.0f);
                     glUniformMatrix4fv(modelLoc, false, planeMatrix.get(modelBuffer));
                     planeRenderer.render(modelShader);
                 }
@@ -178,7 +159,7 @@ public class RelicGL implements Relic {
 
     @Override
     public void close() {
-
+        // Cleanup resources if needed
     }
 
     public Camera getCamera() {
@@ -188,5 +169,4 @@ public class RelicGL implements Relic {
     public Window getWindow() {
         return window;
     }
-
 }

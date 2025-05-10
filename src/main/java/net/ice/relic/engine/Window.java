@@ -12,9 +12,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
 
-    private long windowHandle;
+    private final long windowHandle;
     private int width, height;
-    private Relic relic;
+    private final Relic relic;
     public String title;
     private final Clock clock;
 
@@ -23,6 +23,7 @@ public class Window {
         this.width = width;
         this.height = height;
         this.title = title;
+        this.relic = relic;
 
         this.clock = new Clock();
 
@@ -53,16 +54,14 @@ public class Window {
         });
 
         createCapabilities();
-
         glEnable(GL_FRAMEBUFFER_SRGB);
+
+        clock.timerInit();
 
         relic.initShaders();
         relic.init(this);
 
-        clock.timerInit();
-
         relic.loop();
-
         relic.close();
     }
 

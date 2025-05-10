@@ -1,35 +1,51 @@
 package net.ice.relic.engine.opengl;
 
 import net.ice.relic.engine.common.AABB;
-import org.joml.*;
+import org.joml.Vector3f;
+import org.joml.Quaternionf;
 
 public class RigidBody {
     public float mass;
     public Vector3f position;
-    public Vector3f velocity = new Vector3f();
-    public Vector3f forces = new Vector3f();
-    public Quaternionf rotation = new Quaternionf();
+    public Vector3f velocity;
+    public Vector3f force;
+    public Quaternionf rotation;
+    public float size;
 
-    public float size = 6.0f; // match scale in render
+    private boolean isStatic;
 
     public RigidBody(float mass, Vector3f position) {
         this.mass = mass;
         this.position = new Vector3f(position);
+        this.velocity = new Vector3f();
+        this.force = new Vector3f();
+        this.rotation = new Quaternionf();
+        this.size = 1.0f;
+        this.isStatic = false;
     }
 
     public void applyForce(Vector3f force) {
-        this.forces.add(force);
+        this.force.add(force);
     }
 
     public void update(float deltaTime) {
-        Vector3f acceleration = new Vector3f(forces).div(mass);
+        if (isStatic) return;
+
+        Vector3f acceleration = new Vector3f(force).div(mass);
         velocity.add(acceleration.mul(deltaTime));
         position.add(new Vector3f(velocity).mul(deltaTime));
-        forces.zero(); // reset forces after applying
+        force.zero();
     }
 
     public AABB getAABB() {
-        Vector3f half = new Vector3f(size / 2f);
-        return new AABB(new Vector3f(position).sub(half), new Vector3f(position).add(half));
+        return AABB.fromCenterAndHalfExtents(position, size / 2f);
+    }
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    public void setStatic(boolean isStatic) {
+        this.isStatic = isStatic;
     }
 }
