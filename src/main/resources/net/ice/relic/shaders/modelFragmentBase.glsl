@@ -30,6 +30,38 @@ vec3 applyEmissive(vec2 uv, vec3 baseColor) {
     return baseColor + emissive;
 }
 
+vec3 calculateEmissiveLighting(vec3 fragPos, vec3 normal) {
+    vec3 result = vec3(0.0);
+    for (int i = 0; i < emissiveLightCount; i++) {
+        vec3 lightPos = emissiveLightPos[i];
+        vec3 lightColor = emissiveLightColor[i];
+        float lightStrength = emissiveLightStrength[i];
+
+        vec3 toLight = lightPos - fragPos;
+        float distance = length(toLight);
+        vec3 lightDir = normalize(toLight);
+
+        // Inverse square attenuation with a small epsilon
+        float attenuation = 1.0 / (distance * distance + 0.01);
+
+        // Optional soft falloff: fade to zero at max range
+        float maxRange = 5.0; // configurable max range
+        float fade = clamp(1.0 - (distance / maxRange), 0.0, 1.0);
+
+        // Lambertian diffuse (emissive lights aren't directional, but this gives nice rim shading)
+        float NdotL = max(dot(normal, lightDir), 0.0);
+
+        // Shadow check (stub – implement actual shadow logic as needed)
+        float shadow = 1.0; // Set to 0.0 if in shadow
+
+        // Final contribution
+        vec3 lightContribution = lightColor * lightStrength * attenuation * fade * NdotL * shadow;
+        result += lightContribution;
+    }
+    return result;
+}
+
+
 vec3 calculateLighting(vec3 normal, vec3 fragPos, vec3 viewDir, vec3 texColor) {
     vec3 ambient = 0.1 * texColor;
 
@@ -52,11 +84,13 @@ void main() {
     vec3 baseLight = calculateLighting(Normal, FragPos, viewDir, texColor);
 
     vec3 emissive = vec3(0.0);
-    for (int i = 0; i < emissiveLightCount; ++i) {
-        float dist = length(emissiveLightPos[i] - FragPos);
-        float attenuation = clamp(1.0 - (dist / 5.0), 0.0, 1.0); // Simple falloff
-        emissive += emissiveLightColor[i] * emissiveLightStrength[i] * attenuation;
+    if (hasEmissiveMap == 1) {
+        emissive = texture(emissiveMap, TexCoords).rgb;
     }
+    emissive *= emissiveColor * emissiveStrength;
+
+    // Dynamic lighting from nearby emissive lights
+    emissive += calculateEmissiveLighting(FragPos, Normal);
 
     vec3 result = baseLight + emissive;
     result = applyEmissive(TexCoord, result);

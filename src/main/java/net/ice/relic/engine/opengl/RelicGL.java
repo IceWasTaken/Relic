@@ -119,7 +119,8 @@ public class RelicGL implements Relic {
                 glUseProgram(modelShader);
 
                 List<EmissiveLight> emissiveLights = List.of(
-                        new EmissiveLight(new Vector3f(0, 1, 0), new Vector3f(0.0f, 0.5f, 1.0f), 3.0f)
+                        new EmissiveLight(new Vector3f(0, 1, 0), new Vector3f(0.0f, 0.5f, 1.0f), 2.0f),
+                        new EmissiveLight(new Vector3f(2.5f, 1, 0), new Vector3f(0.0f, 0.5f, 1.0f), 1f)
                 );
 
                 glUseProgram(modelShader);
