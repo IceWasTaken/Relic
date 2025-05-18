@@ -5,6 +5,7 @@ import net.ice.relic.engine.util.IOUtil;
 
 import static net.ice.relic.engine.util.IOUtil.readShaderFile;
 
+@Deprecated
 public class LightingModule implements ShaderModule {
 
 

@@ -9,6 +9,7 @@ import java.util.List;
 import static net.ice.relic.engine.util.ShaderUtil.validateLink;
 import static org.lwjgl.opengl.GL20.*;
 
+@Deprecated
 public class ShaderBuilder {
     private final List<ShaderModule> modules;
     private final String vertexBase;

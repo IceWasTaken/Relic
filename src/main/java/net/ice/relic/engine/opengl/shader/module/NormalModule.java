@@ -4,6 +4,7 @@ import net.ice.relic.engine.opengl.shader.ShaderModule;
 
 import static net.ice.relic.engine.util.IOUtil.readShaderFile;
 
+@Deprecated
 public class NormalModule implements ShaderModule {
 
     @Override

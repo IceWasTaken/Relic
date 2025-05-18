@@ -1,15 +1,11 @@
-package net.ice.relic;
+package net.ice.rune;
 
 import net.ice.relic.engine.Window;
-import net.ice.relic.engine.common.EngineConfig;
 import net.ice.relic.engine.opengl.RelicGL;
 
-import java.io.IOException;
-
-public class Relic {
+public class Rune {
 
     public static void main(String[] args) {
-        EngineConfig config = EngineConfig.getInstance();
         new Window(720,720,"Relic", new RelicGL());
     }
 }

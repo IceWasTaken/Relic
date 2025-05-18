@@ -44,13 +44,13 @@ public class RelicGL implements Relic {
 
     @Override
     public void init(Window window) {
+        initShaders();
+
         this.window = window;
         this.manager = new EventManager();
         this.camera = new Camera(window);
         this.debugOverlay = new DebugOverlayNew(window);
-        this.cubeRenderer = new ModelRenderer("models/cube.glb", DEFAULT_FLAGS);
-        this.planeRenderer = new ModelRenderer("models/plane.glb", DEFAULT_FLAGS);
-        this.testRenderer = new ModelRenderer("models/EmissiveStrengthTest.gltf", DEFAULT_FLAGS);
+        this.testRenderer = new ModelRenderer("EmissiveStrengthTest.gltf", DEFAULT_FLAGS);
 
         this.physicsWorld = new PhysicsWorld();
 
@@ -81,7 +81,6 @@ public class RelicGL implements Relic {
         physicsWorld.addBody(groundBody);
     }
 
-    @Override
     public void initShaders() {
         List<ShaderModule> modules = List.of(
                 new LightingModule(),
@@ -98,9 +97,9 @@ public class RelicGL implements Relic {
     }
 
     @Override
-    public void loop() {
+    public void update() {
         try {
-            Logger.debug("Beginning game loop.");
+            Logger.debug("Beginning game update.");
             while (!glfwWindowShouldClose(window.getWindowHandle())) {
                 glfwPollEvents();
 
@@ -151,18 +150,7 @@ public class RelicGL implements Relic {
 
                     int modelLoc = glGetUniformLocation(modelShader, "model");
 
-                    // === Cube ===
-                    Matrix4f cubeMatrix = new Matrix4f()
-                            .translate(cubeBody.position)
-                            .rotate(cubeBody.rotation)
-                            .scale(1.0f);
-                    glUniformMatrix4fv(modelLoc, false, cubeMatrix.get(modelBuffer));
-                    //cubeRenderer.render(modelShader);
-
-                    // === Plane ===
-                    Matrix4f planeMatrix = new Matrix4f()
-                            .translate(groundBody.position)
-                            .scale(1.0f);
+                    Matrix4f planeMatrix = new Matrix4f();
                     glUniformMatrix4fv(modelLoc, false, planeMatrix.get(modelBuffer));
                     //planeRenderer.render(modelShader);
 
@@ -172,14 +160,14 @@ public class RelicGL implements Relic {
                 debugOverlay.render(window, camera);
                 glfwSwapBuffers(window.getWindowHandle());
             }
-            Logger.debug("Ending loop. Closing window.");
+            Logger.debug("Ending update. Closing window.");
         } catch (Exception e) {
-            throw new RuntimeException("Error during render loop: " + e.getMessage(), e);
+            throw new RuntimeException("Error during render update: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void close() {
+    public void cleanup() {
         // Cleanup resources if needed
     }
 

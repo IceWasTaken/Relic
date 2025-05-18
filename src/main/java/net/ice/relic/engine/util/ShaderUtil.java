@@ -15,6 +15,7 @@ public class ShaderUtil {
         Logger.debug("Successfully compiled shader: " + fileName);
     }
 
+
     public static void validateLink(int program) {
         if(glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
             System.out.println(glGetError());
@@ -22,5 +23,4 @@ public class ShaderUtil {
         }
         Logger.debug("Successfully linked program: ");
     }
-
 }

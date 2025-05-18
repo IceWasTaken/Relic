@@ -1,5 +1,6 @@
 package net.ice.relic.engine.opengl.model;
 
+import net.ice.relic.engine.util.IOUtil;
 import org.lwjgl.assimp.*;
 
 import java.nio.IntBuffer;
@@ -14,7 +15,7 @@ public class Model {
     private final List<Mesh> meshes = new ArrayList<>();
 
     public Model(String path, int flags) {
-        AIScene scene = aiImportFile(path, flags);
+        AIScene scene = IOUtil.readModelFile(path, flags);
 
         if (scene == null || (scene.mFlags() & AI_SCENE_FLAGS_INCOMPLETE) != 0 || scene.mRootNode() == null) {
             throw new RuntimeException("Error while loading model: " + aiGetErrorString());
@@ -22,6 +23,17 @@ public class Model {
 
         processNode(scene.mRootNode(), scene);
     }
+
+    public Model(String path) {
+        AIScene scene = IOUtil.readModelFile(path);
+
+        if (scene == null || (scene.mFlags() & AI_SCENE_FLAGS_INCOMPLETE) != 0 || scene.mRootNode() == null) {
+            throw new RuntimeException("Error while loading model: " + aiGetErrorString());
+        }
+
+        processNode(scene.mRootNode(), scene);
+    }
+
 
     private void processNode(AINode node, AIScene scene) {
         int numMeshes = node.mNumMeshes();

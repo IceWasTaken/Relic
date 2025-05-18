@@ -4,9 +4,7 @@ public interface Relic {
 
     void init(Window window);
 
-    void initShaders();
+    void update();
 
-    void loop();
-
-    void close();
+    void cleanup();
 }

@@ -2,7 +2,6 @@ package net.ice.relic.engine;
 
 import net.ice.relic.engine.common.Clock;
 import net.ice.relic.engine.common.Input;
-import org.tinylog.Logger;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL.createCapabilities;
@@ -58,11 +57,10 @@ public class Window {
 
         clock.timerInit();
 
-        relic.initShaders();
         relic.init(this);
 
-        relic.loop();
-        relic.close();
+        relic.update();
+        relic.cleanup();
     }
 
     //should i have used lombok?
