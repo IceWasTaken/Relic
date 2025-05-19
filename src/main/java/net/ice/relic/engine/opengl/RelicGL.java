@@ -1,9 +1,10 @@
 package net.ice.relic.engine.opengl;
 
-import net.ice.relic.engine.Relic;
+import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.Window;
 import net.ice.relic.engine.common.event.EventManager;
 import net.ice.relic.engine.opengl.model.ModelRenderer;
+import net.ice.relic.engine.opengl.scene.Scene;
 import net.ice.relic.engine.opengl.shader.ShaderBuilder;
 import net.ice.relic.engine.opengl.shader.ShaderModule;
 import net.ice.relic.engine.opengl.shader.module.EmissiveModule;
@@ -26,7 +27,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public class RelicGL implements Relic {
+public class RelicGL implements RelicApplication {
 
     private Window window;
     private Camera camera;
@@ -43,7 +44,7 @@ public class RelicGL implements Relic {
     private int modelShader;
 
     @Override
-    public void init(Window window) {
+    public void init(Window window, Scene scene, Renderer renderer) {
         initShaders();
 
         this.window = window;
@@ -59,13 +60,13 @@ public class RelicGL implements Relic {
         //glEnable(GL_CULL_FACE);
         glfwSwapInterval(1);
 
-        glfwSetFramebufferSizeCallback(window.getWindowHandle(), (windowHandle, width, height) -> {
-            if (width > 0 && height > 0) {
-                window.setWidth(width);
-                window.setHeight(height);
-                camera.resize();
-            }
-        });
+//        glfwSetFramebufferSizeCallback(window.getWindowHandle(), (windowHandle, width, height) -> {
+//            if (width > 0 && height > 0) {
+//                window.setWidth(width);
+//                window.setHeight(height);
+//                camera.resize();
+//            }
+//        });
 
         if (glfwGetCurrentContext() != window.getWindowHandle()) {
             throw new RuntimeException("Failed to set OpenGL context.");
@@ -97,7 +98,7 @@ public class RelicGL implements Relic {
     }
 
     @Override
-    public void update() {
+    public void update(Window window, Scene scene, Renderer renderer) {
         try {
             Logger.debug("Beginning game update.");
             while (!glfwWindowShouldClose(window.getWindowHandle())) {
@@ -111,7 +112,7 @@ public class RelicGL implements Relic {
 
                 physicsWorld.step(deltaTime);
 
-                glViewport(0, 0, window.getWidth(), window.getHeight());
+                //glViewport(0, 0, window.getWidth(), window.getHeight());
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glClearColor(0.6f, 0.7f, 0.8f, 1.0f);

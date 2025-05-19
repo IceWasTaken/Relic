@@ -18,11 +18,9 @@ public class Camera {
 
     private final Vector3f position = new Vector3f(0,2,5);
     private final Quaternionf orientation = new Quaternionf();
-    private final Window window;
 
-    public Camera(Window window) {
-        this.window = window;
-        projectionMatrix.setPerspective((float) Math.toRadians(60), (float) window.getWidth() / window.getHeight(), 0.1f, 1000.0f);
+    public Camera() {
+        //projectionMatrix.setPerspective((float) Math.toRadians(60), (float) window.getOptions().width() / window.getOptions().height(), 0.1f, 1000.0f);
     }
 
     public void update(Clock clock) {
@@ -75,8 +73,8 @@ public class Camera {
         }
     }
 
-    public void resize() {
-        projectionMatrix.setPerspective((float) Math.toRadians(60), (float) window.getWidth() / window.getHeight(), 0.1f, 1000.0f);
+    public void resize(Window window) {
+        projectionMatrix.setPerspective((float) Math.toRadians(60), (float) window.getOptions().width() / window.getOptions().height(), 0.1f, 1000.0f);
     }
 
     public void newFrame() {

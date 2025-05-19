@@ -1,8 +1,5 @@
 package net.ice.relic.engine.opengl.shader;
 
-import net.ice.relic.engine.util.IOUtil;
-import net.ice.relic.engine.util.ShaderUtil;
-
 import static net.ice.relic.engine.util.IOUtil.readShaderFile;
 import static net.ice.relic.engine.util.ShaderUtil.validateShader;
 import static org.lwjgl.opengl.GL43.*;

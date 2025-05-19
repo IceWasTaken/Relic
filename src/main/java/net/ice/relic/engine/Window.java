@@ -2,6 +2,8 @@ package net.ice.relic.engine;
 
 import net.ice.relic.engine.common.Clock;
 import net.ice.relic.engine.common.Input;
+import net.ice.relic.engine.opengl.scene.Scene;
+import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL.createCapabilities;
@@ -12,16 +14,14 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
 
     private final long windowHandle;
-    private int width, height;
-    private final Relic relic;
-    public String title;
+    private final RelicApplication relic;
     private final Clock clock;
+    private final WindowOptions options;
 
-    public Window(int width, int height, String title, Relic relic) {
+    public Window(WindowOptions options, RelicApplication relic) {
 
-        this.width = width;
-        this.height = height;
-        this.title = title;
+        this.options = options;
+
         this.relic = relic;
 
         this.clock = new Clock();
@@ -32,14 +32,14 @@ public class Window {
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
-        this.windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
+        this.windowHandle = glfwCreateWindow(options.width, options.height, options.title, NULL, NULL);
 
         if(windowHandle == NULL) {
             throw new RuntimeException("Failed to initialize window.");
         }
 
         glfwMakeContextCurrent(windowHandle);
-        glfwSwapInterval(GLFW_TRUE);
+        glfwSwapInterval(options.vsync() ? GLFW_TRUE : GLFW_FALSE);
         glfwShowWindow(windowHandle);
 
         glfwSetKeyCallback(windowHandle, (windowHandle, key, scancode, action, mods) -> {
@@ -51,24 +51,12 @@ public class Window {
                 }
             }
         });
+        GL.createCapabilities();
 
-        createCapabilities();
         glEnable(GL_FRAMEBUFFER_SRGB);
 
         clock.timerInit();
-
-        relic.init(this);
-
-        relic.update();
-        relic.cleanup();
     }
-
-    //should i have used lombok?
-    //yes
-    //is it too late?
-    //no
-    //will i?
-    //no
 
     public Clock getClock() {
         return clock;
@@ -78,23 +66,17 @@ public class Window {
         return windowHandle;
     }
 
-    public Relic getRelic() {
+    public RelicApplication getRelic() {
         return relic;
     }
 
-    public int getHeight() {
-        return height;
+    public WindowOptions getOptions() {
+        return options;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
+    public record WindowOptions(int width, int height, String title, boolean vsync) {
+        public WindowOptions changeOptions(int width, int height, String title, boolean vsync) {
+            return new WindowOptions(width, height, title, vsync);
+        }
     }
 }

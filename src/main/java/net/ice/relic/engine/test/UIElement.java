@@ -39,7 +39,7 @@ public abstract class UIElement {
 
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(0, window.getWidth(), window.getHeight(), 0, -1, 1);
+            glOrtho(0, window.getOptions().width(), window.getOptions().height(), 0, -1, 1);
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();

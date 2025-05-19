@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface IScene {
 
-    Map<String, Model> modelMap = new HashMap<>();
+    Map<String, Model> models = new HashMap<>();
 
     HashMap<String, Model> initModels(HashMap<String, Model> modelMap);
 

@@ -1,10 +1,16 @@
 package net.ice.relic.engine.opengl.scene;
 
+import net.ice.relic.engine.opengl.Camera;
+
 public abstract class Scene implements IScene {
 
-    public Scene() {
+    private Camera camera;
 
+    public Scene() {
+        this.camera = new Camera();
     }
 
-
+    public Camera getCamera() {
+        return camera;
+    }
 }
