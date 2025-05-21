@@ -1,5 +1,6 @@
 package net.ice.relic.engine.opengl.scene;
 
+import net.ice.relic.engine.opengl.Uniforms;
 import net.ice.relic.engine.opengl.model.Model;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -23,6 +24,12 @@ public class SceneObject {
         scaleFactor = 1f;
     }
 
+    public void render(Uniforms uniforms) {
+        uniforms.setUniform("model", getModelMatrix());
+        //model.render(uniforms);
+    }
+
+
     public void setPosition(Vector3f position) {
         this.position = position;
     }
@@ -43,5 +50,21 @@ public class SceneObject {
 
     public void setScaleFactor(float scaleFactor) {
         this.scaleFactor = scaleFactor;
+    }
+
+    public Matrix4f getModelMatrix() {
+        modelMatrix.identity()
+                .translate(position)
+                .rotate(rotation)
+                .scale(scaleFactor);
+        return modelMatrix;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Model getModel() {
+        return model;
     }
 }

@@ -58,6 +58,18 @@ public class Window {
         clock.timerInit();
     }
 
+    public boolean shouldClose() {
+        return glfwWindowShouldClose(windowHandle);
+    }
+
+    public void pollEvents() {
+        glfwPollEvents();
+    }
+
+    public void displayFrame() {
+        glfwSwapBuffers(windowHandle);
+    }
+
     public Clock getClock() {
         return clock;
     }

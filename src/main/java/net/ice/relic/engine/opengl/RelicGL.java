@@ -3,7 +3,6 @@ package net.ice.relic.engine.opengl;
 import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.Window;
 import net.ice.relic.engine.common.event.EventManager;
-import net.ice.relic.engine.opengl.model.ModelRenderer;
 import net.ice.relic.engine.opengl.scene.Scene;
 import net.ice.relic.engine.opengl.shader.ShaderBuilder;
 import net.ice.relic.engine.opengl.shader.ShaderModule;
@@ -20,7 +19,6 @@ import org.tinylog.Logger;
 import java.nio.FloatBuffer;
 import java.util.List;
 
-import static net.ice.relic.engine.opengl.model.Model.DEFAULT_FLAGS;
 import static net.ice.relic.engine.util.IOUtil.readShaderFile;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -33,9 +31,9 @@ public class RelicGL implements RelicApplication {
     private Camera camera;
     private EventManager manager;
     private DebugOverlayNew debugOverlay;
-    private ModelRenderer cubeRenderer;
-    private ModelRenderer planeRenderer;
-    private ModelRenderer testRenderer;
+//    private ModelRenderer cubeRenderer;
+//    private ModelRenderer planeRenderer;
+//    private ModelRenderer testRenderer;
     private PhysicsWorld physicsWorld;
 
     private RigidBody cubeBody;
@@ -49,9 +47,8 @@ public class RelicGL implements RelicApplication {
 
         this.window = window;
         this.manager = new EventManager();
-        this.camera = new Camera(window);
         this.debugOverlay = new DebugOverlayNew(window);
-        this.testRenderer = new ModelRenderer("EmissiveStrengthTest.gltf", DEFAULT_FLAGS);
+        //this.testRenderer = new ModelRenderer("EmissiveStrengthTest.gltf", DEFAULT_FLAGS);
 
         this.physicsWorld = new PhysicsWorld();
 
@@ -154,9 +151,8 @@ public class RelicGL implements RelicApplication {
 
                     Matrix4f planeMatrix = new Matrix4f();
                     glUniformMatrix4fv(modelLoc, false, planeMatrix.get(modelBuffer));
-                    //planeRenderer.render(modelShader);
 
-                    testRenderer.render(modelShader);
+                    //testRenderer.render(modelShader);
                 }
 
                 debugOverlay.render(window, camera);
@@ -171,13 +167,5 @@ public class RelicGL implements RelicApplication {
     @Override
     public void cleanup() {
         // Cleanup resources if needed
-    }
-
-    public Camera getCamera() {
-        return camera;
-    }
-
-    public Window getWindow() {
-        return window;
     }
 }

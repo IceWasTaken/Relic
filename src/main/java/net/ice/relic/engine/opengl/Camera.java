@@ -30,11 +30,11 @@ public class Camera {
             float rotateX = 0f;
             float rotateY = 0f;
 
-            if (Input.isKeyDown(GLFW_KEY_S)) {
-                position.add(orientation.positiveZ(new Vector3f()).mul(clock.getDeltaTime() * speed));
-            }
             if (Input.isKeyDown(GLFW_KEY_W)) {
                 position.sub(orientation.positiveZ(new Vector3f()).mul(clock.getDeltaTime() * speed));
+            }
+            if (Input.isKeyDown(GLFW_KEY_S)) {
+                position.add(orientation.positiveZ(new Vector3f()).mul(clock.getDeltaTime() * speed));
             }
             if (Input.isKeyDown(GLFW_KEY_A)) {
                 position.add(orientation.positiveX(new Vector3f()).mul(clock.getDeltaTime() * -speed));

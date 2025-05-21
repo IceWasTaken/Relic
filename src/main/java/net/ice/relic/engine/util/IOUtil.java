@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static net.ice.relic.engine.opengl.model.Model.DEFAULT_FLAGS;
 import static org.lwjgl.assimp.Assimp.aiImportFile;
 
 public class IOUtil {
@@ -19,9 +18,9 @@ public class IOUtil {
         return aiImportFile("resources/models/" + filename, flags);
     }
 
-    public static AIScene readModelFile(String filename) {
-        return aiImportFile("resources/models/" + filename, DEFAULT_FLAGS);
-    }
+//    public static AIScene readModelFile(String filename) {
+//        return aiImportFile("resources/models/" + filename, DEFAULT_FLAGS);
+//    }
 
     public static String readShaderFile(String fileName) {
         return readFileContents("shaders/" + fileName, StandardCharsets.UTF_8);

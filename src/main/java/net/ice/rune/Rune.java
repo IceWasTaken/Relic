@@ -10,12 +10,16 @@ public class Rune implements RelicApplication {
 
     @Override
     public void init(Window window, Scene scene, Renderer renderer) {
-
     }
 
     @Override
     public void update(Window window, Scene scene, Renderer renderer) {
+        while (!window.shouldClose()) {
+            window.pollEvents();
 
+            renderer.render(window, scene);
+            window.displayFrame();
+        }
     }
 
     @Override

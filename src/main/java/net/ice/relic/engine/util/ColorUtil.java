@@ -15,7 +15,34 @@ public class ColorUtil {
         glColor4f(color.red, color.green, color.blue, 0f);
     }
 
-    public enum Color {
+    public static class Color {
+
+        public final float red;
+        public final float green;
+        public final float blue;
+        public final float alpha;
+
+        public Color(float red, float green, float blue) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+            this.alpha = 1f;
+        }
+
+        public Color(float red, float green, float blue, float alpha) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+            this.alpha = alpha;
+        }
+
+        public Color convertToOpenGLColor() {
+            return new Color(red / 255f, green / 255f, blue / 255f);
+        }
+
+    }
+
+    public enum ColorDefaults {
         RED(232, 13, 13),
         ORANGE(255, 119, 0),
         YELLOW(255, 218, 10),
@@ -30,14 +57,14 @@ public class ColorUtil {
         DARK_GRAY(36, 36, 36),
         WHITE(255, 255, 255);
 
-        public final float red;
-        public final float blue;
-        public final float green;
+        private final Color color;
 
-        Color(float red, float green, float blue) {
-            this.red = red / 255.0f;
-            this.green = green /255.0f;
-            this.blue = blue / 255.0f;
+        ColorDefaults(float red, float green, float blue) {
+            this.color = new Color(red, green, blue);
+        }
+
+        public Color getColor() {
+            return color;
         }
     }
 }
