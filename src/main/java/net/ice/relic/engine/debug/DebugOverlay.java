@@ -1,7 +1,7 @@
 //package net.ice.relic.engine.debug;
 //
 //import net.ice.relic.engine.common.Clock;
-//import net.ice.relic.engine.opengl.Camera;
+//import net.ice.relic.engine.opengl.scene.Camera;
 //import org.joml.Quaternionf;
 //import org.joml.Vector3f;
 //import org.lwjgl.BufferUtils;

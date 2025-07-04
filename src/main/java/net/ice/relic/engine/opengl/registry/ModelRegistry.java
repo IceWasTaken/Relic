@@ -1,12 +1,16 @@
 package net.ice.relic.engine.opengl.registry;
 
-import net.ice.relic.engine.opengl.model.Model;
+import net.ice.relic.annotations.Rewrite;
 
 import static org.lwjgl.assimp.Assimp.*;
 
+@Rewrite(forRemoval = true, since = "7/4/2025")
 public class ModelRegistry {
 
-    private static final int DEFAULT_FLAGS = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_PreTransformVertices;
-
-    public static final Model EMISSIVE_TEST = new Model("EmissieStrengthTest.gltf", DEFAULT_FLAGS);
+    public static final int DEFAULT_FLAGS = aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
+            aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights |
+            aiProcess_GenBoundingBoxes | aiProcess_PreTransformVertices;
+    //re-implement later.
+//    public static final Model CUBE_TEST = ModelLoader.loadModelFromFile("test", "cube.gltf", null, DEFAULT_FLAGS);
+//    public static final Model EMISSIVE_TEST = ModelLoader.loadModelFromFile("test", "EmissiveStrengthTest.gltf", null, DEFAULT_FLAGS);
 }

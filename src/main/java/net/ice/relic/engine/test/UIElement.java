@@ -1,17 +1,12 @@
 package net.ice.relic.engine.test;
 
 import net.ice.relic.engine.Window;
-import net.ice.relic.engine.common.Clock;
-import net.ice.relic.engine.opengl.Camera;
-import net.ice.relic.engine.util.ColorUtil;
+import net.ice.relic.engine.opengl.scene.Camera;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBEasyFont;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.util.Random;
 
-import static net.ice.relic.engine.util.ColorUtil.Color.*;
 import static net.ice.relic.engine.util.ColorUtil.ColorDefaults.BLACK;
 import static net.ice.relic.engine.util.ColorUtil.glSetColor4f;
 import static org.lwjgl.opengl.GL11.*;
@@ -40,7 +35,7 @@ public abstract class UIElement {
 
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(0, window.getOptions().width(), window.getOptions().height(), 0, -1, 1);
+            //glOrtho(0, window.getOptions().width(), window.getOptions().height(), 0, -1, 1);
 
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();

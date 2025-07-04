@@ -1,9 +1,8 @@
 package net.ice.relic.engine.util;
 
-import org.joml.Vector3f;
+import org.joml.Vector4f;
 
-import static org.lwjgl.opengl.GL11.glColor3f;
-import static org.lwjgl.opengl.GL11.glColor4f;
+import static org.lwjgl.opengl.GL11.*;
 
 public class ColorUtil {
 
@@ -13,6 +12,10 @@ public class ColorUtil {
 
     public static void glSetColor3f(Color color) {
         glColor4f(color.red, color.green, color.blue, 0f);
+    }
+
+    public static void glSetClearColor(Color color) {
+        glClearColor(color.convertToOpenGLColor().red, color.convertToOpenGLColor().green, color.convertToOpenGLColor().blue, 1f);
     }
 
     public static class Color {
@@ -38,6 +41,14 @@ public class ColorUtil {
 
         public Color convertToOpenGLColor() {
             return new Color(red / 255f, green / 255f, blue / 255f);
+        }
+
+        public Vector4f convertToVector4f() {
+            return new Vector4f(red, green, blue, alpha);
+        }
+
+        public Vector4f convertToGLVector4f() {
+            return new Vector4f(red / 255f, green / 255f, blue / 255f, alpha);
         }
 
     }

@@ -1,34 +1,59 @@
 package net.ice.relic.engine.common.event;
 
-import java.lang.reflect.Method;
+import org.tinylog.Logger;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class EventManager {
+public class EventManager<Event extends Enum<Event>> implements EventContext<Event> {
 
-    private final List<Object> listeners = new ArrayList<>();
+    private final Map<Event, List<EventListener>> listeners;
 
-    public void register(Object listener) {
-        listeners.add(listener);
+
+    public EventManager() {
+        listeners = new HashMap<>();
     }
 
-    //TODO: Allow multiple events on one listener
-    //eh, maybe just abstraction instead
-    //i'll decide later (never)
-    public void dispatch(Object event) {
-        for(Object listener : listeners) {
-            Method[] methods = listener.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if(method.isAnnotationPresent(EventListener.class)) {
-                    if(method.getParameterCount() == 1 && method.getParameterTypes()[0].isAssignableFrom(event.getClass())) {
-                        try {
-                            method.invoke(listener, event);
-                        } catch (Exception exception) {
-                            throw new RuntimeException("Error while firing event.");
-                        }
-                    }
-                }
+    @Override
+    public void addListener(Event event, EventListener listener) {
+        if(!listeners.containsKey(event)) {
+            listeners.put(event, new ArrayList<>());
+        }
+
+        listeners.get(event).add(listener);
+    }
+
+    @Override
+    public void removeListener(Event event, EventListener listener) {
+        List<EventListener> eventListeners = listeners.get(event);
+
+        if(eventListeners != null) {
+            eventListeners.remove(listener);
+        }
+
+        eventListeners.remove(listener);
+    }
+
+    @Override
+    public void execute(Event event) {
+        List<EventListener> eventListeners = listeners.get(event);
+
+        if(eventListeners == null) {
+            return;
+        }
+
+        for(EventListener listener : eventListeners) {
+            try {
+                listener.execute();
+            } catch(Exception exception) {
+                Logger.error(exception, "Error while executing event listener.");
             }
         }
+    }
+
+    public void destroy() {
+        listeners.clear();
     }
 }

@@ -13,16 +13,26 @@ import static org.lwjgl.opengl.GL20.*;
 
 public class Uniforms {
 
-    private int shaderProgramID;
+    private ShaderProgram shaderProgram;
     private Map<String, Integer> uniformMap;
 
-    public Uniforms(int shaderProgramID) {
-        this.shaderProgramID = shaderProgramID;
+    public Uniforms(ShaderProgram shaderProgram) {
+        this.shaderProgram = shaderProgram;
         this.uniformMap = new HashMap<>();
     }
 
     public void createUniform(String uniformName) {
-        int uniformLocation = glGetUniformLocation(shaderProgramID, uniformName);
+        int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), uniformName);
+
+        if(uniformLocation < 0) {
+            throw new RuntimeException("Could not find uniform: " + uniformName + " in shader.");
+        }
+
+        uniformMap.put(uniformName, uniformLocation);
+    }
+
+    public void createUniform(String uniformName, int index) {
+        int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), formatUniform(uniformName, index));
 
         if(uniformLocation < 0) {
             throw new RuntimeException("Could not find uniform in shader.");
@@ -34,7 +44,7 @@ public class Uniforms {
     private int getUniformLocation(String uniformName) {
         Integer location = uniformMap.get(uniformName);
         if (location == null) {
-            throw new RuntimeException("Could not find uniform in map.");
+            throw new RuntimeException("Could not find: " + uniformName + " in map.");
         }
         return location.intValue();
     }
@@ -63,5 +73,9 @@ public class Uniforms {
 
     public void setUniform(String uniformName, Vector2f value) {
         glUniform2f(getUniformLocation(uniformName), value.x, value.y);
+    }
+
+    public String formatUniform(String uniformName, int index) {
+        return uniformName + "[" + index + "]";
     }
 }

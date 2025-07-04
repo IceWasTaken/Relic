@@ -1,94 +1,146 @@
 package net.ice.relic.engine;
 
-import net.ice.relic.engine.common.Clock;
-import net.ice.relic.engine.common.Input;
-import net.ice.relic.engine.opengl.scene.Scene;
-import org.lwjgl.opengl.GL;
+import net.ice.relic.engine.config.configs.WindowConfig;
+import org.joml.Vector2i;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.system.MemoryUtil;
+import org.tinylog.Logger;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL.createCapabilities;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
 
-    private final long windowHandle;
-    private final RelicApplication relic;
-    private final Clock clock;
-    private final WindowOptions options;
+    private long windowHandle = NULL;
 
-    public Window(WindowOptions options, RelicApplication relic) {
+    private int width;
+    private int height;
+    private String title;
+    private long monitor;
 
-        this.options = options;
+    private boolean isInitialized;
 
-        this.relic = relic;
+    private GLFWFramebufferSizeCallback framebufferSizeCallback;
 
-        this.clock = new Clock();
+    private final RelicApplication application;
 
-        if(!glfwInit()) {
-            throw new RuntimeException("Could not initialize GLFW.");
-        }
+    public Window(RelicApplication application) {
+        this.application = application;
+
+        isInitialized = false;
+    }
+
+    public void init() throws RuntimeException {
+        WindowConfig config = application.getConfig().getWindowConfig();
+
+        this.width = config.getWidth();
+        this.height = config.getHeight();
+        this.title = config.getTitle();
+        this.monitor = glfwGetPrimaryMonitor();
+        GLFWVidMode vidMode = glfwGetVideoMode(monitor);
 
         glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
-        this.windowHandle = glfwCreateWindow(options.width, options.height, options.title, NULL, NULL);
+        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
 
-        if(windowHandle == NULL) {
-            throw new RuntimeException("Failed to initialize window.");
+        this.windowHandle = glfwCreateWindow(width, height, title, config.isFullscreen() ? monitor : NULL, NULL);
+
+        if(this.windowHandle == NULL) {
+            glfwTerminate();
+            throw new RuntimeException("Failed to create GLFW window.");
+        }
+        glfwSetWindowPos(windowHandle, vidMode.width() / 3, vidMode.height() / 5);
+        glfwMakeContextCurrent(windowHandle);
+
+        if(config.isVsync()) {
+            glfwSwapInterval(1);
         }
 
-        glfwMakeContextCurrent(windowHandle);
-        glfwSwapInterval(options.vsync() ? GLFW_TRUE : GLFW_FALSE);
-        glfwShowWindow(windowHandle);
-
-        glfwSetKeyCallback(windowHandle, (windowHandle, key, scancode, action, mods) -> {
-            if (key >= 0 && key <= GLFW_KEY_LAST) {
-                if (action == GLFW_PRESS) {
-                    Input.keysDown.add(key);
-                } else if (action == GLFW_RELEASE) {
-                    Input.keysDown.remove(key);
-                }
+        glfwSetFramebufferSizeCallback(windowHandle, new GLFWFramebufferSizeCallback() {
+            @Override
+            public void invoke(long window, int width, int height) {
+                setSize(width, height);
+                application.getRenderer().getGeometryBuffer().resize(width, height);
             }
         });
-        GL.createCapabilities();
 
-        glEnable(GL_FRAMEBUFFER_SRGB);
+        glfwSetErrorCallback((int errorCode, long msgPtr) ->
+                Logger.error("Error code [{}], msg [{}]", errorCode, MemoryUtil.memUTF8(msgPtr))
+        );
 
-        clock.timerInit();
+        this.isInitialized = true;
     }
 
-    public boolean shouldClose() {
-        return glfwWindowShouldClose(windowHandle);
-    }
+    public void update() {
+        if(!isInitialized) {
+            throw new IllegalStateException("Window has not been initialized yet.");
+        }
 
-    public void pollEvents() {
+        glfwSwapBuffers(windowHandle);
         glfwPollEvents();
     }
 
-    public void displayFrame() {
-        glfwSwapBuffers(windowHandle);
+    public void destroy() {
+        if(!isInitialized) {
+            return;
+        }
+
+        framebufferSizeCallback.free();
+        glfwDestroyWindow(windowHandle);
     }
 
-    public Clock getClock() {
-        return clock;
+    public boolean shouldClose() {
+        if(!isInitialized) {
+            return false;
+        }
+
+        return glfwWindowShouldClose(windowHandle);
     }
+
+
+    public void refreshSize() {
+        glViewport(0, 0, width, height);
+    }
+
+    public void setSize(int width, int height) {
+        setWidth(width);
+        setHeight(height);
+    }
+
+    public Vector2i getWindowSize() {
+        return new Vector2i(width, height);
+    }
+
+    //default setters / getters
 
     public long getWindowHandle() {
         return windowHandle;
     }
 
-    public RelicApplication getRelic() {
-        return relic;
+    public int getHeight() {
+        return height;
     }
 
-    public WindowOptions getOptions() {
-        return options;
+    public int getWidth() {
+        return width;
     }
 
-    public record WindowOptions(int width, int height, String title, boolean vsync) {
-        public WindowOptions changeOptions(int width, int height, String title, boolean vsync) {
-            return new WindowOptions(width, height, title, vsync);
-        }
+    public long getMainMonitor() {
+        return monitor;
     }
+
+    public String getCurrentTitle() {
+        return title;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
 }

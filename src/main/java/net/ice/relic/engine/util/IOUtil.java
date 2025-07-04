@@ -5,7 +5,6 @@ import org.tinylog.Logger;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,9 +21,7 @@ public class IOUtil {
 //        return aiImportFile("resources/models/" + filename, DEFAULT_FLAGS);
 //    }
 
-    public static String readShaderFile(String fileName) {
-        return readFileContents("shaders/" + fileName, StandardCharsets.UTF_8);
-    }
+
 
 
     public static String readFileContents(String path, Charset charset) {
