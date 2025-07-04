@@ -1,20 +1,18 @@
 package net.ice.rune.scenes;
 
-import net.ice.relic.engine.opengl.model.Model;
-import net.ice.relic.engine.opengl.scene.IScene;
+import net.ice.relic.engine.opengl.model.ModelLoader;
+import net.ice.relic.engine.opengl.registry.ModelRegistry;
 import net.ice.relic.engine.opengl.scene.Scene;
-
-import java.util.HashMap;
-
-import static net.ice.relic.engine.opengl.model.Model.DEFAULT_FLAGS;
+import net.ice.relic.engine.opengl.scene.SceneObject;
 
 public class SceneTest extends Scene {
 
-    @Override
-    public HashMap<String, Model> initModels(HashMap<String, Model> modelMap) {
-        modelMap.put("test", new Model("resources/models/EmissiveStrengthTest.gltf", DEFAULT_FLAGS));
-
-        return modelMap;
+    public SceneTest(String name) {
+        super(name);
     }
 
+    @Override
+    protected void sceneInit() {
+        addObject("test", new SceneObject("test", ModelLoader.loadModelFromFile("test", "EmissiveStrengthTest1.gltf", this.getTextureLoader(), this.getMaterialCache(), ModelRegistry.DEFAULT_FLAGS)));
+    }
 }

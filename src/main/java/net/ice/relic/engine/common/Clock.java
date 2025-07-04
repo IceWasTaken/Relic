@@ -9,6 +9,8 @@ public class Clock {
     private long lastTime;
     private float deltaTime;
 
+    private int scale = 0;
+
     private final Deque<Double> frameTimestamps = new ArrayDeque<>();
     private final double fpsWindowSize = 5.0;
 
@@ -20,9 +22,8 @@ public class Clock {
     public void updateTime() {
         long currentTime = System.nanoTime();
         deltaTime = (currentTime - lastTime) * 1E-9f;
+        deltaTime = deltaTime * scale;
         lastTime = currentTime;
-
-        deltaTime = Math.min(deltaTime, 0.1f);
 
         double nowSeconds = currentTime * 1E-9;
         frameTimestamps.addLast(nowSeconds);
@@ -41,4 +42,7 @@ public class Clock {
         return deltaTime;
     }
 
+    public void setScale(int scale) {
+        this.scale = scale;
+    }
 }

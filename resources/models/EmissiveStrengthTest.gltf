@@ -1,7 +1,6 @@
 {
     "asset" : {
-        "copyright" : "CC-BY 4.0 Copyright 2022 Analytical Graphics, Inc. Model and Textures by Ed Mackey.",
-        "generator" : "Khronos glTF Blender I/O v1.7.33, with hand-edits for emissive strength extension",
+        "generator" : "Khronos glTF Blender I/O v1.6.16",
         "version" : "2.0"
     },
     "scene" : 0,
@@ -14,7 +13,9 @@
                 2,
                 3,
                 4,
-                5
+                5,
+                6,
+                7
             ]
         }
     ],
@@ -67,14 +68,42 @@
                 0,
                 0
             ]
+        },
+        {
+            "name" : "Light",
+            "rotation" : [
+                0.16907575726509094,
+                0.7558803558349609,
+                -0.27217137813568115,
+                0.570947527885437
+            ],
+            "translation" : [
+                4.076245307922363,
+                5.903861999511719,
+                -1.0054539442062378
+            ]
+        },
+        {
+            "name" : "Camera",
+            "rotation" : [
+                0.483536034822464,
+                0.33687159419059753,
+                -0.20870360732078552,
+                0.7804827094078064
+            ],
+            "translation" : [
+                7.358891487121582,
+                4.958309173583984,
+                6.925790786743164
+            ]
         }
     ],
     "materials" : [
         {
             "emissiveFactor" : [
-                0.1,
+                0.10000000149011612,
                 0.5,
-                0.9
+                0.8999999761581421
             ],
             "name" : "Emit4",
             "pbrMetallicRoughness" : {
@@ -86,11 +115,6 @@
                 ],
                 "metallicFactor" : 0,
                 "roughnessFactor" : 0.800000011920929
-            },
-            "extensions": {
-                "KHR_materials_emissive_strength": {
-                    "emissiveStrength": 4
-                }
             }
         },
         {
@@ -105,9 +129,9 @@
         },
         {
             "emissiveFactor" : [
-                0.1,
+                0.10000000149011612,
                 0.5,
-                0.9
+                0.8999999761581421
             ],
             "name" : "Emit2",
             "pbrMetallicRoughness" : {
@@ -119,18 +143,13 @@
                 ],
                 "metallicFactor" : 0,
                 "roughnessFactor" : 0.800000011920929
-            },
-            "extensions": {
-                "KHR_materials_emissive_strength": {
-                    "emissiveStrength": 2
-                }
             }
         },
         {
             "emissiveFactor" : [
-                0.1,
+                0.10000000149011612,
                 0.5,
-                0.9
+                0.8999999761581421
             ],
             "name" : "Emit1",
             "pbrMetallicRoughness" : {
@@ -146,9 +165,9 @@
         },
         {
             "emissiveFactor" : [
-                0.1,
+                0.10000000149011612,
                 0.5,
-                0.9
+                0.8999999761581421
             ],
             "name" : "Emit8",
             "pbrMetallicRoughness" : {
@@ -160,18 +179,13 @@
                 ],
                 "metallicFactor" : 0,
                 "roughnessFactor" : 0.800000011920929
-            },
-            "extensions": {
-                "KHR_materials_emissive_strength": {
-                    "emissiveStrength": 8
-                }
             }
         },
         {
             "emissiveFactor" : [
-                0.1,
+                0.10000000149011612,
                 0.5,
-                0.9
+                0.8999999761581421
             ],
             "name" : "Emit16",
             "pbrMetallicRoughness" : {
@@ -183,17 +197,12 @@
                 ],
                 "metallicFactor" : 0,
                 "roughnessFactor" : 0.800000011920929
-            },
-            "extensions": {
-                "KHR_materials_emissive_strength": {
-                    "emissiveStrength": 16
-                }
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Cube",
+            "name" : "Cube.001",
             "primitives" : [
                 {
                     "attributes" : {
@@ -212,23 +221,11 @@
                     "attributes" : {
                         "POSITION" : 3,
                         "NORMAL" : 4,
-                        "TEXCOORD_0" : 5
+                        "TANGENT" : 5,
+                        "TEXCOORD_0" : 6
                     },
-                    "indices" : 6,
+                    "indices" : 7,
                     "material" : 1
-                }
-            ]
-        },
-        {
-            "name" : "Cube.001",
-            "primitives" : [
-                {
-                    "attributes" : {
-                        "POSITION" : 7,
-                        "NORMAL" : 8
-                    },
-                    "indices" : 2,
-                    "material" : 2
                 }
             ]
         },
@@ -237,11 +234,11 @@
             "primitives" : [
                 {
                     "attributes" : {
-                        "POSITION" : 9,
-                        "NORMAL" : 10
+                        "POSITION" : 8,
+                        "NORMAL" : 9
                     },
                     "indices" : 2,
-                    "material" : 3
+                    "material" : 2
                 }
             ]
         },
@@ -250,11 +247,11 @@
             "primitives" : [
                 {
                     "attributes" : {
-                        "POSITION" : 11,
-                        "NORMAL" : 12
+                        "POSITION" : 10,
+                        "NORMAL" : 11
                     },
                     "indices" : 2,
-                    "material" : 4
+                    "material" : 3
                 }
             ]
         },
@@ -263,8 +260,21 @@
             "primitives" : [
                 {
                     "attributes" : {
-                        "POSITION" : 13,
-                        "NORMAL" : 14
+                        "POSITION" : 12,
+                        "NORMAL" : 13
+                    },
+                    "indices" : 2,
+                    "material" : 4
+                }
+            ]
+        },
+        {
+            "name" : "Cube.005",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 14,
+                        "NORMAL" : 15
                     },
                     "indices" : 2,
                     "material" : 5
@@ -317,7 +327,7 @@
         {
             "bufferView" : 3,
             "componentType" : 5126,
-            "count" : 68,
+            "count" : 74,
             "max" : [
                 8.001113891601562,
                 4.009398460388184,
@@ -333,23 +343,29 @@
         {
             "bufferView" : 4,
             "componentType" : 5126,
-            "count" : 68,
+            "count" : 74,
             "type" : "VEC3"
         },
         {
             "bufferView" : 5,
             "componentType" : 5126,
-            "count" : 68,
-            "type" : "VEC2"
+            "count" : 74,
+            "type" : "VEC4"
         },
         {
             "bufferView" : 6,
+            "componentType" : 5126,
+            "count" : 74,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 7,
             "componentType" : 5123,
             "count" : 90,
             "type" : "SCALAR"
         },
         {
-            "bufferView" : 7,
+            "bufferView" : 8,
             "componentType" : 5126,
             "count" : 24,
             "max" : [
@@ -362,60 +378,60 @@
                 -0.5,
                 -0.5
             ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 8,
-            "componentType" : 5126,
-            "count" : 24,
             "type" : "VEC3"
         },
         {
             "bufferView" : 9,
             "componentType" : 5126,
             "count" : 24,
-            "max" : [
-                0.5,
-                0.5,
-                0.5
-            ],
-            "min" : [
-                -0.5,
-                -0.5,
-                -0.5
-            ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 10,
             "componentType" : 5126,
             "count" : 24,
+            "max" : [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "min" : [
+                -0.5,
+                -0.5,
+                -0.5
+            ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 11,
             "componentType" : 5126,
             "count" : 24,
-            "max" : [
-                0.5,
-                0.5,
-                0.5
-            ],
-            "min" : [
-                -0.5,
-                -0.5,
-                -0.5
-            ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 12,
             "componentType" : 5126,
             "count" : 24,
+            "max" : [
+                0.5,
+                0.5,
+                0.5
+            ],
+            "min" : [
+                -0.5,
+                -0.5,
+                -0.5
+            ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 13,
+            "componentType" : 5126,
+            "count" : 24,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 14,
             "componentType" : 5126,
             "count" : 24,
             "max" : [
@@ -431,7 +447,7 @@
             "type" : "VEC3"
         },
         {
-            "bufferView" : 14,
+            "bufferView" : 15,
             "componentType" : 5126,
             "count" : 24,
             "type" : "VEC3"
@@ -455,63 +471,68 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 816,
+            "byteLength" : 888,
             "byteOffset" : 648
         },
         {
             "buffer" : 0,
-            "byteLength" : 816,
-            "byteOffset" : 1464
+            "byteLength" : 888,
+            "byteOffset" : 1536
         },
         {
             "buffer" : 0,
-            "byteLength" : 544,
-            "byteOffset" : 2280
+            "byteLength" : 1184,
+            "byteOffset" : 2424
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 592,
+            "byteOffset" : 3608
         },
         {
             "buffer" : 0,
             "byteLength" : 180,
-            "byteOffset" : 2824
+            "byteOffset" : 4200
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 3004
+            "byteOffset" : 4380
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 3292
+            "byteOffset" : 4668
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 3580
+            "byteOffset" : 4956
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 3868
+            "byteOffset" : 5244
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 4156
+            "byteOffset" : 5532
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 4444
+            "byteOffset" : 5820
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 4732
+            "byteOffset" : 6108
         },
         {
             "buffer" : 0,
             "byteLength" : 288,
-            "byteOffset" : 5020
+            "byteOffset" : 6396
         }
     ],
     "samplers" : [
@@ -522,11 +543,8 @@
     ],
     "buffers" : [
         {
-            "byteLength" : 5308,
+            "byteLength" : 6684,
             "uri" : "EmissiveStrengthTest.bin"
         }
-    ],
-    "extensionsUsed": [
-        "KHR_materials_emissive_strength"
     ]
 }

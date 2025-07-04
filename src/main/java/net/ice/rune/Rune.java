@@ -1,29 +1,40 @@
 package net.ice.rune;
 
 import net.ice.relic.engine.RelicApplication;
-import net.ice.relic.engine.Window;
-import net.ice.relic.engine.opengl.Relic;
-import net.ice.relic.engine.opengl.Renderer;
-import net.ice.relic.engine.opengl.scene.Scene;
+import net.ice.relic.engine.config.Config;
+import net.ice.relic.engine.opengl.rendering.Renderer;
 
-public class Rune implements RelicApplication {
+public class Rune extends RelicApplication {
 
-    @Override
-    public void init(Window window, Scene scene, Renderer renderer) {
-
-    }
-
-    @Override
-    public void update(Window window, Scene scene, Renderer renderer) {
+    public Rune(Config config) {
+        super(config);
+        config.getWindowConfig().setFullscreen(false);
 
     }
 
     @Override
-    public void cleanup() {
+    protected void init(RelicApplication application, Config config) {
+        //application.loadScene(new SceneTest("test"));
+
+    }
+
+    @Override
+    protected void update(RelicApplication application, float deltaTime) {
+        application.getCurrentScene().getObjects().forEach(((s, sceneObject) -> sceneObject.update()));
+    }
+
+    @Override
+    protected void render(RelicApplication application, Renderer renderer) {
+
+    }
+
+    @Override
+    protected void cleanup(RelicApplication application) {
 
     }
 
     public static void main(String[] args) {
-        new Relic(new Rune());
+        Rune rune = new Rune(new Config());
+        rune.run();
     }
 }
