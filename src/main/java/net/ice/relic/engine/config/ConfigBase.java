@@ -7,9 +7,9 @@ public abstract class ConfigBase {
     protected ConfigFile configFile;
     protected ConfigFile defaultConfigFile;
 
-    protected ConfigBase(Path configFilePath, Path defaultConfigFilePath) {
-        this.configFile = ConfigFile.loadFromFile(configFilePath.toString());
-        this.defaultConfigFile = ConfigFile.loadFromJar(defaultConfigFilePath.toString());
+    protected ConfigBase(String configFilePath, String defaultConfigFilePath) {
+        this.configFile = ConfigFile.loadFromFile(configFilePath);
+        this.defaultConfigFile = ConfigFile.loadFromJar(defaultConfigFilePath);
     }
 
     protected Integer getInt(String key) {

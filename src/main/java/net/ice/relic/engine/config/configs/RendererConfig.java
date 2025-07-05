@@ -9,8 +9,8 @@ public class RendererConfig extends ConfigBase {
     private static final String defaultFileName = "default_renderer_config.properties";
     private static final String fileName = "rendererConfig.properties";
 
-    private static final Path configPath = Path.of("config/" + fileName);
-    private static final Path defaultConfigPath = Path.of("net/ice/relic/config/" + defaultFileName);
+    private static final String configPath = "config/" + fileName;
+    private static final String defaultConfigPath = "net/ice/relic/config/" + defaultFileName;
 
     private Integer MAX_DRAW_ELEMENTS;
     private Integer MAX_SCENE_OBJECTS;

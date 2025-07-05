@@ -58,7 +58,6 @@ uniform sampler2D depthSampler;
 uniform mat4 invProjectionMatrix;
 uniform mat4 invViewMatrix;
 
-
 uniform AmbientLight ambientLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
@@ -202,7 +201,6 @@ void main()
             diffuseSpecularComp += calcSpotLight(diffuse, specular, reflectance, spotLights[i], view_pos, normal);
         }
     }
-
 
     vec4 ambient = calcAmbient(ambientLight, diffuse);
     fragColor = ambient + diffuseSpecularComp;

@@ -32,6 +32,8 @@ public abstract class AbstractRenderer {
         this.shaderProgram = new ShaderProgram(shaders);
         this.uniforms = new Uniforms(shaderProgram);
         initUniforms();
+
+
     }
 
     public void cleanup() {

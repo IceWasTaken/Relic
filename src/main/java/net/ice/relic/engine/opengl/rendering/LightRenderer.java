@@ -47,6 +47,9 @@ public class LightRenderer extends AbstractRenderer {
         uniforms.createUniform("normalSampler");
         uniforms.createUniform("specularSampler");
         uniforms.createUniform("depthSampler");
+        //uniforms.createUniform("ormSampler");
+        //uniforms.createUniform("emissiveSampler");
+
         uniforms.createUniform("invProjectionMatrix");
         uniforms.createUniform("invViewMatrix");
         uniforms.createUniform("ambientLight.factor");
@@ -106,7 +109,10 @@ public class LightRenderer extends AbstractRenderer {
         uniforms.setUniform("albedoSampler", 0);
         uniforms.setUniform("normalSampler", 1);
         uniforms.setUniform("specularSampler", 2);
+        //uniforms.setUniform("ormSampler", 3);
+        //uniforms.setUniform("emissiveSampler", 4);
         uniforms.setUniform("depthSampler", 3);
+
 
         Fog fog = application.getCurrentScene().getFog();
         uniforms.setUniform("fog.activeFog", fog.isActive() ? 1 : 0);

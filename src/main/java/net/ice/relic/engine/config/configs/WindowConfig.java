@@ -9,8 +9,8 @@ public class WindowConfig extends ConfigBase {
     private static final String defaultFileName = "default_window_config.properties";
     private static final String fileName = "windowConfig.properties";
 
-    private static final Path configPath = Path.of("config/" + fileName);
-    private static final Path defaultConfigPath = Path.of("net/ice/relic/config/" + defaultFileName);
+    private static final String configPath = "config/" + fileName;
+    private static final String defaultConfigPath = "net/ice/relic/config/" + defaultFileName;
 
     private String title;
     private Integer width;

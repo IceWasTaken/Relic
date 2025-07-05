@@ -12,8 +12,11 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.opengl.GL.createCapabilities;
 import static org.lwjgl.opengl.GL43.*;
+import static org.lwjgl.opengl.GLDebugMessageCallback.getMessage;
 
 public class Renderer implements Lifecycle {
 
@@ -39,7 +42,13 @@ public class Renderer implements Lifecycle {
 
     @Override
     public void init() {
+        glfwMakeContextCurrent(application.getWindow().getWindowHandle());
         createCapabilities();
+
+        glDebugMessageCallback((source, type, id, severity, length, message, userParam) -> {
+            System.err.println("GL DEBUG: " + getMessage(length, message));
+        }, 0);
+
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_DEPTH_TEST);
 
@@ -47,6 +56,7 @@ public class Renderer implements Lifecycle {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
         IntBuffer maxTextures = BufferUtils.createIntBuffer(1);
         GL11.glGetIntegerv(GL20.GL_MAX_TEXTURE_IMAGE_UNITS, maxTextures);
@@ -62,8 +72,6 @@ public class Renderer implements Lifecycle {
         lightRenderer.init();
 
         lightRenderer.setShadowRenderer(shadowRenderer);
-
-
     }
 
     @Override
@@ -72,14 +80,15 @@ public class Renderer implements Lifecycle {
         shadowRenderer.render(renderingBuffer, geometryBuffer);
         sceneRenderer.render(renderingBuffer, geometryBuffer);
 
+        // Bind default framebuffer for lighting pass
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         application.getWindow().refreshSize();
+
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_ONE, GL_ONE);
 
-        geometryBuffer.getGeometryBuffer().bind(GL_READ_FRAMEBUFFER);
         lightRenderer.render(renderingBuffer, geometryBuffer);
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

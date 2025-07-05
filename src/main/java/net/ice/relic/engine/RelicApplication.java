@@ -67,6 +67,8 @@ public abstract class RelicApplication implements ApplicationContext {
     }
 
     public void init() throws RuntimeException {
+
+
         if(currentState != EngineState.INITIALIZING) {
             throw new RuntimeException("init() called while not in initializing state.");
         }
@@ -84,13 +86,17 @@ public abstract class RelicApplication implements ApplicationContext {
         window.init();
         Logger.info("Created Window. (2/4)");
 
-
-
         renderer.init();
+
+        System.out.println("RENDERER DONE.");
+        printOpenGLInfo();
+
         glEnable(GL_DEBUG_OUTPUT);
 
         hasInitOpenGL = true;
+        checkForOpenGLErrors();
         Logger.info("Initialized OpenGL. (3/4)");
+
 
         clock.timerInit();
 
@@ -101,8 +107,6 @@ public abstract class RelicApplication implements ApplicationContext {
         input.init();
         renderer.setupData();
 
-
-
         init(this, config);
 
         Logger.info("Initialized Application. (4/4)");
@@ -112,10 +116,8 @@ public abstract class RelicApplication implements ApplicationContext {
         changeState(EngineState.RUNNING);
         resume();
 
-
-
         while(!window.shouldClose()) {
-            checkForOpenGLErrors();
+
             clock.updateTime();
             float deltaTime = clock.getDeltaTime();
             this.currentScene.getCamera().newFrame();

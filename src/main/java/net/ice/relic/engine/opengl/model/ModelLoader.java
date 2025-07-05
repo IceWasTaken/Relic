@@ -2,6 +2,7 @@ package net.ice.relic.engine.opengl.model;
 
 import net.ice.relic.engine.opengl.AABB;
 import net.ice.relic.engine.opengl.MaterialCache;
+import net.ice.relic.engine.opengl.model.texture.Texture;
 import net.ice.relic.engine.opengl.model.texture.TextureLoader;
 import net.ice.relic.engine.util.ColorUtil;
 import org.joml.Matrix4f;
@@ -380,8 +381,10 @@ public class ModelLoader {
             aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, aiTexturePath, (IntBuffer) null, null, null, null, null, null);
             String texturePath = aiTexturePath.dataString();
             if(texturePath != null && texturePath.length() > 0) {
-                material.setTexturePath(modelDirectory + File.separator + new File(texturePath).getName());
-                loader.createTexture(material.getTexturePath());
+                String fullPath = modelDirectory + File.separator + new File(texturePath).getName();
+                material.setTexturePath(fullPath);
+                Texture diffuseTexture = loader.createTexture(fullPath);
+                material.setTexture(diffuseTexture);
                 material.setDiffuseColor(Material.DEFAULT_COLOR);
             }
 
@@ -389,16 +392,30 @@ public class ModelLoader {
             Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_NORMALS, 0, aiNormalMapPath, (IntBuffer) null, null, null, null, null, null);
             String normalMapPath = aiNormalMapPath.dataString();
             if(normalMapPath != null && normalMapPath.length() > 0) {
-                material.setNormalMapPath(modelDirectory + File.separator + new File(normalMapPath).getName());
-                loader.createTexture(material.getNormalMapPath());
+                String fullNormalPath = modelDirectory + File.separator + new File(normalMapPath).getName();
+                material.setNormalMapPath(fullNormalPath);
+                Texture normalTexture = loader.createTexture(fullNormalPath);
+                material.setNormalMap(normalTexture);
             }
 
             AIString aiOcclusionMapPath = AIString.calloc(stack);
             Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_AMBIENT_OCCLUSION, 0, aiOcclusionMapPath, (IntBuffer) null, null, null, null, null, null);
             String occlusionMapPath = aiOcclusionMapPath.dataString();
             if (occlusionMapPath != null && occlusionMapPath.length() > 0) {
-                material.setORMMapPath(modelDirectory + File.separator + new File(occlusionMapPath).getName());
-                loader.createTexture(material.getORMMapPath());
+                String fullORMPath = modelDirectory + File.separator + new File(occlusionMapPath).getName();
+                material.setORMMapPath(fullORMPath);
+                Texture ormTexture = loader.createTexture(fullORMPath);
+                material.setORMMap(ormTexture);
+            }
+
+            AIString aiEmissiveMapPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_EMISSIVE, 0, aiEmissiveMapPath, (IntBuffer) null, null, null, null, null, null);
+            String emissiveMapPath = aiEmissiveMapPath.dataString();
+            if (emissiveMapPath != null && emissiveMapPath.length() > 0) {
+                String fullEmissivePath = modelDirectory + File.separator + new File(emissiveMapPath).getName();
+                material.setEmissiveMapPath(fullEmissivePath);
+                Texture emissiveTexture = loader.createTexture(fullEmissivePath);
+                material.setEmissiveMap(emissiveTexture);
             }
             return material;
         }

@@ -53,9 +53,11 @@ public class Shader {
         return createShader(type, shaderSource.toString());
     }
 
-    private void validateShader(int shader) {
-        if(glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
-            throw new RuntimeException("Error while compiling " + (type == ShaderType.VERTEX ? "vertex" : "fragment") + " shader." + "\n\n" + glGetShaderInfoLog(shader));
+    private void validateShader(int shaderId) {
+        int status = glGetShaderi(shaderId, GL_COMPILE_STATUS);
+        if (status == GL_FALSE) {
+            String log = glGetShaderInfoLog(shaderId);
+            throw new RuntimeException("Shader compilation failed:\n" + log);
         }
     }
 

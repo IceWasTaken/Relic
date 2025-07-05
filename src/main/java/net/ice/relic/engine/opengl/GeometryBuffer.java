@@ -31,10 +31,12 @@ public class GeometryBuffer {
         for (int i = 0; i < TEXTURE_COUNT; i++) {
             glBindTexture(GL_TEXTURE_2D, textureIDS[i]);
             int type;
-            if(i == TEXTURE_COUNT - 1) {
+            if (i == TEXTURE_COUNT - 1) {
+                // Last texture is depth buffer
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, application.getWindow().getWindowSize().x, application.getWindow().getWindowSize().y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
                 type = GL_DEPTH_ATTACHMENT;
             } else {
+                // First 5 are color attachments
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, application.getWindow().getWindowSize().x, application.getWindow().getWindowSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
                 type = GL_COLOR_ATTACHMENT0 + i;
             }
@@ -44,14 +46,13 @@ public class GeometryBuffer {
             glFramebufferTexture2D(GL_FRAMEBUFFER, type, GL_TEXTURE_2D, textureIDS[i], 0);
         }
 
-        try(MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer drawBuffers = stack.mallocInt(TEXTURE_COUNT);
-            for (int i = 0; i < TEXTURE_COUNT; i++) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer drawBuffers = stack.mallocInt(TEXTURE_COUNT - 1); // only color attachments
+            for (int i = 0; i < TEXTURE_COUNT - 1; i++) {
                 drawBuffers.put(i, GL_COLOR_ATTACHMENT0 + i);
             }
             glDrawBuffers(drawBuffers);
         }
-
         geometryBuffer.unbindFrameBuffer();
     }
 
@@ -64,21 +65,24 @@ public class GeometryBuffer {
         for (int i = 0; i < TEXTURE_COUNT; i++) {
             glBindTexture(GL_TEXTURE_2D, textureIDS[i]);
             int type;
-            if(i == TEXTURE_COUNT - 1) {
+            if (i == TEXTURE_COUNT - 1) {
+                // Last texture is depth buffer
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, (ByteBuffer) null);
                 type = GL_DEPTH_ATTACHMENT;
             } else {
+                // First 5 are color attachments
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer) null);
                 type = GL_COLOR_ATTACHMENT0 + i;
             }
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
             glFramebufferTexture2D(GL_FRAMEBUFFER, type, GL_TEXTURE_2D, textureIDS[i], 0);
         }
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer drawBuffers = stack.mallocInt(TEXTURE_COUNT);
-            for (int i = 0; i < TEXTURE_COUNT; i++) {
+            IntBuffer drawBuffers = stack.mallocInt(TEXTURE_COUNT - 1);
+            for (int i = 0; i < TEXTURE_COUNT - 1; i++) {
                 drawBuffers.put(i, GL_COLOR_ATTACHMENT0 + i);
             }
             glDrawBuffers(drawBuffers);
