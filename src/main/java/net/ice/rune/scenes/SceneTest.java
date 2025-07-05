@@ -13,6 +13,8 @@ public class SceneTest extends Scene {
 
     @Override
     protected void sceneInit() {
-        addObject("test", new SceneObject("test", ModelLoader.loadModelFromFile("test", "EmissiveStrengthTest1.gltf", this.getTextureLoader(), this.getMaterialCache(), ModelRegistry.DEFAULT_FLAGS)));
+        //addObject("test", new SceneObject("test", ModelLoader.loadModelFromFile("test", "NormalTangentTest.gltf", this.getTextureLoader(), this.getMaterialCache(), ModelRegistry.DEFAULT_FLAGS)));
+        //addObject("test1", new SceneObject("test1", ModelLoader.loadModelFromFile("test", "EmissiveStrengthTest1.gltf", this.getTextureLoader(), this.getMaterialCache(), ModelRegistry.DEFAULT_FLAGS)).setPosition(10,0,0));
+        addObject("test1", new SceneObject("test1", ModelLoader.loadModelFromFile("test", "VahRuta/ruta.dae", this.getTextureLoader(), this.getMaterialCache(), ModelRegistry.DEFAULT_FLAGS)).setPosition(10,0,0));
     }
 }

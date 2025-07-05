@@ -4,7 +4,11 @@ import net.ice.relic.engine.Lifecycle;
 import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.opengl.GeometryBuffer;
 import net.ice.relic.engine.opengl.model.Model;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +47,10 @@ public class Renderer implements Lifecycle {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        IntBuffer maxTextures = BufferUtils.createIntBuffer(1);
+        GL11.glGetIntegerv(GL20.GL_MAX_TEXTURE_IMAGE_UNITS, maxTextures);
+        System.out.println("GL_MAX_TEXTURE_IMAGE_UNITS: " + maxTextures.get(0));
 
         this.renderingBuffer = new RenderingBuffer(application);
 

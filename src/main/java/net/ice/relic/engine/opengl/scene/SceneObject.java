@@ -55,10 +55,19 @@ public class SceneObject {
         this.position = position;
     }
 
-    public void setPosition(float x, float y, float z) {
+
+
+//    public void setPosition(float x, float y, float z) {
+//        this.position.x = x;
+//        this.position.y = y;
+//        this.position.z = z;
+//    }
+
+    public SceneObject setPosition(float x, float y, float z) {
         this.position.x = x;
         this.position.y = y;
         this.position.z = z;
+        return this;
     }
 
     public AnimationData getAnimationData() {

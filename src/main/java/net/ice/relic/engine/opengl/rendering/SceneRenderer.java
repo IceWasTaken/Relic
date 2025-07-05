@@ -52,6 +52,7 @@ public class SceneRenderer extends AbstractRenderer {
             uniforms.createUniform(uniforms.formatUniform("materials", i) + ".reflectance");
             uniforms.createUniform(uniforms.formatUniform("materials", i) + ".normalMapIndex");
             uniforms.createUniform(uniforms.formatUniform("materials", i) + ".textureIndex");
+            uniforms.createUniform(uniforms.formatUniform("materials", i) + ".ormMapIndex");
         }
 
         for (int i = 0; i < config.getMaxDrawElements(); i++) {
@@ -91,8 +92,6 @@ public class SceneRenderer extends AbstractRenderer {
             glActiveTexture(GL_TEXTURE0 + i);
             texture.bind();
         }
-
-
 
         int entityIndex = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
@@ -257,27 +256,35 @@ public class SceneRenderer extends AbstractRenderer {
 
         shaderProgram.bind();
         List<Material> materialList = materialCache.getMaterialsList();
-        int numMaterials = materialList.size();
-        for (int i = 0; i < numMaterials; i++) {
+        int maxMaterials = config.getMaxMaterials();
+        for (int i = 0; i < Math.min(materialList.size(), maxMaterials); i++) {
             Material material = materialCache.getMaterial(i);
             String name = uniforms.formatUniform("materials", i);
 
             uniforms.setUniform(name + ".diffuse", material.getDiffuseColor().convertToGLVector4f());
             uniforms.setUniform(name + ".specular", material.getSpecularColor().convertToGLVector4f());
-            //uniforms.setUniform(name + ".emissiveColor", material.getEmissiveColor().convertToGLVector4f());
-
             uniforms.setUniform(name + ".reflectance", material.getReflectance());
-            //uniforms.setUniform(name + ".emissiveStrength", material.getEmissiveStrength());
 
-            String normalMapPath = material.getNormalMapPath();
-            int idx = 0;
-            if (normalMapPath != null) {
-                idx = texturePosMap.computeIfAbsent(normalMapPath, k -> 0);
+            int texIndex = 0;
+            String diffusePath = material.getTexturePath();
+            if (diffusePath != null) {
+                texIndex = texturePosMap.getOrDefault(diffusePath, 0);
             }
-            uniforms.setUniform(name + ".normalMapIndex", idx);
-            Texture texture = textureLoader.getTexture(material.getTexturePath());
-            idx = texturePosMap.computeIfAbsent(texture.getTexturePath(), k -> 0);
-            uniforms.setUniform(name + ".textureIndex", idx);
+            uniforms.setUniform(name + ".textureIndex", texIndex);
+
+            int normalIndex = 0;
+            String normalPath = material.getNormalMapPath();
+            if (normalPath != null) {
+                normalIndex = texturePosMap.getOrDefault(normalPath, 0);
+            }
+            uniforms.setUniform(name + ".normalMapIndex", normalIndex);
+
+            int ormIndex = 0;
+            String ormPath = material.getORMMapPath();
+            if (ormPath != null) {
+                ormIndex = texturePosMap.getOrDefault(ormPath, 0);
+            }
+            uniforms.setUniform(name + ".ormMapIndex", ormIndex);
         }
         shaderProgram.unbind();
     }

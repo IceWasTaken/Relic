@@ -1,6 +1,5 @@
 package net.ice.relic.engine.opengl.rendering;
 
-
 import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.config.configs.RendererConfig;
 import net.ice.relic.engine.opengl.GeometryBuffer;

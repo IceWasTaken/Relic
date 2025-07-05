@@ -3,6 +3,7 @@ package net.ice.relic.engine;
 import net.ice.relic.annotations.Rewrite;
 import net.ice.relic.engine.common.Clock;
 import net.ice.relic.engine.common.Input;
+import net.ice.relic.engine.common.event.EventManager;
 import net.ice.relic.engine.config.Config;
 import net.ice.relic.engine.opengl.rendering.Renderer;
 import net.ice.relic.engine.opengl.scene.Scene;
@@ -14,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.glfwInit;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glGetError;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20C.GL_SHADING_LANGUAGE_VERSION;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 
 @Rewrite
@@ -82,6 +83,8 @@ public abstract class RelicApplication implements ApplicationContext {
 
         window.init();
         Logger.info("Created Window. (2/4)");
+
+
 
         renderer.init();
         glEnable(GL_DEBUG_OUTPUT);
@@ -162,6 +165,18 @@ public abstract class RelicApplication implements ApplicationContext {
             currentScene.resetState();
         }
         currentScene = null;
+    }
+
+    public static void printOpenGLInfo() {
+        String vendor = glGetString(GL_VENDOR);
+        String renderer = glGetString(GL_RENDERER);
+        String version = glGetString(GL_VERSION);
+        String glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+        System.out.println("OpenGL Vendor: " + vendor);
+        System.out.println("OpenGL Renderer: " + renderer);
+        System.out.println("OpenGL Version: " + version);
+        System.out.println("GLSL Version: " + glslVersion);
     }
 
 

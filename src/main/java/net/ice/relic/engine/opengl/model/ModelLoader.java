@@ -284,7 +284,6 @@ public class ModelLoader {
         Vector3f max = new Vector3f(aabb.mMax().x(), aabb.mMax().y(), aabb.mMax().z());
         AABB aabb1 = new AABB(min, max);
 
-        Logger.debug("Vertices: {}, Normals: {}, UVs: {}, Indices: {}", vertices.length, normals.length, textureCoords.length, indices.length);
 
 
         return new MeshData(vertices, normals, tangents, bitangents, textureCoords, indices, animationMeshData.boneIds, animationMeshData.weights, aabb1);
@@ -361,6 +360,7 @@ public class ModelLoader {
                 material.setEmissiveColor(new ColorUtil.Color(color4D.r(), color4D.g(), color4D.b(), color4D.a()));
             }
 
+
             float reflectance = 0.0f;
             float[] shininessFactor = new float[]{0.0f};
             int[] pMax = new int[]{1};
@@ -391,6 +391,14 @@ public class ModelLoader {
             if(normalMapPath != null && normalMapPath.length() > 0) {
                 material.setNormalMapPath(modelDirectory + File.separator + new File(normalMapPath).getName());
                 loader.createTexture(material.getNormalMapPath());
+            }
+
+            AIString aiOcclusionMapPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_AMBIENT_OCCLUSION, 0, aiOcclusionMapPath, (IntBuffer) null, null, null, null, null, null);
+            String occlusionMapPath = aiOcclusionMapPath.dataString();
+            if (occlusionMapPath != null && occlusionMapPath.length() > 0) {
+                material.setORMMapPath(modelDirectory + File.separator + new File(occlusionMapPath).getName());
+                loader.createTexture(material.getORMMapPath());
             }
             return material;
         }

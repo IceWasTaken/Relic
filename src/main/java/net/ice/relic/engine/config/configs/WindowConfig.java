@@ -1,12 +1,9 @@
 package net.ice.relic.engine.config.configs;
 
-import net.ice.relic.annotations.Rewrite;
 import net.ice.relic.engine.config.ConfigBase;
-import net.ice.relic.engine.config.ConfigEntry;
 
 import java.nio.file.Path;
 
-@Rewrite
 public class WindowConfig extends ConfigBase {
 
     private static final String defaultFileName = "default_window_config.properties";
@@ -15,11 +12,11 @@ public class WindowConfig extends ConfigBase {
     private static final Path configPath = Path.of("config/" + fileName);
     private static final Path defaultConfigPath = Path.of("net/ice/relic/config/" + defaultFileName);
 
-    private ConfigEntry<String> TITLE;
-    private ConfigEntry<Integer> WIDTH;
-    private ConfigEntry<Integer> HEIGHT;
-    private ConfigEntry<Boolean> VSYNC;
-    private ConfigEntry<Boolean> FULLSCREEN;
+    private String title;
+    private Integer width;
+    private Integer height;
+    private Boolean vsync;
+    private Boolean fullscreen;
 
     public WindowConfig() {
         super(configPath, defaultConfigPath);
@@ -27,52 +24,52 @@ public class WindowConfig extends ConfigBase {
 
     @Override
     public WindowConfig loadConfig() {
-        writeConfigToFileAndSave(configPath);
-
-        TITLE = getString("title");
-        WIDTH = getInt("width");
-        HEIGHT = getInt("height");
-        VSYNC = getBoolean("vsync");
-        FULLSCREEN = getBoolean("fullscreen");
-
-        writeConfigToFileAndSave(configPath);
+        title = getString("title");
+        width = getInt("width");
+        height = getInt("height");
+        vsync = getBoolean("vsync");
+        fullscreen = getBoolean("fullscreen");
 
         return this;
     }
 
     public String getTitle() {
-        return TITLE.getValue();
+        return title;
     }
 
     public int getWidth() {
-        return WIDTH.getValue();
+        return width;
     }
 
     public int getHeight() {
-        return HEIGHT.getValue();
+        return height;
     }
 
     public boolean isVsync() {
-        return VSYNC.getValue();
+        return vsync;
     }
 
     public boolean isFullscreen() {
-        return FULLSCREEN.getValue();
+        return fullscreen;
     }
 
     public void setTitle(String title) {
-        this.TITLE.setValue(title);
+        this.title = title;
     }
 
     public void setWidth(int width) {
-        this.WIDTH.setValue(width);
+        this.width = width;
     }
 
     public void setHeight(int height) {
-        this.HEIGHT.setValue(height);
+        this.height = height;
+    }
+
+    public void setVsync(boolean vsync) {
+        this.vsync = vsync;
     }
 
     public void setFullscreen(boolean fullscreen) {
-        this.FULLSCREEN.setValue(fullscreen);
+        this.fullscreen = fullscreen;
     }
 }

@@ -11,7 +11,6 @@ public class EventManager<Event extends Enum<Event>> implements EventContext<Eve
 
     private final Map<Event, List<EventListener>> listeners;
 
-
     public EventManager() {
         listeners = new HashMap<>();
     }

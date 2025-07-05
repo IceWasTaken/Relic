@@ -11,7 +11,7 @@ public class ColorUtil {
     }
 
     public static void glSetColor3f(Color color) {
-        glColor4f(color.red, color.green, color.blue, 0f);
+        glColor4f(color.red, color.green, color.blue, color.alpha);
     }
 
     public static void glSetClearColor(Color color) {
@@ -50,7 +50,6 @@ public class ColorUtil {
         public Vector4f convertToGLVector4f() {
             return new Vector4f(red / 255f, green / 255f, blue / 255f, alpha);
         }
-
     }
 
     public enum ColorDefaults {

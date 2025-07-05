@@ -16,7 +16,7 @@ public class Camera {
 
     public Matrix4f viewMatrix = new Matrix4f();
     public Matrix4f projectionMatrix = new Matrix4f();
-    private Vector3f position = new Vector3f(0,0,0);
+    private Vector3f position = new Vector3f(0,0,10);
     private Quaternionf orientation = new Quaternionf();
     private RelicApplication application;
 

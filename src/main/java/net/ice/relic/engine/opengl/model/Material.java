@@ -13,7 +13,7 @@ public class Material {
 
     private String texturePath;
     private String normalMapPath;
-
+    private String ORMMapPath;
     private ColorUtil.Color ambientColor;
     private ColorUtil.Color diffuseColor;
     private ColorUtil.Color specularColor;
@@ -63,6 +63,10 @@ public class Material {
         return materialIndex;
     }
 
+    public String getORMMapPath() {
+        return ORMMapPath;
+    }
+
     public void setAmbientColor(ColorUtil.Color ambientColor) {
         this.ambientColor = ambientColor;
     }
@@ -97,5 +101,9 @@ public class Material {
 
     public void setEmissiveStrength(float emissiveStrength) {
         this.emissiveStrength = emissiveStrength;
+    }
+
+    public void setORMMapPath(String ORMMapPath) {
+        this.ORMMapPath = ORMMapPath;
     }
 }

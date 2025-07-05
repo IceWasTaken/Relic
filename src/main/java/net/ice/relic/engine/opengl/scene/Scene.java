@@ -38,7 +38,7 @@ public abstract class Scene {
         this.models = new HashMap<>();
         this.objects = new HashMap<>();
         this.materialCache = new MaterialCache();
-        this.fog = new Fog(true, new Vector3f(0.5f, 0.5f, 0.5f), 0.02f);
+        this.fog = new Fog(true, new Vector3f(0.5f, 0.5f, 0.5f), 0.005f);
         resetState();
 
         Lights lights1 = new Lights();
