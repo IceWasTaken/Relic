@@ -25,6 +25,7 @@ public abstract class Scene {
     private RelicApplication application;
     private TextureLoader loader;
     private MaterialCache materialCache;
+    private Skybox skybox;
     private boolean loaded;
     private boolean initialized;
 
@@ -38,7 +39,7 @@ public abstract class Scene {
         this.models = new HashMap<>();
         this.objects = new HashMap<>();
         this.materialCache = new MaterialCache();
-        this.fog = new Fog(true, new Vector3f(0.5f, 0.5f, 0.5f), 0.005f);
+        this.fog = new Fog(true, new Vector3f(0.5f, 0.5f, 0.5f), 0.02f);
         resetState();
 
         Lights lights1 = new Lights();
@@ -142,5 +143,13 @@ public abstract class Scene {
 
     public Fog getFog() {
         return fog;
+    }
+
+    public void setSkybox(Skybox skybox) {
+        this.skybox = skybox;
+    }
+
+    public Skybox getSkybox() {
+        return skybox;
     }
 }

@@ -1,0 +1,41 @@
+newmtl BigBossAUrokoMip.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossAUrokoMip.png
+
+newmtl BigBossAFinger.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossAFinger.png
+
+newmtl BigBossABody.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossABody.png
+
+newmtl BigBossALeg.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossALeg.png
+
+newmtl BigBossAMouth.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossAMouth.png
+
+newmtl BigBossAHair.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossAHair.png
+
+newmtl BigBossAHairB.png
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+Ns 1.000000
+map_Kd BigBossAHairB.png

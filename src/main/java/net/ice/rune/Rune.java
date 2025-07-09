@@ -3,6 +3,7 @@ package net.ice.rune;
 import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.config.Config;
 import net.ice.relic.engine.opengl.rendering.Renderer;
+import net.ice.rune.scenes.SceneTest;
 
 public class Rune extends RelicApplication {
 
@@ -20,6 +21,11 @@ public class Rune extends RelicApplication {
 
     @Override
     protected void update(RelicApplication application, float deltaTime) {
+        if(currentScene instanceof SceneTest) {
+            if(deltaTime % 2 == 0) {
+                ((SceneTest) currentScene).getAnimationData().nextFrame();
+            }
+        }
         application.getCurrentScene().getObjects().forEach(((s, sceneObject) -> sceneObject.update()));
     }
 

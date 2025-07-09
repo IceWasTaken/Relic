@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset />
+  <library_images>
+    <image id="Lv8_StepXBase_070725a_Line">
+      <init_from>Lv8_StepXBase_070725a_Line.png</init_from>
+    </image>
+    <image id="Lv8_StepXBase_070725a">
+      <init_from>Lv8_StepXBase_070725a.png</init_from>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="cc_Moyou_v">
+      <instance_effect url="#Effect_cc_Moyou_v" />
+    </material>
+    <material id="aa_LBstepS_v">
+      <instance_effect url="#Effect_aa_LBstepS_v" />
+    </material>
+  </library_materials>
+  <library_effects>
+    <effect id="Effect_cc_Moyou_v">
+      <profile_COMMON>
+        <newparam sid="surface_cc_Moyou_v-diffuse">
+          <surface type="2D">
+            <init_from>Lv8_StepXBase_070725a_Line</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="sampler_cc_Moyou_v-diffuse">
+          <sampler2D>
+            <source>surface_cc_Moyou_v-diffuse</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <diffuse>
+              <texture texture="sampler_cc_Moyou_v-diffuse" texcoord="CHANNEL0" />
+            </diffuse>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <specular>
+              <color sid="specular">0 0 0 1</color>
+            </specular>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="Effect_aa_LBstepS_v">
+      <profile_COMMON>
+        <newparam sid="surface_aa_LBstepS_v-diffuse">
+          <surface type="2D">
+            <init_from>Lv8_StepXBase_070725a</init_from>
+            <format>A8R8G8B8</format>
+          </surface>
+        </newparam>
+        <newparam sid="sampler_aa_LBstepS_v-diffuse">
+          <sampler2D>
+            <source>surface_aa_LBstepS_v-diffuse</source>
+            <wrap_s>WRAP</wrap_s>
+            <wrap_t>WRAP</wrap_t>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <diffuse>
+              <texture texture="sampler_aa_LBstepS_v-diffuse" texcoord="CHANNEL0" />
+            </diffuse>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <specular>
+              <color sid="specular">0 0 0 1</color>
+            </specular>
+          </phong>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_geometries>
+    <geometry id="Shape0-mesh" name="Shape 0">
+      <mesh>
+        <source id="Shape0-position">
+          <float_array id="Shape0-position-array" count="90">-225 0 -75 -225 0 75 -225 -43.5625 -75 -225 0 75 -225 -43.5625 75 -225 -43.5625 -75 -225 0 75 225 0 75 -225 -43.5625 75 225 0 75 225 -43.5625 75 -225 -43.5625 75 225 0 75 225 0 -75 225 -43.5625 75 225 0 -75 225 -43.5625 -75 225 -43.5625 75 225 0 -75 -225 0 -75 225 -43.5625 -75 -225 0 -75 -225 -43.5625 -75 225 -43.5625 -75 -211.0625 0 -75 212.1875 0 -75 -214.9375 0 75 212.1875 0 -75 212 0 75 -214.9375 0 75</float_array>
+          <technique_common>
+            <accessor source="#Shape0-position-array" count="30" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Shape0-color">
+          <float_array id="Shape0-color-array" count="120">0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0 0 0 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1</float_array>
+          <technique_common>
+            <accessor source="#Shape0-color-array" count="30" stride="4">
+              <param name="R" type="float" />
+              <param name="G" type="float" />
+              <param name="B" type="float" />
+              <param name="A" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Shape0-texcoord">
+          <float_array id="Shape0-texcoord-array" count="60">0.01489258 0.5546875 0.01489258 0.8756104 0.1068115 0.5546875 0.01489258 0.8756104 0.1068115 0.8756104 0.1068115 0.5546875 0.8864746 0.5018311 0.1373291 0.5018311 0.8864746 0.5938721 0.1373291 0.5018311 0.1373291 0.5938721 0.8864746 0.5938721 0.01489258 0.5546875 0.01489258 0.8756104 0.1068115 0.5546875 0.01489258 0.8756104 0.1068115 0.8756104 0.1068115 0.5546875 0.8864746 0.5018311 0.1373291 0.5018311 0.8864746 0.5938721 0.1373291 0.5018311 0.1373291 0.5938721 0.8864746 0.5938721 0.1182861 0.9129639 0.9064941 0.9129639 0.1109619 0.5888672 0.9064941 0.9129639 0.90625 0.5888672 0.1109619 0.5888672</float_array>
+          <technique_common>
+            <accessor source="#Shape0-texcoord-array" count="30" stride="2">
+              <param name="S" type="float" />
+              <param name="T" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Shape0-vertex">
+          <input semantic="POSITION" source="#Shape0-position" />
+        </vertices>
+        <triangles material="cc_Moyou_v" count="10">
+          <input semantic="VERTEX" source="#Shape0-vertex" offset="0" />
+          <input semantic="COLOR" source="#Shape0-color" offset="1" set="0" />
+          <input semantic="TEXCOORD" source="#Shape0-texcoord" offset="2" set="0" />
+          <p>2 2 2 1 1 1 0 0 0 5 5 5 4 4 4 3 3 3 8 8 8 7 7 7 6 6 6 11 11 11 10 10 10 9 9 9 14 14 14 13 13 13 12 12 12 17 17 17 16 16 16 15 15 15 20 20 20 19 19 19 18 18 18 23 23 23 22 22 22 21 21 21 26 26 26 25 25 25 24 24 24 29 29 29 28 28 28 27 27 27 </p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="Shape1-mesh" name="Shape 1">
+      <mesh>
+        <source id="Shape1-position">
+          <float_array id="Shape1-position-array" count="90">-224.5 -1 -74.5 224.5 -1 -74.5 -224.5 -1 74.5 224.5 -1 -74.5 224.5 -1 74.5 -224.5 -1 74.5 224.5 -1 -74.5 224.5 -1350 -74.5 224.5 -1 74.5 224.5 -1350 -74.5 224.5 -1350 74.5 224.5 -1 74.5 -224.5 -1 74.5 -224.5 -1350 74.5 -224.5 -1 -74.5 -224.5 -1350 74.5 -224.5 -1350 -74.5 -224.5 -1 -74.5 224.5 -1 -74.5 -224.5 -1 -74.5 224.5 -1350 -74.5 -224.5 -1 -74.5 -224.5 -1350 -74.5 224.5 -1350 -74.5 -224.5 -1 74.5 224.5 -1 74.5 -224.5 -1350 74.5 224.5 -1 74.5 224.5 -1350 74.5 -224.5 -1350 74.5</float_array>
+          <technique_common>
+            <accessor source="#Shape1-position-array" count="30" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Shape1-normal">
+          <float_array id="Shape1-normal-array" count="90">0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 -1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Shape1-normal-array" count="30" stride="3">
+              <param name="X" type="float" />
+              <param name="Y" type="float" />
+              <param name="Z" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Shape1-color">
+          <float_array id="Shape1-color-array" count="120">0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1 0.7490196 0.8 0.8 1</float_array>
+          <technique_common>
+            <accessor source="#Shape1-color-array" count="30" stride="4">
+              <param name="R" type="float" />
+              <param name="G" type="float" />
+              <param name="B" type="float" />
+              <param name="A" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Shape1-texcoord">
+          <float_array id="Shape1-texcoord-array" count="60">0 1 1 1 0 0.8125 1 1 1 0.8125 0 0.8125 2 -0.6875 0 -0.6875 2 -0.5 0 -0.6875 0 -0.5 2 -0.5 0 -0.6875 2 -0.6875 0 -0.5 2 -0.6875 2 -0.5 0 -0.5 2 0 2 0.5 0 0 2 0.5 0 0.5 0 0 2 0.5 2 0 0 0.5 2 0 0 0 0 0.5</float_array>
+          <technique_common>
+            <accessor source="#Shape1-texcoord-array" count="30" stride="2">
+              <param name="S" type="float" />
+              <param name="T" type="float" />
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Shape1-vertex">
+          <input semantic="POSITION" source="#Shape1-position" />
+        </vertices>
+        <triangles material="aa_LBstepS_v" count="10">
+          <input semantic="VERTEX" source="#Shape1-vertex" offset="0" />
+          <input semantic="NORMAL" source="#Shape1-normal" offset="1" />
+          <input semantic="COLOR" source="#Shape1-color" offset="2" set="0" />
+          <input semantic="TEXCOORD" source="#Shape1-texcoord" offset="3" set="0" />
+          <p>2 2 2 2 1 1 1 1 0 0 0 0 5 5 5 5 4 4 4 4 3 3 3 3 8 8 8 8 7 7 7 7 6 6 6 6 11 11 11 11 10 10 10 10 9 9 9 9 14 14 14 14 13 13 13 13 12 12 12 12 17 17 17 17 16 16 16 16 15 15 15 15 20 20 20 20 19 19 19 19 18 18 18 18 23 23 23 23 22 22 22 22 21 21 21 21 26 26 26 26 25 25 25 25 24 24 24 24 29 29 29 29 28 28 28 28 27 27 27 27 </p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Armature" name="Armature" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+      </node>
+      <node id="Shape 0" name="Shape 0" type="NODE">
+        <instance_geometry url="#Shape0-mesh" name="Shape 0">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="cc_Moyou_v" target="#cc_Moyou_v">
+                <bind_vertex_input semantic="CHANNEL0" input_semantic="TEXCOORD" input_set="0" />
+                <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="1" />
+                <bind_vertex_input semantic="CHANNEL2" input_semantic="TEXCOORD" input_set="2" />
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+      <node id="Shape 1" name="Shape 1" type="NODE">
+        <instance_geometry url="#Shape1-mesh" name="Shape 1">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="aa_LBstepS_v" target="#aa_LBstepS_v">
+                <bind_vertex_input semantic="CHANNEL0" input_semantic="TEXCOORD" input_set="0" />
+                <bind_vertex_input semantic="CHANNEL1" input_semantic="TEXCOORD" input_set="1" />
+                <bind_vertex_input semantic="CHANNEL2" input_semantic="TEXCOORD" input_set="2" />
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene" />
+  </scene>
+</COLLADA>

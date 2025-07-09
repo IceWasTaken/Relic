@@ -31,7 +31,7 @@ public class AnimationRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected void render(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
+    protected void render() {
         shaderProgram.bind();
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, renderingBuffer.getBindingPoseBuffer().getId());

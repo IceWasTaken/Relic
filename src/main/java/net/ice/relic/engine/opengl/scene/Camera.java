@@ -5,6 +5,7 @@ import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.common.Input;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -13,6 +14,9 @@ import static org.lwjgl.glfw.GLFW.*;
 public class Camera {
 
     private boolean hasUpdated;
+
+    private float pitch = 0f; // vertical rotation
+    private float yaw = 0f;
 
     public Matrix4f viewMatrix = new Matrix4f();
     public Matrix4f projectionMatrix = new Matrix4f();
@@ -26,6 +30,12 @@ public class Camera {
 
     public void update(float deltaTime) {
         if (!hasUpdated) {
+            Input input = application.getInput();
+            Vector2f currMousePos = input.getMousePosition();
+            Vector2f prevMousePos = input.getPrevMousePosition();
+
+            Vector2f delta = new Vector2f(currMousePos).sub(prevMousePos);
+
             float speed = Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) ? 10f : 2f;
             float rotateZ = 0f;
             float rotateX = 0f;
@@ -49,28 +59,27 @@ public class Camera {
             if (Input.isKeyDown(GLFW_KEY_E)) {
                 rotateZ += 1f;
             }
-            if (Input.isKeyDown(GLFW_KEY_UP)) {
-                rotateX -= 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_DOWN)) {
-                rotateX += 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_LEFT)) {
-                rotateY -= 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_RIGHT)) {
-                rotateY += 1f;
+
+            if (Input.getMouseButtonsDown().contains(GLFW_MOUSE_BUTTON_RIGHT)) {
+                float sensitivity = application.getConfig().getPlayerConfig().getMouseSensitivity();
+
+                yaw   += delta.x * sensitivity * deltaTime;
+                pitch += delta.y * sensitivity * deltaTime;
+
+                pitch = Math.max((float)Math.toRadians(-89), Math.min((float)Math.toRadians(89), pitch));
             }
 
-            orientation.rotateLocalZ(rotateZ * deltaTime * speed);
-            orientation.rotateLocalX(rotateX * deltaTime * speed);
-            orientation.rotateLocalY(rotateY * deltaTime * speed);
+            orientation.identity()
+                    .rotateY(yaw)
+                    .rotateX(pitch)
+                    .rotateZ(rotateZ * deltaTime * speed);
 
             viewMatrix.identity()
                     .rotate(orientation)
                     .translate(new Vector3f(position).negate());
 
             hasUpdated = true;
+            input.getPrevMousePosition().set(currMousePos);
         }
     }
 

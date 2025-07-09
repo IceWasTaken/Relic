@@ -23,6 +23,7 @@ public class ShadowRenderer extends AbstractRenderer {
 
     private VertexBufferObject staticVBO;
     private VertexBufferObject animatedVBO;
+
     private ShadowBuffer shadowBuffer;
     private ArrayList<Shadow> shadows;
     private Map<String, Integer> objectIndexMap;
@@ -35,8 +36,8 @@ public class ShadowRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void init() {
-        super.init();
+    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
+        super.init(renderingBuffer, geometryBuffer);
         this.shadowBuffer = new ShadowBuffer();
 
         for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
@@ -63,7 +64,7 @@ public class ShadowRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected void render(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
+    protected void render() {
         Shadow.update(shadows, application.getCurrentScene());
 
         shadowBuffer.getShadowMapFBO().bind(GL_FRAMEBUFFER);

@@ -5,6 +5,7 @@ import net.ice.relic.engine.RelicApplication;
 import net.ice.relic.engine.opengl.*;
 import net.ice.relic.engine.opengl.scene.Fog;
 import net.ice.relic.engine.opengl.scene.Lights;
+import net.ice.relic.engine.opengl.scene.Scene;
 import net.ice.relic.engine.opengl.scene.light.AmbientLight;
 import net.ice.relic.engine.opengl.scene.light.DirLight;
 import net.ice.relic.engine.opengl.scene.light.PointLight;
@@ -18,6 +19,7 @@ import java.util.List;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 @Rewrite
 public class LightRenderer extends AbstractRenderer {
@@ -30,8 +32,8 @@ public class LightRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void init() {
-        super.init();
+    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
+        super.init(renderingBuffer, buffer);
         this.quadMesh = new QuadMesh();
     }
 
@@ -47,8 +49,6 @@ public class LightRenderer extends AbstractRenderer {
         uniforms.createUniform("normalSampler");
         uniforms.createUniform("specularSampler");
         uniforms.createUniform("depthSampler");
-        //uniforms.createUniform("ormSampler");
-        //uniforms.createUniform("emissiveSampler");
 
         uniforms.createUniform("invProjectionMatrix");
         uniforms.createUniform("invViewMatrix");
@@ -94,50 +94,49 @@ public class LightRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected void render(RenderingBuffer renderingBuffer, GeometryBuffer geometryBuffer) {
+    protected void render() {
+        Scene scene = application.getCurrentScene();
+
         shaderProgram.bind();
 
         updateLights();
 
-        int[] textureIDs = geometryBuffer.getTextureIDS();
-        int textureCount = textureIDs != null ? textureIDs.length : 0;
-        for (int i = 0; i < textureCount; i++) {
+        // Bind the G-Buffer textures
+        int[] textureIds = geometryBuffer.getTextureIDS();
+        int numTextures = textureIds != null ? textureIds.length : 0;
+        for (int i = 0; i < numTextures; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, textureIDs[i]);
+            glBindTexture(GL_TEXTURE_2D, textureIds[i]);
         }
 
         uniforms.setUniform("albedoSampler", 0);
         uniforms.setUniform("normalSampler", 1);
         uniforms.setUniform("specularSampler", 2);
-        //uniforms.setUniform("ormSampler", 3);
-        //uniforms.setUniform("emissiveSampler", 4);
         uniforms.setUniform("depthSampler", 3);
 
-
-        Fog fog = application.getCurrentScene().getFog();
+        Fog fog = scene.getFog();
         uniforms.setUniform("fog.activeFog", fog.isActive() ? 1 : 0);
         uniforms.setUniform("fog.color", fog.getColor());
         uniforms.setUniform("fog.density", fog.getDensity());
 
         int start = 4;
-        List<Shadow> shadows = shadowRenderer.getShadows();
+        List<Shadow> cascadeShadows = shadowRenderer.getShadows();
         for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
             glActiveTexture(GL_TEXTURE0 + start + i);
             uniforms.setUniform("shadowMap_" + i, start + i);
-            Shadow shadow = shadows.get(i);
-            uniforms.setUniform(uniforms.formatUniform("shadowMap", i) + ".shadowProjectionMatrix", shadow.getProjectionMatrix());
-            uniforms.setUniform(uniforms.formatUniform("shadowMap", i) + ".splitDistance", shadow.getShadowDistance());
+            Shadow cascadeShadow = cascadeShadows.get(i);
+            uniforms.setUniform("shadowMap[" + i + "]" + ".shadowProjectionMatrix", cascadeShadow.getProjectionMatrix());
+            uniforms.setUniform("shadowMap[" + i + "]" + ".splitDistance", cascadeShadow.getShadowDistance());
         }
         shadowRenderer.getShadowBuffer().bindTextures(GL_TEXTURE0 + start);
 
-        uniforms.setUniform("invProjectionMatrix", application.getCurrentScene().getCamera().getProjectionMatrix().invert());
-        uniforms.setUniform("invViewMatrix", application.getCurrentScene().getCamera().getViewMatrix().invert());
+        uniforms.setUniform("invProjectionMatrix", scene.getCamera().getProjectionMatrix().invert());
+        uniforms.setUniform("invViewMatrix", scene.getCamera().getViewMatrix().invert());
 
         quadMesh.getMeshVAO().bind();
         glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
 
         shaderProgram.unbind();
-
         ensureNoErrorBeforeContinue();
     }
 

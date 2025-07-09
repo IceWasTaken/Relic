@@ -9,6 +9,8 @@ import net.ice.relic.engine.opengl.rendering.Renderer;
 import net.ice.relic.engine.opengl.scene.Scene;
 import net.ice.rune.scenes.SceneTest;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.GLUtil;
+import org.lwjgl.system.Callback;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
@@ -30,6 +32,7 @@ public abstract class RelicApplication implements ApplicationContext {
 
     protected Scene currentScene;
     private final Map<String, Scene> scenes;
+    private Callback callback;
 
     protected EngineState currentState;
     protected final Config config;
@@ -48,7 +51,6 @@ public abstract class RelicApplication implements ApplicationContext {
         changeState(EngineState.INITIALIZING);
 
         this.config = config;
-
         this.clock = new Clock();
         this.stats = new Stats(this);
         this.window = new Window(this);
@@ -87,6 +89,7 @@ public abstract class RelicApplication implements ApplicationContext {
         Logger.info("Created Window. (2/4)");
 
         renderer.init();
+        callback = GLUtil.setupDebugMessageCallback();
 
         System.out.println("RENDERER DONE.");
         printOpenGLInfo();
@@ -220,5 +223,7 @@ public abstract class RelicApplication implements ApplicationContext {
         return clock;
     }
 
-
+    public Input getInput() {
+        return input;
+    }
 }

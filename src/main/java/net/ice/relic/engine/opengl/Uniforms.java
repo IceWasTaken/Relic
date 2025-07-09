@@ -5,6 +5,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class Uniforms {
     public void createUniform(String uniformName) {
         int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), uniformName);
 
+        Logger.debug(uniformName + ": " + uniformLocation);
         if(uniformLocation < 0) {
             throw new RuntimeException("Could not find uniform: " + uniformName + " in shader.");
         }

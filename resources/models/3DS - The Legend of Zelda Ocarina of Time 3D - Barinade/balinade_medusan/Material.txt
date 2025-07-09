@@ -1,0 +1,570 @@
+{
+  "MaterialParams": {
+    "Flags": 14,
+    "FragmentFlags": 0,
+    "MaterialShader": null,
+    "TextureCoords": [
+      {
+        "Flags": 0,
+        "TransformType": 0,
+        "MappingType": 0,
+        "ReferenceCameraIndex": 0,
+        "Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "Rotation": 0.0,
+        "Translation": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      {
+        "Flags": 0,
+        "TransformType": 0,
+        "MappingType": 0,
+        "ReferenceCameraIndex": 0,
+        "Scale": {
+          "X": 0.0,
+          "Y": 0.0
+        },
+        "Rotation": 0.0,
+        "Translation": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      {
+        "Flags": 0,
+        "TransformType": 0,
+        "MappingType": 0,
+        "ReferenceCameraIndex": 0,
+        "Scale": {
+          "X": 0.0,
+          "Y": 0.0
+        },
+        "Rotation": 0.0,
+        "Translation": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      }
+    ],
+    "LightSetIndex": 0,
+    "FogIndex": 0,
+    "EmissionColor": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "AmbientColor": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "DiffuseColor": {
+      "R": 127,
+      "G": 127,
+      "B": 127,
+      "A": 255
+    },
+    "Specular0Color": {
+      "R": 255,
+      "G": 255,
+      "B": 255,
+      "A": 0
+    },
+    "Specular1Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Constant0Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Constant1Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Constant2Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Constant3Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Constant4Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Constant5Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "BlendColor": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "ColorScale": 0.0,
+    "FresnelSelector": 0,
+    "BumpMode": 0,
+    "BumpTexture": 0,
+    "PolygonOffsetUnit": 0.0,
+    "LUTDist0TableName": null,
+    "LUTDist1TableName": null,
+    "LUTFresnelTableName": null,
+    "LUTReflecRTableName": null,
+    "LUTReflecGTableName": null,
+    "LUTReflecBTableName": null,
+    "LUTDist0SamplerName": null,
+    "LUTDist1SamplerName": null,
+    "LUTFresnelSamplerName": null,
+    "LUTReflecRSamplerName": null,
+    "LUTReflecGSamplerName": null,
+    "LUTReflecBSamplerName": null,
+    "ShaderReference": null,
+    "ModelReference": null,
+    "MetaData": null,
+    "LUTInputAbsolute": {
+      "Dist0": true,
+      "Dist1": true,
+      "Specular": false,
+      "Fresnel": true,
+      "ReflecR": true,
+      "ReflecG": true,
+      "ReflecB": true
+    },
+    "LUTInputSelection": {
+      "Dist0": 0,
+      "Dist1": 0,
+      "Specular": 0,
+      "Fresnel": 0,
+      "ReflecR": 0,
+      "ReflecG": 0,
+      "ReflecB": 0
+    },
+    "LUTInputScale": {
+      "Dist0": 0,
+      "Dist1": 0,
+      "Specular": 0,
+      "Fresnel": 0,
+      "ReflecR": 0,
+      "ReflecG": 0,
+      "ReflecB": 0
+    },
+    "TexEnvStages": [
+      {
+        "Source": {
+          "Color": [
+            0,
+            3,
+            14
+          ],
+          "Alpha": [
+            0,
+            3,
+            14
+          ]
+        },
+        "Operand": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Combiner": {
+          "Color": 1,
+          "Alpha": 1
+        },
+        "Color": {
+          "R": 0,
+          "G": 0,
+          "B": 0,
+          "A": 0
+        },
+        "Scale": {
+          "Color": 1,
+          "Alpha": 0
+        },
+        "UpdateColorBuffer": false,
+        "UpdateAlphaBuffer": false,
+        "IsColorPassThrough": false,
+        "IsAlphaPassThrough": false
+      },
+      {
+        "Source": {
+          "Color": [
+            15,
+            14,
+            14
+          ],
+          "Alpha": [
+            15,
+            1,
+            14
+          ]
+        },
+        "Operand": {
+          "Color": [
+            0,
+            2,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Combiner": {
+          "Color": 8,
+          "Alpha": 0
+        },
+        "Color": {
+          "R": 0,
+          "G": 0,
+          "B": 0,
+          "A": 0
+        },
+        "Scale": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "UpdateColorBuffer": false,
+        "UpdateAlphaBuffer": false,
+        "IsColorPassThrough": false,
+        "IsAlphaPassThrough": true
+      },
+      {
+        "Source": {
+          "Color": [
+            15,
+            14,
+            14
+          ],
+          "Alpha": [
+            15,
+            1,
+            14
+          ]
+        },
+        "Operand": {
+          "Color": [
+            0,
+            2,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Combiner": {
+          "Color": 8,
+          "Alpha": 0
+        },
+        "Color": {
+          "R": 0,
+          "G": 0,
+          "B": 0,
+          "A": 0
+        },
+        "Scale": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "UpdateColorBuffer": false,
+        "UpdateAlphaBuffer": false,
+        "IsColorPassThrough": false,
+        "IsAlphaPassThrough": true
+      },
+      {
+        "Source": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Operand": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Combiner": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "Color": {
+          "R": 0,
+          "G": 0,
+          "B": 0,
+          "A": 0
+        },
+        "Scale": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "UpdateColorBuffer": false,
+        "UpdateAlphaBuffer": false,
+        "IsColorPassThrough": false,
+        "IsAlphaPassThrough": false
+      },
+      {
+        "Source": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Operand": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Combiner": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "Color": {
+          "R": 0,
+          "G": 0,
+          "B": 0,
+          "A": 0
+        },
+        "Scale": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "UpdateColorBuffer": false,
+        "UpdateAlphaBuffer": false,
+        "IsColorPassThrough": false,
+        "IsAlphaPassThrough": false
+      },
+      {
+        "Source": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Operand": {
+          "Color": [
+            0,
+            0,
+            0
+          ],
+          "Alpha": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Combiner": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "Color": {
+          "R": 0,
+          "G": 0,
+          "B": 0,
+          "A": 0
+        },
+        "Scale": {
+          "Color": 0,
+          "Alpha": 0
+        },
+        "UpdateColorBuffer": false,
+        "UpdateAlphaBuffer": false,
+        "IsColorPassThrough": false,
+        "IsAlphaPassThrough": false
+      }
+    ],
+    "TexEnvBufferColor": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "ColorOperation": {
+      "FragOpMode": 0,
+      "BlendMode": 0
+    },
+    "BlendFunction": {
+      "ColorEquation": 0,
+      "AlphaEquation": 0,
+      "ColorSrcFunc": 1,
+      "ColorDstFunc": 0,
+      "AlphaSrcFunc": 6,
+      "AlphaDstFunc": 1
+    },
+    "LogicalOperation": 0,
+    "AlphaTest": {
+      "Enabled": false,
+      "Function": 1,
+      "Reference": 0
+    },
+    "StencilTest": {
+      "Enabled": false,
+      "Function": 0,
+      "BufferMask": 0,
+      "Reference": 0,
+      "Mask": 0
+    },
+    "StencilOperation": {
+      "FailOp": 0,
+      "ZFailOp": 0,
+      "ZPassOp": 0
+    },
+    "DepthColorMask": {
+      "Enabled": false,
+      "DepthFunc": 0,
+      "RedWrite": false,
+      "GreenWrite": false,
+      "BlueWrite": false,
+      "AlphaWrite": false,
+      "DepthWrite": false
+    },
+    "FaceCulling": 0,
+    "ColorBufferRead": false,
+    "ColorBufferWrite": false,
+    "StencilBufferRead": false,
+    "StencilBufferWrite": false,
+    "DepthBufferRead": false,
+    "DepthBufferWrite": false,
+    "TextureSources": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "TranslucencyKind": 0,
+    "TexCoordConfig": 0,
+    "Constant0Assignment": 0,
+    "Constant1Assignment": 0,
+    "Constant2Assignment": 0,
+    "Constant3Assignment": 0,
+    "Constant4Assignment": 0,
+    "Constant5Assignment": 0,
+    "Name": null,
+    "VtxShaderUniforms": {},
+    "GeoShaderUniforms": {}
+  },
+  "Texture0": null,
+  "Texture1": null,
+  "Texture2": null,
+  "TextureMappers": [
+    {
+      "SamplerType": 0,
+      "MagFilter": 1,
+      "MinFilter": 3,
+      "MinLOD": 0,
+      "LODBias": 0.0,
+      "BorderColor": {
+        "R": 0,
+        "G": 0,
+        "B": 0,
+        "A": 255
+      },
+      "WrapU": 3,
+      "WrapV": 2
+    },
+    {
+      "SamplerType": 0,
+      "MagFilter": 0,
+      "MinFilter": 0,
+      "MinLOD": 0,
+      "LODBias": 0.0,
+      "BorderColor": {
+        "R": 0,
+        "G": 0,
+        "B": 0,
+        "A": 0
+      },
+      "WrapU": 0,
+      "WrapV": 0
+    },
+    {
+      "SamplerType": 0,
+      "MagFilter": 0,
+      "MinFilter": 0,
+      "MinLOD": 0,
+      "LODBias": 0.0,
+      "BorderColor": {
+        "R": 0,
+        "G": 0,
+        "B": 0,
+        "A": 0
+      },
+      "WrapU": 0,
+      "WrapV": 0
+    }
+  ],
+  "Texture0Name": "balinade_01",
+  "Texture1Name": "balinade_01",
+  "Texture2Name": "balinade_01",
+  "EnabledTextures": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "Name": null
+}

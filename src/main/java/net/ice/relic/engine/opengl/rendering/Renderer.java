@@ -28,6 +28,7 @@ public class Renderer implements Lifecycle {
     private final SceneRenderer sceneRenderer;
     private final ShadowRenderer shadowRenderer;
     private final LightRenderer lightRenderer;
+    private final SkyboxRenderer skyboxRenderer;
 
     private final RelicApplication application;
 
@@ -38,6 +39,7 @@ public class Renderer implements Lifecycle {
         this.shadowRenderer = new ShadowRenderer(application);
         this.animationRenderer = new AnimationRenderer(application);
         this.lightRenderer = new LightRenderer(application);
+        this.skyboxRenderer = new SkyboxRenderer(application);
     }
 
     @Override
@@ -57,30 +59,33 @@ public class Renderer implements Lifecycle {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
-        IntBuffer maxTextures = BufferUtils.createIntBuffer(1);
-        GL11.glGetIntegerv(GL20.GL_MAX_TEXTURE_IMAGE_UNITS, maxTextures);
-        System.out.println("GL_MAX_TEXTURE_IMAGE_UNITS: " + maxTextures.get(0));
-
         this.renderingBuffer = new RenderingBuffer(application);
 
         geometryBuffer.init();
 
-        sceneRenderer.init();
-        shadowRenderer.init();
-        animationRenderer.init();
-        lightRenderer.init();
-
-        lightRenderer.setShadowRenderer(shadowRenderer);
+        sceneRenderer.init(renderingBuffer, geometryBuffer);
+        skyboxRenderer.init(renderingBuffer, geometryBuffer);
+        shadowRenderer.init(renderingBuffer, geometryBuffer);
+        lightRenderer.init(renderingBuffer, geometryBuffer);
+        animationRenderer.init(renderingBuffer, geometryBuffer);
     }
 
     @Override
     public void render() {
-        animationRenderer.render(renderingBuffer, geometryBuffer);
-        shadowRenderer.render(renderingBuffer, geometryBuffer);
-        sceneRenderer.render(renderingBuffer, geometryBuffer);
+        animationRenderer.render();
+        shadowRenderer.render();
+        sceneRenderer.render();
+        lightRenderStart();
+        lightRenderer.render();
+        skyboxRenderer.render();
+        lightRenderFinish();
+    }
 
-        // Bind default framebuffer for lighting pass
+    private void lightRenderFinish() {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    private void lightRenderStart() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         application.getWindow().refreshSize();
@@ -89,9 +94,9 @@ public class Renderer implements Lifecycle {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_ONE, GL_ONE);
 
-        lightRenderer.render(renderingBuffer, geometryBuffer);
+        geometryBuffer.getGeometryBuffer().bind(GL_READ_FRAMEBUFFER);
+        lightRenderer.setShadowRenderer(shadowRenderer);
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     @Override

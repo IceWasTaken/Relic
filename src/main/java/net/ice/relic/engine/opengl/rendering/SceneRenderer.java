@@ -53,12 +53,14 @@ public class SceneRenderer extends AbstractRenderer {
 
             uniforms.createUniform(prefix + ".textureHandle");
             uniforms.createUniform(prefix + ".normalHandle");
-            uniforms.createUniform(prefix + ".ormHandle");
+//            uniforms.createUniform(prefix + ".ormHandle");
+//            uniforms.createUniform(prefix + ".emissiveHandle");
         }
 
         for (int i = 0; i < config.getMaxDrawElements(); i++) {
-            uniforms.createUniform(uniforms.formatUniform("drawElements", i) + ".modelMatrixIndex");
-            uniforms.createUniform(uniforms.formatUniform("drawElements", i) + ".materialIndex");
+            String name = "drawElements[" + i + "]";
+            uniforms.createUniform(name + ".modelMatrixIndex");
+            uniforms.createUniform(name + ".materialIndex");
         }
 
         for (int i = 0; i < config.getMaxSceneObjects(); i++) {
@@ -69,10 +71,10 @@ public class SceneRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void render(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
-        buffer.bind(GL_FRAMEBUFFER);
+    public void render() {
+        geometryBuffer.bind(GL_FRAMEBUFFER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        application.getWindow().refreshSize();
+        glViewport(0, 0, geometryBuffer.getWidth(), geometryBuffer.getHeight());
         glDisable(GL_BLEND);
 
         shaderProgram.bind();
@@ -135,7 +137,7 @@ public class SceneRenderer extends AbstractRenderer {
         setupObjectData();
         setupStaticCommandBuffer();
         setupAnimationCommandBuffer();
-        setupMaterialUniforms(application.getCurrentScene().getTextureLoader(), application.getCurrentScene().getMaterialCache());
+        setupMaterialUniforms(application.getCurrentScene().getMaterialCache());
     }
 
     private void setupObjectData() {
@@ -143,31 +145,39 @@ public class SceneRenderer extends AbstractRenderer {
         int objectIndex = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
             for (SceneObject object : model.getSceneObjects()) {
-                objectIndexMap.put(object.getId(), objectIndex++);
+                objectIndexMap.put(object.getId(), objectIndex);
+                objectIndex++;
             }
         }
     }
 
     private void setupStaticCommandBuffer() {
-        List<Model> models = application.getCurrentScene().getModels().values().stream()
-                .filter(m -> !m.isAnimated()).toList();
+        List<Model> models = application.getCurrentScene().getModels().values().stream().filter(m -> !m.isAnimated()).toList();
 
-        int meshCount = models.stream().mapToInt(m -> m.getMeshDrawData().size()).sum();
-        ByteBuffer commandBuffer = MemoryUtil.memAlloc(meshCount * config.getCommandSize());
-
-        int firstIndex = 0, baseInstance = 0;
+        int numMeshes = 0;
+        int firstIndex = 0;
+        int baseInstance = 0;
 
         for (Model model : models) {
-            int entityCount = model.getSceneObjects().size();
+            numMeshes += model.getMeshDrawData().size();
+        }
+
+        ByteBuffer commandBuffer = MemoryUtil.memAlloc(numMeshes * config.getCommandSize());
+        for (Model model : models) {
+            List<SceneObject> entities = model.getSceneObjects();
+            int numEntities = entities.size();
             for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+                // count
                 commandBuffer.putInt(meshDrawData.vertices());
-                commandBuffer.putInt(entityCount);
+                // instanceCount
+                commandBuffer.putInt(numEntities);
                 commandBuffer.putInt(firstIndex);
+                // baseVertex
                 commandBuffer.putInt(meshDrawData.offset());
                 commandBuffer.putInt(baseInstance);
 
                 firstIndex += meshDrawData.vertices();
-                baseInstance += entityCount;
+                baseInstance += entities.size();
             }
         }
 
@@ -177,6 +187,7 @@ public class SceneRenderer extends AbstractRenderer {
         staticVBO = new VertexBufferObject();
         staticVBO.bind(GL_DRAW_INDIRECT_BUFFER);
         staticVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, GL_DYNAMIC_DRAW);
+
         MemoryUtil.memFree(commandBuffer);
     }
 
@@ -210,40 +221,31 @@ public class SceneRenderer extends AbstractRenderer {
         MemoryUtil.memFree(commandBuffer);
     }
 
-    public void setupMaterialUniforms(TextureLoader textureLoader, MaterialCache materialCache) {
+    public void setupMaterialUniforms(MaterialCache materialCache) {
+        List<Material> materialList = materialCache.getMaterialsList();
+        int materialCount = materialList.size();
         shaderProgram.bind();
 
-        List<Material> materials = materialCache.getMaterialsList();
-        int maxMaterials = Math.min(materials.size(), config.getMaxMaterials());
+        for (int i = 0; i < materialCount; i++) {
+            Material material = materialList.get(i);
+            String prefix = uniforms.formatUniform("materials", i);
 
-        for (int i = 0; i < maxMaterials; i++) {
-            Material material = materials.get(i);
+            uniforms.setUniform(prefix + ".diffuse", material.getDiffuseColor().convertToGLVector4f());
+            uniforms.setUniform(prefix + ".specular", material.getSpecularColor().convertToGLVector4f());
+            uniforms.setUniform(prefix + ".reflectance", material.getReflectance());
 
-            if(material.getTexture() != null) {
-                Logger.debug(material.getTexture().getBindlessHandle());
-            }
-            String uniformBase = uniforms.formatUniform("materials", i);
-
-            // Set base color and scalar properties
-            uniforms.setUniform(uniformBase + ".diffuse", material.getDiffuseColor().convertToGLVector4f());
-            uniforms.setUniform(uniformBase + ".specular", material.getSpecularColor().convertToGLVector4f());
-            uniforms.setUniform(uniformBase + ".reflectance", material.getReflectance());
-            ensureNoErrorBeforeContinue();
-
-            // Bindless texture handles — 0 if no texture present
-            long texHandle = material.hasTexture() ? material.getTexture().getBindlessHandle() : 0L;
-            long normalHandle = material.hasNormalMap() ? material.getNormalMap().getBindlessHandle() : 0L;
-            long ormHandle = material.hasORMMap() ? material.getOrmMap().getBindlessHandle() : 0L;
+            long texHandle = material.hasTexture() ? material.getTextureHandle() : 0L;
+            long normalHandle = material.hasNormalMap() ? material.getNormalHandle() : 0L;
 
             if (texHandle != 0L && !material.getTexture().isResident()) glMakeTextureHandleResidentARB(texHandle);
             if (normalHandle != 0L && !material.getNormalMap().isResident()) glMakeTextureHandleResidentARB(normalHandle);
-            if (ormHandle != 0L && !material.getOrmMap().isResident()) glMakeTextureHandleResidentARB(ormHandle);
 
-            uniforms.setUniform(uniformBase + ".textureHandle", texHandle);
-            uniforms.setUniform(uniformBase + ".normalHandle", normalHandle);
-            uniforms.setUniform(uniformBase + ".ormHandle", ormHandle);
+            Logger.debug(texHandle);
+            Logger.debug(normalHandle);
+
+            uniforms.setUniform(prefix + ".textureHandle", texHandle);
+            uniforms.setUniform(prefix + ".normalHandle", normalHandle);
         }
-
         shaderProgram.unbind();
     }
 }

@@ -14,13 +14,12 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Input {
 
-
     private static final Set<Integer> keysDown = new HashSet<>();
     private static final Set<Integer> mouseButtonsDown = new HashSet<>();
 
-
     private final Vector2f scroll = new Vector2f();
-    private final Vector2i mousePosition = new Vector2i();
+    private final Vector2f mousePosition = new Vector2f();
+    private final Vector2f prevMousePosition = new Vector2f();
     private long cursorHandle;
 
     private GLFWKeyCallback keyCallback;
@@ -63,8 +62,8 @@ public class Input {
         glfwSetCursorPosCallback(application.getWindow().getWindowHandle(), mousePosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
-                mousePosition.x = (int) xpos;
-                mousePosition.y = (int) ypos;
+                mousePosition.x = (float) xpos;
+                mousePosition.y = (float) ypos;
             }
         });
 
@@ -78,9 +77,17 @@ public class Input {
                 }
             }
         });
-
-
     }
 
+    public Vector2f getMousePosition() {
+        return mousePosition;
+    }
 
+    public static Set<Integer> getMouseButtonsDown() {
+        return mouseButtonsDown;
+    }
+
+    public Vector2f getPrevMousePosition() {
+        return prevMousePosition;
+    }
 }

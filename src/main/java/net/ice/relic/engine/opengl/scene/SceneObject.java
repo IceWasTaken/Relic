@@ -78,8 +78,9 @@ public class SceneObject {
         this.animationData = animationData;
     }
 
-    public void setScaleFactor(float scaleFactor) {
+    public SceneObject setScaleFactor(float scaleFactor) {
         this.scale = scaleFactor;
+        return this;
     }
 
     public String getId() {

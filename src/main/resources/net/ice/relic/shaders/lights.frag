@@ -159,7 +159,6 @@ float calcShadow(vec4 worldPosition, int idx) {
     shadow = textureProj(shadowCoord, vec2(0, 0), idx);
     return shadow;
 }
-
 void main()
 {
     vec4 albedoSamplerValue = texture(albedoSampler, outTextCoord);
@@ -201,8 +200,8 @@ void main()
             diffuseSpecularComp += calcSpotLight(diffuse, specular, reflectance, spotLights[i], view_pos, normal);
         }
     }
-
     vec4 ambient = calcAmbient(ambientLight, diffuse);
+
     fragColor = ambient + diffuseSpecularComp;
     fragColor.rgb = fragColor.rgb * shadowFactor;
 

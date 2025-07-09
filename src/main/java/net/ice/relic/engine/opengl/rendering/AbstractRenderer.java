@@ -18,6 +18,8 @@ public abstract class AbstractRenderer {
     protected ShaderProgram shaderProgram;
     protected Uniforms uniforms;
     protected RendererConfig config;
+    protected RenderingBuffer renderingBuffer;
+    protected GeometryBuffer geometryBuffer;
 
     private List<Shader> shaders;
 
@@ -27,10 +29,12 @@ public abstract class AbstractRenderer {
         this.config = application.getConfig().getRendererConfig();
     }
 
-    public void init() {
+    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
         initShaders();
         this.shaderProgram = new ShaderProgram(shaders);
         this.uniforms = new Uniforms(shaderProgram);
+        this.renderingBuffer = renderingBuffer;
+        this.geometryBuffer = buffer;
         initUniforms();
 
 
@@ -54,7 +58,7 @@ public abstract class AbstractRenderer {
 
     protected abstract void initShaders();
     protected abstract void initUniforms();
-    protected abstract void render(RenderingBuffer renderingBuffer, GeometryBuffer buffer);
+    protected abstract void render();
     protected abstract void setupData();
 
 }

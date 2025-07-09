@@ -37,6 +37,8 @@ public class Shadow {
         float range = maxZ - minZ;
         float ratio = maxZ / minZ;
 
+        // Calculate split depths based on view camera frustum
+        // Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
         for (int i = 0; i < SHADOW_MAP_COUNT; i++) {
             float p = (i + 1) / (float) (SHADOW_MAP_COUNT);
             float log = (float) (minZ * java.lang.Math.pow(ratio, p));
@@ -98,6 +100,7 @@ public class Shadow {
             Matrix4f lightOrthoMatrix = new Matrix4f().ortho
                     (minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z, true);
 
+            // Store split distance and matrix in cascade
             Shadow cascadeShadow = shadows.get(i);
             cascadeShadow.shadowDistance = (nearClip + splitDist * clipRange) * -1.0f;
             cascadeShadow.projectionMatrix = lightOrthoMatrix.mul(lightViewMatrix);

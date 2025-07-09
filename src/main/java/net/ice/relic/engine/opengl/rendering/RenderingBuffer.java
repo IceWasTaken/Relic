@@ -209,29 +209,33 @@ public class RenderingBuffer {
     }
 
     private void loadBindingPoses(List<Model> models) {
-        int meshSize = 0;
+        int totalVertices = 0;
         for (Model model : models) {
             for (MeshData meshData : model.getMeshData()) {
-                meshSize += meshData.getVertices().length + meshData.getNormals().length * 3 +
-                        meshData.getTextureCoords().length + meshData.getIndices().length;
+                totalVertices += meshData.getVertices().length / 3; // 3 floats per vertex position
             }
         }
 
-        bindingPoseBuffer = new VertexBufferObject();
-        VBOs.add(bindingPoseBuffer);
-        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(meshSize);
+        int bufferSize = totalVertices * 14; // 14 floats per vertex (pos, norm, tangent, bitangent, texcoord)
+        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(bufferSize);
+
         for (Model model : models) {
             for (MeshData meshData : model.getMeshData()) {
                 populateMeshBuffer(meshesBuffer, meshData);
             }
         }
         meshesBuffer.flip();
+
+        bindingPoseBuffer = new VertexBufferObject();
+        VBOs.add(bindingPoseBuffer);
         bindingPoseBuffer.bind(GL_SHADER_STORAGE_BUFFER);
         bindingPoseBuffer.bufferDataFloat(GL_SHADER_STORAGE_BUFFER, meshesBuffer, GL_STATIC_DRAW);
+
         MemoryUtil.memFree(meshesBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+
 
     private void loadBonesMatricesBuffer(List<Model> models) {
         int bufferSize = 0;
@@ -241,15 +245,14 @@ public class RenderingBuffer {
                 List<Animation.AnimatedFrame> frameList = animation.frames();
                 for (Animation.AnimatedFrame frame : frameList) {
                     Matrix4f[] matrices = frame.getBonesMatrices();
-                    bufferSize += matrices.length * 64;
+                    bufferSize += matrices.length * 64; // 64 bytes per 4x4 matrix (16 floats * 4 bytes)
                 }
             }
         }
 
-        bonesMatricesBuffer = new VertexBufferObject();
-        VBOs.add(bonesMatricesBuffer);
         ByteBuffer dataBuffer = MemoryUtil.memAlloc(bufferSize);
         int matrixSize = 4 * 4 * 4;
+
         for (Model model : models) {
             List<Animation> animationsList = model.getAnimations();
             for (Animation animation : animationsList) {
@@ -259,17 +262,23 @@ public class RenderingBuffer {
                     Matrix4f[] matrices = frame.getBonesMatrices();
                     for (Matrix4f matrix : matrices) {
                         matrix.get(dataBuffer);
-                        dataBuffer.position(dataBuffer.position() + matrixSize);
+                        // Removed manual position advance because matrix.get() already advances buffer position
                     }
                     frame.clear();
                 }
             }
         }
+
         dataBuffer.flip();
+
+        bonesMatricesBuffer = new VertexBufferObject();
+        VBOs.add(bonesMatricesBuffer);
         bonesMatricesBuffer.bind(GL_SHADER_STORAGE_BUFFER);
         bonesMatricesBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, GL_STATIC_DRAW);
+
         MemoryUtil.memFree(dataBuffer);
     }
+
 
     private void loadBonesIndicesWeights(List<Model> models) {
         int bufferSize = 0;

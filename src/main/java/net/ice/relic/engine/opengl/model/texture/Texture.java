@@ -58,33 +58,11 @@ public class Texture {
             this.isResident = true;
 
             Logger.debug("Bindless texture loaded: {} [{}x{}]", texturePath, width, height);
+            Logger.debug("Bindless texture handle: {}", bindlessHandle);
         }
         if (!glIsTextureHandleResidentARB(bindlessHandle)) {
             Logger.error("Texture handle not resident: {}", texturePath);
         }
-    }
-
-    public Texture(int width, int height, ByteBuffer data) {
-        this.texturePath = "";
-
-        this.textureID = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, textureID);
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        this.bindlessHandle = glGetTextureHandleARB(textureID);
-        if (bindlessHandle == 0L && !isResident) {
-            throw new RuntimeException("Failed to obtain bindless texture handle.");
-        }
-
-        glMakeTextureHandleResidentARB(bindlessHandle);
-        this.isResident = true;
-
-        Logger.debug("Bindless texture created from raw data [{}x{}]", width, height);
     }
 
     public long getBindlessHandle() {
@@ -103,7 +81,7 @@ public class Texture {
         isResident = false;
     }
 
-    public boolean isResident() { 
+    public boolean isResident() {
         return isResident;
     }
 }
