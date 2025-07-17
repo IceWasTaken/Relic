@@ -1,6 +1,6 @@
 #version 460
 
-const int MAX_DRAW_ELEMENTS = 100;
+const int MAX_DRAW_ELEMENTS = 200;
 const int MAX_ENTITIES = 50;
 
 layout (location=0) in vec3 position;

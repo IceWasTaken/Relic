@@ -1,6 +1,6 @@
 package net.ice.relic.engine.opengl;
 
-import net.ice.relic.engine.RelicApplication;
+import net.ice.relic.RelicApplication;
 import org.joml.Matrix4f;
 
 public class ProjectionMatrix {
@@ -19,7 +19,11 @@ public class ProjectionMatrix {
 
         projectionMatrix = new Matrix4f();
         inverseProjectionMatrix = new Matrix4f();
+    }
+
+    public ProjectionMatrix init() {
         updateProjMatrix(application.getWindow().getWidth(), application.getWindow().getHeight());
+        return this;
     }
 
     public Matrix4f getInvProjMatrix() {

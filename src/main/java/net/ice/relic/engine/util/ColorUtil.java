@@ -43,6 +43,10 @@ public class ColorUtil {
             return new Color(red / 255f, green / 255f, blue / 255f);
         }
 
+        public Color convertFromOpenGLColor() {
+            return new Color(red * 255f, green * 255f, blue * 255f);
+        }
+
         public Vector4f convertToVector4f() {
             return new Vector4f(red, green, blue, alpha);
         }

@@ -1,0 +1,7 @@
+Material 0:
+Textures: bv_blood_txt1
+Meshes: nodes_4_
+
+Material 1:
+Textures: bv_blood_txt2
+Meshes: nodes_5_

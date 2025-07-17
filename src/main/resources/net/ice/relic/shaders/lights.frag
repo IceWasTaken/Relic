@@ -201,8 +201,8 @@ void main()
             diffuseSpecularComp += calcSpotLight(diffuse, specular, reflectance, spotLights[i], view_pos, normal);
         }
     }
-
     vec4 ambient = calcAmbient(ambientLight, diffuse);
+
     fragColor = ambient + diffuseSpecularComp;
     fragColor.rgb = fragColor.rgb * shadowFactor;
 

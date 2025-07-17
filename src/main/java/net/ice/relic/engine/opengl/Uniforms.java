@@ -1,9 +1,6 @@
 package net.ice.relic.engine.opengl;
 
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.util.HashMap;
@@ -32,6 +29,12 @@ public class Uniforms {
         uniformMap.put(uniformName, uniformLocation);
     }
 
+    public void createUniformUnsafe(String uniformName) {
+        int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), uniformName);
+        uniformMap.put(uniformName, uniformLocation);
+    }
+
+
     public void createUniform(String uniformName, int index) {
         int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), formatUniform(uniformName, index));
 
@@ -47,7 +50,7 @@ public class Uniforms {
         if (location == null) {
             throw new RuntimeException("Could not find: " + uniformName + " in map.");
         }
-        return location.intValue();
+        return location;
     }
 
     public void setUniform(String uniformName, Matrix4f value) {
@@ -66,6 +69,10 @@ public class Uniforms {
 
     public void setUniform(String uniformName, Vector3f value) {
         glUniform3f(getUniformLocation(uniformName), value.x, value.y, value.z);
+    }
+
+    public void setUniform(String uniformName, Vector2i value) {
+        glUniform2i(getUniformLocation(uniformName), value.x, value.y);
     }
 
     public void setUniform(String uniformName, Vector4f value) {
