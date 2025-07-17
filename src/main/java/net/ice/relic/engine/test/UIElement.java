@@ -1,7 +1,7 @@
 package net.ice.relic.engine.test;
 
-import net.ice.relic.engine.Window;
-import net.ice.relic.engine.opengl.scene.Camera;
+import net.ice.relic.Window;
+import net.ice.relic.common.scene.Camera;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBEasyFont;
 

@@ -1,7 +1,10 @@
 #version 400
 
-const int MAX_MATERIALS  = 20;
-const int MAX_TEXTURES = 16;
+#extension GL_ARB_bindless_texture : require
+#extension GL_ARB_gpu_shader_int64 : require
+
+const int MAX_MATERIALS  = 200;
+const int MAX_TEXTURES = 160;
 
 in vec3 outNormal;
 in vec3 outTangent;
@@ -19,21 +22,16 @@ struct Material
 {
     vec4 diffuse;
     vec4 specular;
-    //vec4 emissiveColor;
-
     float reflectance;
-    //float emissiveStrength;
-
-    int normalMapIndex;
-    int textureIndex;
+    uint64_t textureHandle;
+    uint64_t normalHandle;
 };
 
-uniform sampler2D textureSampler[MAX_TEXTURES];
 uniform Material materials[MAX_MATERIALS];
 
-vec3 calcNormal(int idx, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoords) {
+vec3 calcNormal(Material mat, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoords) {
     mat3 TBN = mat3(tangent, bitangent, normal);
-    vec3 newNormal = texture(textureSampler[idx], textCoords).rgb;
+    vec3 newNormal = texture(sampler2D(mat.normalHandle), textCoords).rgb;
     newNormal = normalize(newNormal * 2.0 - 1.0);
     newNormal = normalize(TBN * newNormal);
     return newNormal;
@@ -41,7 +39,10 @@ vec3 calcNormal(int idx, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoo
 
 void main() {
     Material material = materials[outMaterialIdx];
-    vec4 text_color = texture(textureSampler[material.textureIndex], outTextCoord);
+
+    sampler2D albedo = sampler2D(material.textureHandle);
+
+    vec4 text_color = texture(albedo, outTextCoord);
     vec4 diffuse = text_color + material.diffuse;
     if (diffuse.a < 0.5) {
         discard;
@@ -49,8 +50,8 @@ void main() {
     vec4 specular = text_color + material.specular;
 
     vec3 normal = outNormal;
-    if (material.normalMapIndex > 0) {
-        normal = calcNormal(material.normalMapIndex, outNormal, outTangent, outBitangent, outTextCoord);
+    if (material.normalHandle != 0u) {
+        normal = calcNormal(material, outNormal, outTangent, outBitangent, outTextCoord);
     }
 
     buffAlbedo   = vec4(diffuse.xyz, material.reflectance);

@@ -27,8 +27,10 @@ public class ShaderProgram {
     }
 
     private void validateLink(int program) {
-        if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
-            throw new RuntimeException("Error while linking shaderProgram.");
+        int status = glGetProgrami(program, GL_LINK_STATUS);
+        if (status == GL_FALSE) {
+            String log = glGetProgramInfoLog(program);
+            throw new RuntimeException("Shader program linking failed:\n" + log);
         }
     }
 

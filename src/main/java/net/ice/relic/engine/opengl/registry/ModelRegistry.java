@@ -1,10 +1,7 @@
 package net.ice.relic.engine.opengl.registry;
 
-import net.ice.relic.annotations.Rewrite;
-
 import static org.lwjgl.assimp.Assimp.*;
 
-@Rewrite(forRemoval = true, since = "7/4/2025")
 public class ModelRegistry {
 
     public static final int DEFAULT_FLAGS = aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |

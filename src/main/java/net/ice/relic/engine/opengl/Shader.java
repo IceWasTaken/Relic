@@ -11,6 +11,7 @@ public class Shader {
 
     private final int shaderID;
     private final ShaderType type;
+    private boolean isPostShader;
 
     private Shader(ShaderType type) {
         this.type = type;
@@ -18,10 +19,12 @@ public class Shader {
         this.shaderID = glCreateShader(type.getGlType());
     }
 
-    private static Shader createShader(ShaderType type, String source) {
+    private static Shader createShader(ShaderType type, String source, boolean postShader) {
         Shader shader = new Shader(type);
+        shader.isPostShader = postShader;
         shader.setSource(source);
         shader.compile();
+
         return shader;
     }
 
@@ -34,7 +37,7 @@ public class Shader {
         validateShader(shaderID);
     }
 
-    public static Shader loadShader(String fileName, ShaderType type) {
+    public static Shader loadShader(String fileName, ShaderType type, boolean postShader) {
         StringBuilder shaderSource = new StringBuilder();
 
         try(InputStream stream = Shader.class.getResourceAsStream("/net/ice/relic/shaders/" + fileName)) {
@@ -50,12 +53,14 @@ public class Shader {
             throw new RuntimeException("Unable to load shader (or shader not found): " + fileName, exception);
         }
 
-        return createShader(type, shaderSource.toString());
+        return createShader(type, shaderSource.toString(), postShader);
     }
 
-    private void validateShader(int shader) {
-        if(glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
-            throw new RuntimeException("Error while compiling " + (type == ShaderType.VERTEX ? "vertex" : "fragment") + " shader." + "\n\n" + glGetShaderInfoLog(shader));
+    private void validateShader(int shaderId) {
+        int status = glGetShaderi(shaderId, GL_COMPILE_STATUS);
+        if (status == GL_FALSE) {
+            String log = glGetShaderInfoLog(shaderId);
+            throw new RuntimeException("Shader compilation failed:\n" + log);
         }
     }
 

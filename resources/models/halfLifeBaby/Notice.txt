@@ -1,0 +1,19 @@
+The texture of the Nihilanth's collars and lower section appears as a dark black. This is because Half-Life renders that texture in-game with a unique "chrome" effect that gives off a reflective appearance.
+
+The following steps show how to replicate Half-Life's chrome effect in Blender:
+
+1. Select the chrome_nihilanth material in the Material Properties section of the Properties Editor.
+2. Open the chrome_nihilanth material in the Shader Editor.
+3. Add the Mapping Node to the Shader Editor. 
+4. On the Mapping Node, set both the X and Y parameters in the Location section to 1 m. Also set both the X and Y parameters in the Scale section to 2.0.
+5. In addition, set the Vector Type Property to "Texture."
+6. Connect the Vector Output on the Mapping Node to the Vector Input on the Base Color Node.
+7. Add the Vector Transform Node to the Shader Editor. 
+8. On the Vector Transform Node, set the Convert To Property to "Camera."
+9. Connect the Vector Output on the Vector Transform Node to the Vector Input on the Mapping Node.
+10. Add the Texture Coordinate Node to the Shader Editor. 
+11. Connect the Normal Output on the Texture Coordinate Node to the Vector Input on the Vector Transform Node.
+
+This video shows the final resulting node tree and the replicated chrome effect: https://i.imgur.com/I2ZZcK1.mp4
+
+Credit to seedee for the original instructions and video.

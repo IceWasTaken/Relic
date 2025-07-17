@@ -1,0 +1,16 @@
+True Master Sword extracted from Skyward Sword.
+
+From what I can tell this is the "Master Sword" and "True Master Sword" model. The cross-guard are extended outwards like the "True Master Sword" but default loads the darker "Master Sword" textures. The movment of the cross-guards are controlled by vertex morph that I can't export so the geometry is locked in the shape of the "True Master Sword".
+
+While the "Master Sword" and "True Master Sword" look to be the same model the game uses 2 unique Sheaths for the "Master Sword" and "True Master Sword".
+
+Textures are not broken. The model(s) is made use mirrored texture tiling.
+
+Tools:
+Dolphin to extract the .arc.LZ files
+Puyo Tools Bin 1.0.7 to decompress .arc.LZ files
+BREES Viewer V1.02 to convert to psk files
+Blender 2.78 via psk/psa import plug-in to save a .obj
+
+AJD-262
+March 17 2021

@@ -67,15 +67,22 @@ tasks.register('fatJar', Jar) {
 
     manifest {
         attributes(
-                'Main-Class': 'net.ice.rune.Rune'  // Replace with your actual main class if different
+                'Main-Class': 'net.ice.rune.Rune'
         )
     }
 
+    // Include compiled classes
+    with tasks.named('jar').get()
+
+    // Include runtime dependencies
     from({
         configurations.runtimeClasspath
                 .filter { it.name.endsWith('jar') }
                 .collect { zipTree(it) }
     })
 
-    with tasks.named('jar').get()
+
+    from {
+        sourceSets.main.resources.srcDirs
+    }
 }

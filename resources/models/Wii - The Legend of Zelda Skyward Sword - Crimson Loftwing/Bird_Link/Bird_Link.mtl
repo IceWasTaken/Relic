@@ -1,0 +1,35 @@
+# Blender MTL File: ''
+# Material Count: 3
+newmtl BirdLink_Body_BirdLink_Body.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd BirdLink_Body.png
+
+
+newmtl BirdLink_Eye_BirdLink_Eye.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd BirdLink_Eye.png
+
+
+newmtl BirdLink_Feather_BirdLink_Feather.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Kd BirdLink_Feather.png
+
+

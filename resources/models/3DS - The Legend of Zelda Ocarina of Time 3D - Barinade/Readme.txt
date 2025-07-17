@@ -1,0 +1,1 @@
+Details for the materials are included in text files which are json formatted. Also included for any models that require it are lists of the textures and meshes that are associated with each material.

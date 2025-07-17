@@ -109,9 +109,7 @@ public class Mesh {
         VBO.bind(GL_ELEMENT_ARRAY_BUFFER);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         VBO.unbind(GL_ARRAY_BUFFER);
-
         glBindVertexArray(0);
 
         MemoryUtil.memFree(positionsBuffer);
