@@ -1,7 +1,7 @@
 package net.ice.relic.engine.opengl.model;
 
-import net.ice.relic.engine.opengl.rendering.RenderingBuffer;
-import net.ice.relic.engine.opengl.scene.SceneObject;
+import net.ice.relic.engine.opengl.rendering.renderer.RenderingBuffer;
+import net.ice.relic.common.scene.SceneObject;
 
 import java.util.ArrayList;
 import java.util.List;

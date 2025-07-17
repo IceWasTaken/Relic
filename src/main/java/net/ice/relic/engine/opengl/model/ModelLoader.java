@@ -1,29 +1,33 @@
 package net.ice.relic.engine.opengl.model;
 
-import net.ice.relic.engine.opengl.MaterialCache;
-import net.ice.relic.engine.opengl.model.texture.Texture;
-import net.ice.relic.engine.opengl.model.texture.TextureLoader;
-import net.ice.relic.engine.util.ColorUtil;
+import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.common.cache.MaterialCache;
+import net.ice.relic.common.model.Material;
+import net.ice.relic.common.cache.TextureCache;
 import org.joml.*;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
-import org.lwjgl.system.MemoryStack;
-import org.tinylog.Logger;
 
 import java.io.File;
 import java.lang.Math;
 import java.nio.IntBuffer;
 import java.util.*;
 
+import static net.ice.relic.common.model.Material.processMaterial;
+import static net.ice.relic.util.MatrixUtil.toMatrix4f;
 import static org.lwjgl.assimp.Assimp.*;
 
+@Rewrite
 public class ModelLoader {
 
     public static final int MAX_BONES = 150;
     private static final Matrix4f IDENTITY_MATRIX = new Matrix4f();
 
+    private TextureCache textureCache;
+    private MaterialCache materialCache;
+
     private ModelLoader() {
-        // Utility class
+
     }
 
     private static void buildFrameMatrices(AIAnimation aiAnimation, List<Bone> boneList, Animation.AnimatedFrame animatedFrame,
@@ -83,7 +87,7 @@ public class ModelLoader {
 
     private static Node buildNodesTree(AINode aiNode, Node parentNode) {
         String nodeName = aiNode.mName().dataString();
-        Node node = new Node(nodeName, parentNode, toMatrix(aiNode.mTransformation()));
+        Node node = new Node(nodeName, parentNode, toMatrix4f(aiNode.mTransformation()));
 
         int numChildren = aiNode.mNumChildren();
         PointerBuffer aiChildren = aiNode.mChildren();
@@ -123,14 +127,14 @@ public class ModelLoader {
         return result;
     }
 
-    public static Model loadModel(String modelId, String modelPath, TextureLoader textureCache, MaterialCache materialCache,
+    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache,
                                   boolean animation) {
         return loadModel(modelId, modelPath, textureCache, materialCache, aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
                 aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights |
                 aiProcess_GenBoundingBoxes | (animation ? 0 : aiProcess_PreTransformVertices));
     }
 
-    public static Model loadModel(String modelId, String modelPath, TextureLoader textureCache, MaterialCache materialCache, int flags) {
+    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, int flags) {
         File file = new File("resources/models/" + modelPath);
         if (!file.exists()) {
             throw new RuntimeException("Model path does not exist [" + modelPath + "]");
@@ -174,7 +178,7 @@ public class ModelLoader {
         int numAnimations = aiScene.mNumAnimations();
         if (numAnimations > 0) {
             Node rootNode = buildNodesTree(aiScene.mRootNode(), null);
-            Matrix4f globalInverseTransformation = toMatrix(aiScene.mRootNode().mTransformation()).invert();
+            Matrix4f globalInverseTransformation = toMatrix4f(aiScene.mRootNode().mTransformation()).invert();
             animations = processAnimations(aiScene, boneList, rootNode, globalInverseTransformation);
         }
 
@@ -239,7 +243,7 @@ public class ModelLoader {
         for (int i = 0; i < numBones; i++) {
             AIBone aiBone = AIBone.create(aiBones.get(i));
             int id = boneList.size();
-            Bone bone = new Bone(id, aiBone.mName().dataString(), toMatrix(aiBone.mOffsetMatrix()));
+            Bone bone = new Bone(id, aiBone.mName().dataString(), toMatrix4f(aiBone.mOffsetMatrix()));
             boneList.add(bone);
             int numWeights = aiBone.mNumWeights();
             AIVertexWeight.Buffer aiWeights = aiBone.mWeights();
@@ -289,58 +293,7 @@ public class ModelLoader {
         return indices.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    private static Material processMaterial(AIMaterial aiMaterial, String modelDir, TextureLoader textureCache) {
-        Material material = new Material();
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            AIColor4D color = AIColor4D.create();
 
-            int result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
-                material.setAmbientColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()));
-            }
-
-            result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
-                System.out.println("diffuse color: " + color.r() + ", " + color.g() + ", " + color.b() + ", " + color.a() + ", model: " + modelDir);
-                material.setDiffuseColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()));
-            }
-
-            result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
-                material.setSpecularColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()));
-            }
-
-            float reflectance = 0.0f;
-            float[] shininessFactor = new float[]{0.0f};
-            int[] pMax = new int[]{1};
-
-            result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH, aiTextureType_NONE, 0, shininessFactor, pMax);
-            if (result != aiReturn_SUCCESS) {
-                reflectance = shininessFactor[0];
-            }
-            material.setReflectance(reflectance);
-
-            AIString aiTexturePath = AIString.calloc(stack);
-            aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, aiTexturePath, (IntBuffer) null, null, null, null, null, null);
-            String texturePath = aiTexturePath.dataString();
-            if (!texturePath.isEmpty()) {
-                material.setTexturePath(modelDir + File.separator + "textures/" + new File(texturePath).getName());
-                Texture texture = textureCache.createTexture(material.getTexturePath());
-                material.setDiffuseColor(Material.DEFAULT_COLOR);
-                material.setTexture(texture);
-            }
-
-            AIString aiNormalMapPath = AIString.calloc(stack);
-            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_NORMALS, 0, aiNormalMapPath, (IntBuffer) null,
-                    null, null, null, null, null);
-            String normalMapPath = aiNormalMapPath.dataString();
-            if (!normalMapPath.isEmpty()) {
-                material.setNormalMapPath(modelDir + File.separator + "textures/" + new File(normalMapPath).getName());
-                material.setNormalMap(textureCache.createTexture(material.getNormalMapPath()));
-            }
-            return material;
-        }
-    }
 
     private static MeshData processMesh(AIMesh aiMesh, List<Bone> boneList) {
         float[] vertices = processVertices(aiMesh);
@@ -360,9 +313,6 @@ public class ModelLoader {
         AIAABB aabb = aiMesh.mAABB();
         Vector3f aabbMin = new Vector3f(aabb.mMin().x(), aabb.mMin().y(), aabb.mMin().z());
         Vector3f aabbMax = new Vector3f(aabb.mMax().x(), aabb.mMax().y(), aabb.mMax().z());
-
-        Logger.debug("Vertices: {}, Normals: {}, UVs: {}, Indices: {}", vertices.length, normals.length, textCoords.length, indices.length);
-
 
         return new MeshData(vertices, normals, tangents, bitangents, textCoords, indices, animMeshData.boneIds,
                 animMeshData.weights, aabbMin, aabbMax);
@@ -426,28 +376,6 @@ public class ModelLoader {
             data[pos++] = textCoord.z();
         }
         return data;
-    }
-
-    private static Matrix4f toMatrix(AIMatrix4x4 aiMatrix4x4) {
-        Matrix4f result = new Matrix4f();
-        result.m00(aiMatrix4x4.a1());
-        result.m10(aiMatrix4x4.a2());
-        result.m20(aiMatrix4x4.a3());
-        result.m30(aiMatrix4x4.a4());
-        result.m01(aiMatrix4x4.b1());
-        result.m11(aiMatrix4x4.b2());
-        result.m21(aiMatrix4x4.b3());
-        result.m31(aiMatrix4x4.b4());
-        result.m02(aiMatrix4x4.c1());
-        result.m12(aiMatrix4x4.c2());
-        result.m22(aiMatrix4x4.c3());
-        result.m32(aiMatrix4x4.c4());
-        result.m03(aiMatrix4x4.d1());
-        result.m13(aiMatrix4x4.d2());
-        result.m23(aiMatrix4x4.d3());
-        result.m33(aiMatrix4x4.d4());
-
-        return result;
     }
 
     public record AnimMeshData(float[] weights, int[] boneIds) {

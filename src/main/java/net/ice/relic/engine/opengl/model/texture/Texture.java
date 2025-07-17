@@ -6,9 +6,9 @@ import org.tinylog.Logger;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import static org.lwjgl.glfw.GLFW.glfwGetCurrentContext;
 import static org.lwjgl.opengl.ARBBindlessTexture.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.GL_RGBA16F;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.*;
 
@@ -46,23 +46,35 @@ public class Texture {
             glGenerateMipmap(GL_TEXTURE_2D);
 
             stbi_image_free(imageData);
-            System.out.println("Texture ctor thread: " + Thread.currentThread().getName());
-            System.out.println("Current context in Texture ctor: " + glfwGetCurrentContext());
-
             this.bindlessHandle = glGetTextureHandleARB(textureID);
-            if (bindlessHandle == 0L && !isResident) {
+            if (bindlessHandle == 0L) {
                 throw new RuntimeException("Failed to obtain bindless texture handle.");
             }
 
             glMakeTextureHandleResidentARB(bindlessHandle);
             this.isResident = true;
-
-            Logger.debug("Bindless texture loaded: {} [{}x{}]", texturePath, width, height);
-            Logger.debug("Bindless texture handle: {}", bindlessHandle);
         }
         if (!glIsTextureHandleResidentARB(bindlessHandle)) {
             Logger.error("Texture handle not resident: {}", texturePath);
         }
+    }
+
+    public Texture(int width, int height) {
+        this.texturePath = "__internal__";
+        this.textureID = glGenTextures();
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, (ByteBuffer) null);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        this.bindlessHandle = glGetTextureHandleARB(textureID);
+        if (bindlessHandle == 0L) {
+            throw new RuntimeException("Failed to get bindless handle for post-process texture.");
+        }
+
+        glMakeTextureHandleResidentARB(bindlessHandle);
+        this.isResident = true;
     }
 
     public long getBindlessHandle() {
@@ -79,6 +91,10 @@ public class Texture {
         }
         glDeleteTextures(textureID);
         isResident = false;
+    }
+
+    public int getTextureID() {
+        return textureID;
     }
 
     public boolean isResident() {

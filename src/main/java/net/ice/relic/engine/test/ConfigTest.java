@@ -1,7 +1,7 @@
 package net.ice.relic.engine.test;
 
-import net.ice.relic.engine.config.Config;
-import net.ice.relic.engine.config.configs.WindowConfig;
+import net.ice.relic.config.Config;
+import net.ice.relic.config.configs.WindowConfig;
 
 public class ConfigTest {
 

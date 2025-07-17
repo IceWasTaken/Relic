@@ -1,6 +1,6 @@
 package net.ice.relic.engine.opengl;
 
-import net.ice.relic.engine.opengl.scene.Scene;
+import net.ice.relic.common.scene.Scene;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -20,7 +20,7 @@ public class Shadow {
 
     public static void update(List<Shadow> shadows, Scene scene) {
         Matrix4f viewMatrix = scene.getCamera().getViewMatrix();
-        Matrix4f projMatrix = scene.getCamera().getProjectionMatrix();
+        Matrix4f projMatrix = scene.getMatrix().getProjMatrix();
         Vector4f lightPos = new Vector4f(scene.getLights().getDirLight().getDirection(), 0);
 
         float cascadeSplitLambda = 0.95f;

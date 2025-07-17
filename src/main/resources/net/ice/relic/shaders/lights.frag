@@ -159,6 +159,7 @@ float calcShadow(vec4 worldPosition, int idx) {
     shadow = textureProj(shadowCoord, vec2(0, 0), idx);
     return shadow;
 }
+
 void main()
 {
     vec4 albedoSamplerValue = texture(albedoSampler, outTextCoord);

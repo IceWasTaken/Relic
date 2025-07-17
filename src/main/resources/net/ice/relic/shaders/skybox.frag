@@ -15,6 +15,6 @@ void main()
     if (hasTexture == 1) {
         fragColor = texture(sampler2D(textureHandle), outTextCoord);
     } else {
-        fragColor = diffuse * vec4(500, 1, 1, 1);
+        fragColor = diffuse;
     }
 }

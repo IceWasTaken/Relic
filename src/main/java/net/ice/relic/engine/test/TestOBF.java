@@ -2,7 +2,6 @@ package net.ice.relic.engine.test;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class TestOBF {
     // XOR function for obfuscating the content
@@ -57,7 +56,6 @@ public class TestOBF {
             byte[] obfuscatedBytes = new byte[length];
             bis.read(obfuscatedBytes);
 
-            System.out.println(Arrays.toString(obfuscatedBytes));
 
             // De-obfuscate the data using XOR
             byte[] jsonBytes = xorWithKey(obfuscatedBytes, xorKey);
@@ -94,6 +92,5 @@ public class TestOBF {
         // Read the model back from the file and de-obfuscate
         String loadedJson = readModelFile(filePath, xorKey);
 
-        System.out.println("Loaded JSON: " + loadedJson);  // Output the loaded JSON for verification
     }
 }

@@ -18,7 +18,7 @@ public class VertexBufferObject {
         glBindBuffer(type, id);
     }
 
-    public void unbind(int type) {
+    public static void unbind(int type) {
         glBindBuffer(type, 0);
     }
 
