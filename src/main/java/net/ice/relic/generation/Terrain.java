@@ -35,15 +35,12 @@ public class Terrain {
     private MeshData meshData;
 
     public Terrain(int seed, MaterialCache materialCache, TextureCache textureCache, ModelCache modelCache) {
-        FastNoiseLite noise = new FastNoiseLite(seed);
-        noise.SetNoiseType(FastNoiseLite.NoiseType.ValueCubic);
-        noise.SetCellularJitter(2.4f);
-
+        TerrainGenerator.Desert desert = new TerrainGenerator.Desert();
+        FastNoiseLite noise = desert.setupGenerator();
         // 1. Generate vertices, uvs, and placeholders
         for (int z = 0; z < height; z++) {
             for (int x = 0; x < width; x++) {
                 float y = noise.GetNoise(x, z) * 10f; // scale height
-                y = (float) Math.pow(y, 1.5);
                 vertices.add(new Vector3f(x, y, z));
                 uvs.add(new Vector2f((float) x / width * 8.0f, (float) z / height * 8.0f));
                 normals.add(new Vector3f(0, 0, 0));
