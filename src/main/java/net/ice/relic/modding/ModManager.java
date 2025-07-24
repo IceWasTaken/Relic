@@ -1,7 +1,7 @@
 package net.ice.relic.modding;
 
 import net.ice.glyph.Glyph;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;

@@ -1,6 +1,7 @@
-package net.ice.relic.engine.opengl.rendering;
+package net.ice.relic.engine.opengl.rendering.buffer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.Lifecycle;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.FrameBufferObject;
 import org.lwjgl.system.MemoryStack;
 
@@ -10,7 +11,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class GeometryBuffer {
+public class GeometryBuffer implements Lifecycle {
 
     private static final int TEXTURE_COUNT = 4;
 
@@ -25,6 +26,7 @@ public class GeometryBuffer {
         this.application = application;
     }
 
+    @Override
     public void init() {
         geometryBuffer = new FrameBufferObject();
         geometryBuffer.bind(GL_DRAW_FRAMEBUFFER);

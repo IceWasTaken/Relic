@@ -1,5 +1,6 @@
 package net.ice.relic.engine.util;
 
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -14,8 +15,23 @@ public class ColorUtil {
         glColor4f(color.red, color.green, color.blue, color.alpha);
     }
 
+    public static Color vectorToColor(Vector3f vector) {
+        return new Color(vector.x, vector.y, vector.z);
+    }
+
+    public static Color glVectorToColor(Vector3f vector) {
+        return new Color(vector.x, vector.y, vector.z).convertFromOpenGLColor();
+    }
+
     public static void glSetClearColor(Color color) {
         glClearColor(color.convertToOpenGLColor().red, color.convertToOpenGLColor().green, color.convertToOpenGLColor().blue, 1f);
+    }
+
+    public static Color interpolate(Color a, Color b, float t) {
+        int r = (int) (a.red   + (b.red   - a.red)   * t);
+        int g = (int) (a.green + (b.green - a.green) * t);
+        int bVal = (int) (a.blue  + (b.blue  - a.blue)  * t);
+        return new Color(r, g, bVal);
     }
 
     public static class Color {
@@ -54,6 +70,14 @@ public class ColorUtil {
         public Vector4f convertToGLVector4f() {
             return new Vector4f(red / 255f, green / 255f, blue / 255f, alpha);
         }
+
+        public Vector3f convertToVector3f() {
+            return new Vector3f(red, green, blue);
+        }
+
+        public Vector3f convertToGLVector3f() {
+            return new Vector3f(red / 255f, green / 255f, blue / 255f);
+        }
     }
 
     public enum ColorDefaults {
@@ -69,7 +93,14 @@ public class ColorUtil {
         LIGHT_GRAY(196, 196, 196),
         GRAY(64, 64, 64),
         DARK_GRAY(36, 36, 36),
-        WHITE(255, 255, 255);
+        WHITE(255, 255, 255),
+
+        SUN_NOON(255, 242, 217),
+        SUN_AFTERNOON(255, 221, 180),
+        SUN_SET_RISE(255, 165, 102),
+        SUN_OVERCAST(217, 217, 230),
+
+        MOON_NIGHT(40, 60, 100);
 
         private final Color color;
 

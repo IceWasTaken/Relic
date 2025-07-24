@@ -1,10 +1,13 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.Lifecycle;
-import net.ice.relic.RelicApplication;
-import net.ice.relic.engine.opengl.rendering.GeometryBuffer;
+import net.ice.relic.application.RelicApplication;
+import net.ice.relic.engine.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.engine.opengl.ShaderProgram;
 import net.ice.relic.engine.opengl.model.Model;
+import net.ice.relic.engine.opengl.rendering.buffer.ReflectionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RefractionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +18,10 @@ import static org.lwjgl.opengl.GLDebugMessageCallback.getMessage;
 
 public class Renderer implements Lifecycle {
 
-    private final RenderingBuffer renderingBuffer;
+    private final RenderingBuffers renderingBuffer;
     private final GeometryBuffer geometryBuffer;
+    private final ReflectionBuffer reflectionBuffer;
+    private final RefractionBuffer refractionBuffer;
 
     private final AnimationRenderer animationRenderer;
     private final SceneRenderer sceneRenderer;
@@ -33,8 +38,11 @@ public class Renderer implements Lifecycle {
 
     public Renderer(RelicApplication application) {
         this.application = application;
-        this.renderingBuffer = new RenderingBuffer(application);
+        this.renderingBuffer = new RenderingBuffers(application);
         this.geometryBuffer = new GeometryBuffer(application);
+        this.reflectionBuffer = new ReflectionBuffer(application);
+        this.refractionBuffer = new RefractionBuffer(application);
+
         this.sceneRenderer = new SceneRenderer(application);
         this.shadowRenderer = new ShadowRenderer(application);
         this.animationRenderer = new AnimationRenderer(application);
@@ -61,13 +69,15 @@ public class Renderer implements Lifecycle {
         }, 0);
 
         geometryBuffer.init();
+        reflectionBuffer.init();
+        refractionBuffer.init();
 
-        sceneRenderer.init(renderingBuffer, geometryBuffer);
-        skyboxRenderer.init(renderingBuffer, geometryBuffer);
-        shadowRenderer.init(renderingBuffer, geometryBuffer);
-        lightRenderer.init(renderingBuffer, geometryBuffer);
-        animationRenderer.init(renderingBuffer, geometryBuffer);
-        guiRenderer.init(renderingBuffer, geometryBuffer);
+        sceneRenderer.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
+        skyboxRenderer.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
+        shadowRenderer.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
+        lightRenderer.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
+        animationRenderer.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
+        guiRenderer.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
         postRenderer.init();
     }
 

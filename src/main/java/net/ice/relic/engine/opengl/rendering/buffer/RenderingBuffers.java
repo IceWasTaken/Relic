@@ -1,10 +1,10 @@
-package net.ice.relic.engine.opengl.rendering.renderer;
+package net.ice.relic.engine.opengl.rendering.buffer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.VertexArrayObject;
 import net.ice.relic.engine.opengl.VertexBufferObject;
 import net.ice.relic.engine.opengl.model.Animation;
-import net.ice.relic.engine.opengl.model.MeshData;
+import net.ice.relic.common.model.MeshData;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.common.scene.SceneObject;
 import org.joml.Matrix4f;
@@ -22,7 +22,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
-public class RenderingBuffer {
+public class RenderingBuffers {
 
     private VertexBufferObject bindingPoseBuffer;
     private VertexBufferObject bonesIndicesWeightsBuffer;
@@ -35,7 +35,7 @@ public class RenderingBuffer {
     private final List<VertexBufferObject> VBOs;
     private final RelicApplication application;
 
-    public RenderingBuffer(RelicApplication application) {
+    public RenderingBuffers(RelicApplication application) {
         this.application = application;
 
         VBOs = new ArrayList<>();
@@ -81,7 +81,7 @@ public class RenderingBuffer {
         int indicesSize = 0;
         int offset = 0;
         for (Model model : modelList) {
-            List<RenderingBuffer.MeshDrawData> meshDrawDataList = model.getMeshDrawData();
+            List<RenderingBuffers.MeshDrawData> meshDrawDataList = model.getMeshDrawData();
             for (MeshData meshData : model.getMeshData()) {
                 positionsSize += meshData.getVertices().length;
                 normalsSize += meshData.getNormals().length;

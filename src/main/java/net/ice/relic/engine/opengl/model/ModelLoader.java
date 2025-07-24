@@ -2,8 +2,10 @@ package net.ice.relic.engine.opengl.model;
 
 import net.ice.relic.annotations.Rewrite;
 import net.ice.relic.common.cache.MaterialCache;
+import net.ice.relic.common.cache.ModelCache;
 import net.ice.relic.common.model.Material;
 import net.ice.relic.common.cache.TextureCache;
+import net.ice.relic.common.model.MeshData;
 import org.joml.*;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
@@ -127,14 +129,14 @@ public class ModelLoader {
         return result;
     }
 
-    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache,
+    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, ModelCache cache,
                                   boolean animation) {
-        return loadModel(modelId, modelPath, textureCache, materialCache, aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
+        return loadModel(modelId, modelPath, textureCache, materialCache, cache, aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
                 aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights |
                 aiProcess_GenBoundingBoxes | (animation ? 0 : aiProcess_PreTransformVertices));
     }
 
-    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, int flags) {
+    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
         File file = new File("resources/models/" + modelPath);
         if (!file.exists()) {
             throw new RuntimeException("Model path does not exist [" + modelPath + "]");
@@ -183,6 +185,8 @@ public class ModelLoader {
         }
 
         aiReleaseImport(aiScene);
+
+        cache.addModel(new Model(modelId, meshDataList, animations));
 
         return new Model(modelId, meshDataList, animations);
     }

@@ -1,11 +1,11 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.Lifecycle;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.FrameBufferObject;
-import net.ice.relic.engine.opengl.QuadMesh;
+import net.ice.relic.engine.opengl.rendering.QuadMesh;
 import net.ice.relic.engine.opengl.ShaderProgram;
-import net.ice.relic.engine.opengl.Uniforms;
+import net.ice.relic.engine.opengl.UniformBufferObject;
 import net.ice.relic.engine.opengl.model.texture.Texture;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -19,7 +19,7 @@ public class PostRenderer implements Lifecycle {
     private ShaderProgram shaderProgram;
     private Texture postTexture;
     private QuadMesh quadMesh;
-    private Uniforms uniforms;
+    private UniformBufferObject uniforms;
 
     private int width;
     private int height;
@@ -85,7 +85,7 @@ public class PostRenderer implements Lifecycle {
     public void loadShader(ShaderProgram shaderProgram) {
         enabled = true;
         this.shaderProgram = shaderProgram;
-        this.uniforms = new Uniforms(shaderProgram);
+        this.uniforms = new UniformBufferObject(shaderProgram);
         initUniforms();
     }
 

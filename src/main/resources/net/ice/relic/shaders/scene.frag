@@ -54,7 +54,7 @@ void main() {
         normal = calcNormal(material, outNormal, outTangent, outBitangent, outTextCoord);
     }
 
-    buffAlbedo   = vec4(diffuse.xyz, material.reflectance);
+    buffAlbedo   = vec4(normal * 2, material.reflectance);
     buffNormal   = vec4(0.5 * normal + 0.5, 1.0);
     buffSpecular = specular;
 }

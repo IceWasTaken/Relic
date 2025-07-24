@@ -1,16 +1,20 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.annotations.Rewrite;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.Shadow;
 import net.ice.relic.engine.opengl.*;
-import net.ice.relic.engine.opengl.rendering.GeometryBuffer;
+import net.ice.relic.engine.opengl.rendering.QuadMesh;
+import net.ice.relic.engine.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.common.scene.Fog;
-import net.ice.relic.common.scene.Lights;
 import net.ice.relic.common.scene.Scene;
 import net.ice.relic.common.scene.light.AmbientLight;
-import net.ice.relic.common.scene.light.DirLight;
+import net.ice.relic.common.scene.light.DirectionalLight;
 import net.ice.relic.common.scene.light.PointLight;
 import net.ice.relic.common.scene.light.SpotLight;
+import net.ice.relic.engine.opengl.rendering.buffer.ReflectionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RefractionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -32,14 +36,14 @@ public class LightRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
-        super.init(renderingBuffer, buffer);
+    public void init(RenderingBuffers renderingBuffer, GeometryBuffer buffer, RefractionBuffer refractionBuffer, ReflectionBuffer reflectionBuffer) {
+        super.init(renderingBuffer, buffer, refractionBuffer, reflectionBuffer);
         this.quadMesh = new QuadMesh();
     }
 
     @Override
     protected void initShaders() {
-        loadShader("lights.vert", Shader.ShaderType.VERTEX);
+        loadShader("lighting/lights.vert", Shader.ShaderType.VERTEX);
         loadShader("lights.frag", Shader.ShaderType.FRAGMENT);
     }
 
@@ -54,6 +58,7 @@ public class LightRenderer extends AbstractRenderer {
         uniforms.createUniform("invViewMatrix");
         uniforms.createUniform("ambientLight.factor");
         uniforms.createUniform("ambientLight.color");
+
 
         for (int i = 0; i < config.getMaxPointLights(); i++) {
             String prefix = uniforms.formatUniform("pointLights", i);
@@ -116,7 +121,7 @@ public class LightRenderer extends AbstractRenderer {
 
         Fog fog = scene.getFog();
         uniforms.setUniform("fog.activeFog", fog.isActive() ? 1 : 0);
-        uniforms.setUniform("fog.color", fog.getColor());
+        uniforms.setUniform("fog.color", fog.getColor().convertToGLVector3f());
         uniforms.setUniform("fog.density", fog.getDensity());
 
         int start = 4;
@@ -137,27 +142,27 @@ public class LightRenderer extends AbstractRenderer {
         glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
 
         shaderProgram.unbind();
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     public void updateLights() {
-        Matrix4f viewMatrix = application.getCurrentScene().getCamera().getViewMatrix();
+        Scene scene = application.getCurrentScene();
+        Matrix4f viewMatrix = scene.getCamera().getViewMatrix();
 
-        Lights lights = application.getCurrentScene().getLights();
-        AmbientLight ambientLight = lights.getAmbientLight();
+        AmbientLight ambientLight = scene.getAmbientLight();
         uniforms.setUniform("ambientLight.factor", ambientLight.getIntensity());
-        uniforms.setUniform("ambientLight.color", ambientLight.getColor());
+        uniforms.setUniform("ambientLight.color", ambientLight.getColor().convertToGLVector3f());
 
-        DirLight dirLight = application.getCurrentScene().getLights().getDirLight();
+        DirectionalLight dirLight = scene.getDirectionalLight();
         Vector4f auxDirection = new Vector4f(dirLight.getDirection(), 0);
         auxDirection.mul(viewMatrix);
         Vector3f direction = new Vector3f(auxDirection.x, auxDirection.y, auxDirection.z);
-        uniforms.setUniform("directionalLight.color", dirLight.getColor());
+        uniforms.setUniform("directionalLight.color", dirLight.getColor().convertToGLVector3f());
         uniforms.setUniform("directionalLight.direction", direction);
         uniforms.setUniform("directionalLight.intensity", dirLight.getIntensity());
 
 
-        List<PointLight> pointLights = application.getCurrentScene().getLights().getPointLights();
+        List<PointLight> pointLights = scene.getPointLights();
         int numPointLights = pointLights.size();
         PointLight pointLight;
         for (int i = 0; i < config.getMaxPointLights(); i++) {
@@ -170,7 +175,7 @@ public class LightRenderer extends AbstractRenderer {
             updatePointLight(pointLight, name, viewMatrix);
         }
 
-        List<SpotLight> spotLights = application.getCurrentScene().getLights().getSpotLights();
+        List<SpotLight> spotLights = scene.getSpotLights();
         int numSpotLights = spotLights.size();
         SpotLight spotLight;
         for (int i = 0; i < config.getMaxSpotLights(); i++) {

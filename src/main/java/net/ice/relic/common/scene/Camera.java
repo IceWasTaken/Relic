@@ -1,7 +1,7 @@
 package net.ice.relic.common.scene;
 
 import net.ice.relic.annotations.Rewrite;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.Input;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -17,15 +17,13 @@ public class Camera {
     public Matrix4f viewMatrix = new Matrix4f();
     private Vector3f position = new Vector3f(0,0,0);
     private Quaternionf orientation = new Quaternionf();
-    private RelicApplication application;
 
     public Camera(RelicApplication application) {
-        this.application = application;
     }
 
     public void update(float deltaTime) {
         if (!hasUpdated) {
-            float speed = Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) ? 10f : 2f;
+            float speed = Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) ? 200f : 20f;
             float rotateZ = 0f;
             float rotateX = 0f;
             float rotateY = 0f;
@@ -61,9 +59,9 @@ public class Camera {
                 rotateY += 1f;
             }
 
-            orientation.rotateLocalZ(rotateZ * deltaTime * speed);
-            orientation.rotateLocalX(rotateX * deltaTime * speed);
-            orientation.rotateLocalY(rotateY * deltaTime * speed);
+            orientation.rotateLocalZ(rotateZ * deltaTime * 2);
+            orientation.rotateLocalX(rotateX * deltaTime * 2);
+            orientation.rotateLocalY(rotateY * deltaTime * 2);
 
             viewMatrix.identity()
                     .rotate(orientation)

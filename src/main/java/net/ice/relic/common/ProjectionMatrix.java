@@ -1,12 +1,12 @@
-package net.ice.relic.engine.opengl;
+package net.ice.relic.common;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import org.joml.Matrix4f;
 
 public class ProjectionMatrix {
 
     private static final float FOV = (float) Math.toRadians(90.0f);
-    private static final float Z_FAR = 1000.f;
+    private static final float Z_FAR = 10000.f;
     private static final float Z_NEAR = 0.01f;
 
     private final RelicApplication application;

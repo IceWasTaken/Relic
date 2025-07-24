@@ -9,12 +9,12 @@ import java.util.Map;
 import static org.lwjgl.opengl.ARBBindlessTexture.glUniformHandleui64ARB;
 import static org.lwjgl.opengl.GL20.*;
 
-public class Uniforms {
+public class UniformBufferObject {
 
     private ShaderProgram shaderProgram;
     private Map<String, Integer> uniformMap;
 
-    public Uniforms(ShaderProgram shaderProgram) {
+    public UniformBufferObject(ShaderProgram shaderProgram) {
         this.shaderProgram = shaderProgram;
         this.uniformMap = new HashMap<>();
     }

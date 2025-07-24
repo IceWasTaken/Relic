@@ -1,4 +1,6 @@
-package net.ice.relic;
+package net.ice.relic.common;
+
+import net.ice.relic.application.RelicApplication;
 
 public class Stats {
 

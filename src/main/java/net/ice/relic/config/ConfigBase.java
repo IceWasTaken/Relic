@@ -26,14 +26,11 @@ public abstract class ConfigBase {
         return configFile.getProperty(key, defaultConfigFile.getProperty(key));
     }
 
-    //TODO: rewrite getEnum.
-//    protected <T extends Enum<T>> T> getEnum(String key, Class<T> enumClass) {
-//        String valueStr = configFile.getProperty(key, defaultConfigFile.getProperty(key));
-//        T value = T.valueOf(enumClass, valueStr);
-//        T> entry = new >(key, value);
-//        entries.putIfAbsent(key, entry);
-//        return entry;
-//    }
+    protected <T extends Enum<T>> T getEnum(String key, Class<T> enumClass) {
+        String valueStr = configFile.getProperty(key, defaultConfigFile.getProperty(key));
+        return T.valueOf(enumClass, valueStr);
+    }
+
 
     protected abstract ConfigBase loadConfig();
 }

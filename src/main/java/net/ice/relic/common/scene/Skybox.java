@@ -2,9 +2,12 @@ package net.ice.relic.common.scene;
 
 import net.ice.relic.annotations.Rewrite;
 import net.ice.relic.common.cache.MaterialCache;
+import net.ice.relic.common.cache.ModelCache;
 import net.ice.relic.common.model.Material;
+import net.ice.relic.common.model.MeshData;
 import net.ice.relic.engine.opengl.model.*;
 import net.ice.relic.common.cache.TextureCache;
+import org.joml.Vector3f;
 
 @Rewrite
 public class Skybox {
@@ -14,17 +17,17 @@ public class Skybox {
     private SceneObject sceneObject;
     private Model model;
 
-    public Skybox(String modelPath, TextureCache loader, MaterialCache cache) {
-        model = ModelLoader.loadModel("skybox", modelPath, loader, cache, false);
+    public Skybox(String modelPath, TextureCache loader, MaterialCache materialCache, ModelCache modelCache) {
+        model = ModelLoader.loadModel("skybox", modelPath, loader, materialCache, modelCache, false);
         MeshData meshData = model.getMeshData().getFirst();
-        material = cache.getMaterial(meshData.getMaterialIndex());
+        material = materialCache.getMaterial(meshData.getMaterialIndex());
         mesh = new Mesh(meshData);
         model.getMeshData().clear();
         sceneObject = new SceneObject("skybox", model);
     }
 
-    public Skybox scale(float factor) {
-        sceneObject.setScaleFactor(factor);
+    public Skybox scale(Vector3f factor) {
+        sceneObject.getTransform().setScale(factor);
         return this;
     }
 

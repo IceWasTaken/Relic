@@ -1,5 +1,6 @@
-package net.ice.relic;
+package net.ice.relic.application;
 
+import net.ice.relic.Window;
 import net.ice.relic.common.Clock;
 import net.ice.relic.common.Input;
 import net.ice.relic.engine.opengl.rendering.renderer.Renderer;

@@ -1,11 +1,13 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.cache.MaterialCache;
 import net.ice.relic.engine.opengl.*;
 import net.ice.relic.common.model.Material;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -14,6 +16,7 @@ import java.util.*;
 import static org.lwjgl.opengl.GL43.*;
 import static org.lwjgl.opengl.ARBBindlessTexture.*;
 
+@Rewrite
 public class SceneRenderer extends AbstractRenderer {
 
     private final Map<String, Integer> objectIndexMap;
@@ -34,7 +37,7 @@ public class SceneRenderer extends AbstractRenderer {
         loadShader("scene.vert", Shader.ShaderType.VERTEX);
         loadShader("scene.frag", Shader.ShaderType.FRAGMENT);
 
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     @Override
@@ -50,8 +53,6 @@ public class SceneRenderer extends AbstractRenderer {
 
             uniforms.createUniform(prefix + ".textureHandle");
             uniforms.createUniform(prefix + ".normalHandle");
-//            uniforms.createUniform(prefix + ".ormHandle");
-//            uniforms.createUniform(prefix + ".emissiveHandle");
         }
 
         for (int i = 0; i < config.getMaxDrawElements(); i++) {
@@ -64,7 +65,7 @@ public class SceneRenderer extends AbstractRenderer {
             uniforms.createUniform(uniforms.formatUniform("modelMatrices", i));
         }
 
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     @Override
@@ -82,7 +83,7 @@ public class SceneRenderer extends AbstractRenderer {
         int entityIndex = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
             for (SceneObject object : model.getSceneObjects()) {
-                uniforms.setUniform(uniforms.formatUniform("modelMatrices", entityIndex), object.getModelMatrix());
+                uniforms.setUniform(uniforms.formatUniform("modelMatrices", entityIndex), object.getTransform().getTransformMatrix());
                 entityIndex++;
             }
         }
@@ -91,12 +92,13 @@ public class SceneRenderer extends AbstractRenderer {
         int drawElement = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
             if (model.isAnimated()) continue;
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 for (SceneObject object : model.getSceneObjects()) {
                     String name = uniforms.formatUniform("drawElements", drawElement);
-                    uniforms.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getId()));
+                    uniforms.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getName()));
                     uniforms.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
                     drawElement++;
+
                 }
             }
         }
@@ -109,10 +111,10 @@ public class SceneRenderer extends AbstractRenderer {
         drawElement = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
             if (!model.isAnimated()) continue;
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 SceneObject object = meshDrawData.animMeshDrawData().entity();
                 String name = uniforms.formatUniform("drawElements", drawElement);
-                uniforms.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getId()));
+                uniforms.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getName()));
                 uniforms.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
                 drawElement++;
             }
@@ -126,7 +128,7 @@ public class SceneRenderer extends AbstractRenderer {
         glEnable(GL_BLEND);
         shaderProgram.unbind();
 
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     @Override
@@ -142,7 +144,7 @@ public class SceneRenderer extends AbstractRenderer {
         int objectIndex = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
             for (SceneObject object : model.getSceneObjects()) {
-                objectIndexMap.put(object.getId(), objectIndex);
+                objectIndexMap.put(object.getName(), objectIndex);
                 objectIndex++;
             }
         }
@@ -163,7 +165,7 @@ public class SceneRenderer extends AbstractRenderer {
         for (Model model : models) {
             List<SceneObject> entities = model.getSceneObjects();
             int numEntities = entities.size();
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 // count
                 commandBuffer.putInt(meshDrawData.vertices());
                 // instanceCount
@@ -197,7 +199,7 @@ public class SceneRenderer extends AbstractRenderer {
 
         int firstIndex = 0, baseInstance = 0;
         for (Model model : models) {
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 commandBuffer.putInt(meshDrawData.vertices());
                 commandBuffer.putInt(1);
                 commandBuffer.putInt(firstIndex);
@@ -239,6 +241,11 @@ public class SceneRenderer extends AbstractRenderer {
 
             uniforms.setUniform(prefix + ".textureHandle", texHandle);
             uniforms.setUniform(prefix + ".normalHandle", normalHandle);
+
+            System.out.println("Texture handle for terrain: " + material.getTextureHandle());
+            System.out.println("Texture path for terrain: " + material.getTexturePath());
+            System.out.println("Normal handle for terrain: " + material.getNormalHandle());
+            System.out.println("Normal path for terrain: " + material.getNormalMapPath());
         }
         shaderProgram.unbind();
     }

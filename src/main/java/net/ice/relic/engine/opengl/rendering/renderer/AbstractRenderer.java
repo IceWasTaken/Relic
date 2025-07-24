@@ -1,11 +1,14 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.config.configs.RendererConfig;
-import net.ice.relic.engine.opengl.rendering.GeometryBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.engine.opengl.Shader;
 import net.ice.relic.engine.opengl.ShaderProgram;
-import net.ice.relic.engine.opengl.Uniforms;
+import net.ice.relic.engine.opengl.UniformBufferObject;
+import net.ice.relic.engine.opengl.rendering.buffer.ReflectionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RefractionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +19,13 @@ public abstract class AbstractRenderer {
 
     protected RelicApplication application;
     protected ShaderProgram shaderProgram;
-    protected Uniforms uniforms;
+    protected UniformBufferObject uniforms;
     protected RendererConfig config;
-    protected RenderingBuffer renderingBuffer;
+
+    protected RenderingBuffers renderingBuffer;
     protected GeometryBuffer geometryBuffer;
+    protected RefractionBuffer refractionBuffer;
+    protected ReflectionBuffer reflectionBuffer;
 
     private List<Shader> shaders;
 
@@ -29,15 +35,15 @@ public abstract class AbstractRenderer {
         this.config = application.getConfig().getRendererConfig();
     }
 
-    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
+    public void init(RenderingBuffers renderingBuffer, GeometryBuffer buffer, RefractionBuffer refractionBuffer, ReflectionBuffer reflectionBuffer) {
         initShaders();
         this.shaderProgram = new ShaderProgram(shaders);
-        this.uniforms = new Uniforms(shaderProgram);
+        this.uniforms = new UniformBufferObject(shaderProgram);
         this.renderingBuffer = renderingBuffer;
         this.geometryBuffer = buffer;
+        this.refractionBuffer = refractionBuffer;
+        this.reflectionBuffer = reflectionBuffer;
         initUniforms();
-
-
     }
 
     public void cleanup() {
@@ -48,7 +54,7 @@ public abstract class AbstractRenderer {
         shaders.add(Shader.loadShader(path, type, false));
     }
 
-    protected void ensureNoErrorBeforeContinue() {
+    protected void assertNoError() {
         int error = glGetError();
         if(error == 0) {
             return;
@@ -60,5 +66,4 @@ public abstract class AbstractRenderer {
     protected abstract void initUniforms();
     protected abstract void render();
     protected abstract void setupData();
-
 }

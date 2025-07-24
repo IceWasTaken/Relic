@@ -1,192 +1,190 @@
 package net.ice.relic.common.scene;
 
+import net.ice.relic.Lifecycle;
 import net.ice.relic.annotations.Rewrite;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.cache.MaterialCache;
+import net.ice.relic.common.cache.ModelCache;
 import net.ice.relic.common.gui.Gui;
-import net.ice.relic.engine.opengl.ProjectionMatrix;
-import net.ice.relic.engine.opengl.ShaderProgram;
+import net.ice.relic.common.scene.light.DirectionalLight;
+import net.ice.relic.common.scene.light.PointLight;
+import net.ice.relic.common.scene.light.SpotLight;
+import net.ice.relic.common.ProjectionMatrix;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.common.cache.TextureCache;
 import net.ice.relic.common.scene.light.AmbientLight;
+import net.ice.relic.engine.util.ColorUtil;
 import org.joml.Vector3f;
 import org.tinylog.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Rewrite
-public abstract class Scene {
+public abstract class Scene implements Lifecycle {
 
-    private String name;
-    private Lights lights;
-    private Camera camera;
-    private Fog fog;
+    private final String name;
+
+    private final TextureCache textureCache;
+    private final MaterialCache materialCache;
+    private final ModelCache modelCache;
+
+    private AmbientLight ambientLight;
+    private DirectionalLight directionalLight;
+
+    private List<PointLight> pointLights;
+    private List<SpotLight> spotLights;
+
     private Map<String, SceneObject> objects;
-    private TextureCache loader;
-    private MaterialCache materialCache;
-    private Skybox skybox;
+
     private ProjectionMatrix matrix;
+    private Camera camera;
+
+    private Skybox skybox;
+    private Fog fog;
+
     private Gui GUI;
+
     private boolean loaded;
     private boolean initialized;
 
     protected RelicApplication application;
 
-    public Scene(String name) {
+    protected abstract void sceneInit();
+
+    protected abstract void sceneUpdate(float deltaTime);
+
+    protected abstract void sceneDestroy();
+
+    public Scene(String name, RelicApplication application) {
         this.name = name;
+
+        this.materialCache = new MaterialCache();
+        this.textureCache = new TextureCache();
+        this.modelCache = new ModelCache();
+        this.application = application;
         this.camera = new Camera(application);
         this.matrix = new ProjectionMatrix(application);
-        this.loader = new TextureCache();
         this.objects = new HashMap<>();
-        this.materialCache = new MaterialCache();
-        this.fog = new Fog(true, new Vector3f(0.5f, 0.5f, 0.5f), 0.2f);
-        resetState();
+        this.fog = new Fog(false, ColorUtil.ColorDefaults.WHITE.getColor(), 0.2f);
 
-        Lights lights1 = new Lights();
-
-        AmbientLight ambientLight = lights1.getAmbientLight();
-        ambientLight.setIntensity(0.5f);
-        ambientLight.setColor(0.3f, 0.3f, 0.3f);
-
-        this.setLights(lights1);
+        this.ambientLight = new AmbientLight().setIntensity(100).setColor(0.3f, 0.3f, 0.3f);
+        this.directionalLight = new DirectionalLight(ColorUtil.ColorDefaults.WHITE.getColor(), new Vector3f(0, 1, 0), 1);
+        this.spotLights = new ArrayList<>();
+        this.pointLights = new ArrayList<>();
     }
 
+    @Override
     public void init() {
-        if(initialized) {
+        if (initialized) {
             throw new IllegalStateException("Scene already initialized.");
         }
 
-        load();
+        sceneInit();
 
         Logger.info("Loaded scene: " + name);
         loaded = true;
     }
 
-    public void destroy() {
-        if(!initialized || !loaded) {
+    @Override
+    public void cleanup() {
+        if (!initialized || !loaded) {
             throw new IllegalStateException("Scene not initialized or not loaded.");
         }
 
         objects.clear();
     }
 
+    @Override
     public void update(float deltaTime) {
-//        if(!initialized || !loaded) {
-//            throw new IllegalStateException("Scene not initialized or not loaded.");
-//        }
-
         sceneUpdate(deltaTime);
     }
 
-    protected void load() {
-        sceneInit();
-    }
-
-    public void resetState() {
-        loaded = false;
-        initialized = false;
-    }
-
-    protected abstract void sceneInit();
-    protected abstract void sceneUpdate(float deltaTime);
-
     public Map<String, Model> getModels() {
         Map<String, Model> models = new HashMap<>();
-        for(SceneObject object : objects.values()) {
-            models.put(object.getId(), object.getModel());
+        for (SceneObject object : objects.values()) {
+            models.put(object.getName(), object.getModel());
         }
         return models;
     }
 
-    public void addObject(String id, SceneObject object) {
+    public void addSceneObject(String id, SceneObject object) {
         objects.put(id, object);
         object.getModel().getSceneObjects().add(object);
     }
 
     public void removeObject(String id) {
         SceneObject object = objects.remove(id);
-        if(object != null) {
+        if (object != null) {
             object.getModel().getSceneObjects().remove(object);
         }
     }
 
-    public void loadShader(ShaderProgram shaderProgram) {
-        application.getRenderer().enablePostShader(shaderProgram);
+    public List<SpotLight> getSpotLights() {
+        return spotLights;
     }
 
-    public void unloadShader() {
-        application.getRenderer().disablePostShader();
+    public List<PointLight> getPointLights() {
+        return pointLights;
     }
 
-    public Map<String, SceneObject> getObjects() {
-        return objects;
+    public AmbientLight getAmbientLight() {
+        return ambientLight;
     }
 
-    public Camera getCamera() {
-        return camera;
+    public DirectionalLight getDirectionalLight() {
+        return directionalLight;
+    }
+    public void setDirectionalLight(DirectionalLight directionalLight) {
+        this.directionalLight = directionalLight;
     }
 
-    public boolean isLoaded() {
-        return loaded;
+    public TextureCache getTextureCache() {
+        return textureCache;
     }
-
-    public boolean isInitialized() {
-        return initialized;
+    public ModelCache getModelCache() {
+        return modelCache;
     }
-
-    public Lights getLights() {
-        return lights;
-    }
-
-    public void setLights(Lights lights) {
-        this.lights = lights;
-    }
-
-    public void setGUI(Gui GUI) {
-        this.GUI = GUI;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public TextureCache getTextureLoader() {
-        return loader;
-    }
-
-    public void setApplication(RelicApplication application) {
-        this.application = application;
-        this.camera = new Camera(application);
-        this.matrix = new ProjectionMatrix(application).init();
-    }
-
-    public TextureCache getLoader() {
-        return loader;
+    public MaterialCache getMaterialCache() {
+        return materialCache;
     }
 
     public ProjectionMatrix getMatrix() {
         return matrix;
     }
 
-    public MaterialCache getMaterialCache() {
-        return materialCache;
-    }
-
-    public Fog getFog() {
-        return fog;
-    }
-
-    public void setSkybox(Skybox skybox) {
-        this.skybox = skybox;
+    public Camera getCamera() {
+        return camera;
     }
 
     public Skybox getSkybox() {
         return skybox;
     }
 
+    public void setSkybox(Skybox skybox) {
+        this.skybox = skybox;
+    }
+
+    public Fog getFog() {
+        return fog;
+    }
+
     public Gui getGUI() {
         return GUI;
     }
+
+    public void setGUI(Gui GUI) {
+        this.GUI = GUI;
+    }
+
+
+    public void setApplication(RelicApplication application) {
+        this.application = application;
+        this.camera = new Camera(application);
+        this.matrix = new ProjectionMatrix(application).init();
+    }
 }
+
 

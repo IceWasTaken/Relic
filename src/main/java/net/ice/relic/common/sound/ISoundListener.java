@@ -1,6 +1,6 @@
 package net.ice.relic.common.sound;
 
-import net.ice.relic.common.Transform;
+import net.ice.relic.common.scene.Transform;
 
 public interface ISoundListener {
 

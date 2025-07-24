@@ -1,6 +1,6 @@
 package net.ice.glyph;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.modding.IMod;
 import net.ice.relic.modding.ModData;
 

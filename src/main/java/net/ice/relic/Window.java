@@ -1,6 +1,7 @@
 package net.ice.relic;
 
 import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.config.configs.WindowConfig;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;

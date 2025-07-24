@@ -1,5 +1,7 @@
-package net.ice.relic.engine.opengl;
+package net.ice.relic.engine.opengl.rendering;
 
+import net.ice.relic.engine.opengl.VertexArrayObject;
+import net.ice.relic.engine.opengl.VertexBufferObject;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;

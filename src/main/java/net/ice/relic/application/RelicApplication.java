@@ -1,5 +1,8 @@
-package net.ice.relic;
+package net.ice.relic.application;
 
+import net.ice.relic.EngineState;
+import net.ice.relic.common.Stats;
+import net.ice.relic.Window;
 import net.ice.relic.common.Clock;
 import net.ice.relic.common.Input;
 import net.ice.relic.common.Version;
@@ -70,7 +73,7 @@ public abstract class RelicApplication implements ApplicationContext {
         logGLCapabilities();
         clock.init();
         changeState(LOADING);
-        currentScene = new SceneTest("test");
+        currentScene = new SceneTest("test", this);
         currentScene.setApplication(this);
         currentScene.init();
         input.init();

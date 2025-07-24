@@ -6,12 +6,15 @@ import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiKey;
 import imgui.type.ImInt;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.Window;
 import net.ice.relic.common.gui.Gui;
 import net.ice.relic.engine.opengl.Shader;
-import net.ice.relic.engine.opengl.rendering.GeometryBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.engine.opengl.rendering.GuiMesh;
+import net.ice.relic.engine.opengl.rendering.buffer.ReflectionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RefractionBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
@@ -51,8 +54,8 @@ public class GuiRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
-        super.init(renderingBuffer, buffer);
+    public void init(RenderingBuffers renderingBuffer, GeometryBuffer buffer, RefractionBuffer refractionBuffer, ReflectionBuffer reflectionBuffer) {
+        super.init(renderingBuffer, geometryBuffer, refractionBuffer, reflectionBuffer);
         createUIResources();
         setupKeyCallBack();
     }

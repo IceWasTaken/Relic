@@ -1,9 +1,10 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.Shadow;
 import net.ice.relic.engine.opengl.*;
 import net.ice.relic.engine.opengl.model.Model;
-import net.ice.relic.engine.opengl.rendering.GeometryBuffer;
+import net.ice.relic.engine.opengl.rendering.buffer.*;
 import net.ice.relic.common.scene.SceneObject;
 import org.lwjgl.system.MemoryUtil;
 
@@ -37,8 +38,8 @@ public class ShadowRenderer extends AbstractRenderer {
     }
 
     @Override
-    public void init(RenderingBuffer renderingBuffer, GeometryBuffer buffer) {
-        super.init(renderingBuffer, geometryBuffer);
+    public void init(RenderingBuffers renderingBuffer, GeometryBuffer buffer, RefractionBuffer refractionBuffer, ReflectionBuffer reflectionBuffer) {
+        super.init(renderingBuffer, buffer, refractionBuffer, reflectionBuffer);
         this.shadowBuffer = new ShadowBuffer();
 
         for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
@@ -77,7 +78,7 @@ public class ShadowRenderer extends AbstractRenderer {
         for(Model model : application.getCurrentScene().getModels().values()) {
             List<SceneObject> objects = model.getSceneObjects();
             for(SceneObject object : objects) {
-                uniforms.setUniform(uniforms.formatUniform("modelMatrices", entityIndex), object.getModelMatrix());
+                uniforms.setUniform(uniforms.formatUniform("modelMatrices", entityIndex), object.getTransform().getTransformMatrix());
                 entityIndex++;
             }
         }
@@ -93,9 +94,9 @@ public class ShadowRenderer extends AbstractRenderer {
                 continue;
             }
             List<SceneObject> entities = model.getSceneObjects();
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 for (SceneObject entity : entities) {
-                    uniforms.setUniform(uniforms.formatUniform("drawElements", drawElement) + ".modelMatrixIndex", objectIndexMap.get(entity.getId()));
+                    uniforms.setUniform(uniforms.formatUniform("drawElements", drawElement) + ".modelMatrixIndex", objectIndexMap.get(entity.getName()));
                     drawElement++;
                 }
             }
@@ -114,10 +115,10 @@ public class ShadowRenderer extends AbstractRenderer {
             if (!model.isAnimated()) {
                 continue;
             }
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
-                RenderingBuffer.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+                RenderingBuffers.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
                 SceneObject entity = animMeshDrawData.entity();
-                uniforms.setUniform("drawElements" + drawElement + ".modelMatrixIndex", objectIndexMap.get(entity.getId()));
+                uniforms.setUniform("drawElements" + drawElement + ".modelMatrixIndex", objectIndexMap.get(entity.getName()));
                 drawElement++;
             }
         }
@@ -131,7 +132,7 @@ public class ShadowRenderer extends AbstractRenderer {
         }
 
         glBindVertexArray(0);
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     @Override
@@ -147,7 +148,7 @@ public class ShadowRenderer extends AbstractRenderer {
         for (Model model : application.getCurrentScene().getModels().values()) {
             List<SceneObject> entities = model.getSceneObjects();
             for (SceneObject entity : entities) {
-                objectIndexMap.put(entity.getId(), entityIdx);
+                objectIndexMap.put(entity.getName(), entityIdx);
                 entityIdx++;
             }
         }
@@ -166,7 +167,7 @@ public class ShadowRenderer extends AbstractRenderer {
         for (Model model : modelList) {
             List<SceneObject> entities = model.getSceneObjects();
             int numEntities = entities.size();
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 // count
                 commandBuffer.putInt(meshDrawData.vertices());
                 // instanceCount
@@ -202,8 +203,8 @@ public class ShadowRenderer extends AbstractRenderer {
         int baseInstance = 0;
         ByteBuffer commandBuffer = MemoryUtil.memAlloc(numMeshes * config.getCommandSize());
         for (Model model : modelList) {
-            for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
-                RenderingBuffer.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
+            for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+                RenderingBuffers.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
                 SceneObject entity = animMeshDrawData.entity();
 
                 commandBuffer.putInt(meshDrawData.vertices());

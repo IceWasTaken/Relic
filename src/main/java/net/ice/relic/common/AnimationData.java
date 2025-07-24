@@ -1,4 +1,4 @@
-package net.ice.relic.engine.opengl;
+package net.ice.relic.common;
 
 import net.ice.relic.engine.opengl.model.Animation;
 import net.ice.relic.engine.opengl.model.ModelLoader;

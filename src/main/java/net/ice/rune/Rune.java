@@ -1,6 +1,6 @@
 package net.ice.rune;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.config.Config;
 
 public class Rune extends RelicApplication {

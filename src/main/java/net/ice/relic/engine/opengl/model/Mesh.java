@@ -1,6 +1,7 @@
 package net.ice.relic.engine.opengl.model;
 
-import net.ice.relic.engine.opengl.AABB;
+import net.ice.relic.common.AABB;
+import net.ice.relic.common.model.MeshData;
 import net.ice.relic.engine.opengl.VertexArrayObject;
 import net.ice.relic.engine.opengl.VertexBufferObject;
 import org.lwjgl.system.MemoryUtil;

@@ -1,6 +1,6 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.Shader;
 import net.ice.relic.common.model.Material;
 import net.ice.relic.engine.opengl.model.Mesh;
@@ -56,7 +56,7 @@ public class SkyboxRenderer extends AbstractRenderer {
         uniforms.setUniform("viewMatrix", viewMatrix);
 
         SceneObject skyBoxEntity = skyBox.getSceneObject();
-        TextureCache textureCache = scene.getTextureLoader();
+        TextureCache textureCache = scene.getTextureCache();
         Material material = skyBox.getMaterial();
         Mesh mesh = skyBox.getMesh();
         Texture texture = textureCache.getTexture(material.getTexturePath());
@@ -67,7 +67,7 @@ public class SkyboxRenderer extends AbstractRenderer {
 
         mesh.getVertexArrayObject().bind();
 
-        uniforms.setUniform("modelMatrix", skyBoxEntity.getModelMatrix());
+        uniforms.setUniform("modelMatrix", skyBoxEntity.getTransform().getTransformMatrix());
         glDrawElements(GL_TRIANGLES, mesh.getVertexCount(), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
@@ -76,7 +76,7 @@ public class SkyboxRenderer extends AbstractRenderer {
 
 
 
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     @Override

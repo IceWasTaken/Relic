@@ -1,6 +1,7 @@
 package net.ice.relic.config.configs;
 
 import net.ice.relic.config.ConfigBase;
+import net.ice.relic.config.enums.GraphicsQuality;
 
 public class RendererConfig extends ConfigBase {
 
@@ -10,13 +11,15 @@ public class RendererConfig extends ConfigBase {
     private static final String configPath = "config/" + fileName;
     private static final String defaultConfigPath = "net/ice/relic/config/" + defaultFileName;
 
-    private Integer MAX_DRAW_ELEMENTS;
-    private Integer MAX_SCENE_OBJECTS;
-    private Integer MAX_TEXTURES;
-    private Integer MAX_MATERIALS;
-    private Integer COMMAND_SIZE;
-    private Integer MAX_POINT_LIGHTS;
-    private Integer MAX_SPOT_LIGHTS;
+    private Integer maxDrawElements;
+    private Integer maxSceneObjects;
+    private Integer maxTextures;
+    private Integer maxMaterials;
+    private Integer commandSize;
+    private Integer maxPointLights;
+    private Integer maxSpotLights;
+    private GraphicsQuality shadowQuality;
+    private GraphicsQuality lightingQuality;
 
     public RendererConfig() {
         super(configPath, defaultConfigPath);
@@ -24,70 +27,79 @@ public class RendererConfig extends ConfigBase {
 
     @Override
     public RendererConfig loadConfig() {
-        MAX_DRAW_ELEMENTS = getInt("max_draw_elements");
-        MAX_SCENE_OBJECTS = getInt("max_scene_objects");
-        MAX_TEXTURES = getInt("max_textures");
-        MAX_MATERIALS = getInt("max_materials");
-        COMMAND_SIZE = getInt("command_size");
-        MAX_POINT_LIGHTS = getInt("max_point_lights");
-        MAX_SPOT_LIGHTS = getInt("max_spot_lights");
+        maxDrawElements = getInt("max_draw_elements");
+        maxSceneObjects = getInt("max_scene_objects");
+        maxTextures = getInt("max_textures");
+        maxMaterials = getInt("max_materials");
+        commandSize = getInt("command_size");
+        maxPointLights = getInt("max_point_lights");
+        maxSpotLights = getInt("max_spot_lights");
+        shadowQuality = getEnum("shadowQuality", GraphicsQuality.class);
+        lightingQuality = getEnum("lightingQuality", GraphicsQuality.class);
 
         return this;
     }
 
     public int getMaxDrawElements() {
-        return MAX_DRAW_ELEMENTS;
+        return maxDrawElements;
     }
-
     public void setMaxDrawElements(Integer maxDrawElements) {
-        this.MAX_DRAW_ELEMENTS = maxDrawElements;
+        this.maxDrawElements = maxDrawElements;
     }
 
     public int getMaxSceneObjects() {
-        return MAX_SCENE_OBJECTS;
+        return maxSceneObjects;
     }
-
     public void setMaxSceneObjects(Integer maxSceneObjects) {
-        this.MAX_SCENE_OBJECTS = maxSceneObjects;
+        this.maxSceneObjects = maxSceneObjects;
     }
 
     public int getMaxTextures() {
-        return MAX_TEXTURES;
+        return maxTextures;
     }
-
     public void setMaxTextures(Integer maxTextures) {
-        this.MAX_TEXTURES = maxTextures;
+        this.maxTextures = maxTextures;
     }
 
     public int getMaxMaterials() {
-        return MAX_MATERIALS;
+        return maxMaterials;
     }
-
     public void setMaxMaterials(Integer maxMaterials) {
-        this.MAX_MATERIALS = maxMaterials;
+        this.maxMaterials = maxMaterials;
     }
 
     public int getCommandSize() {
-        return COMMAND_SIZE * 4;
+        return commandSize * 4;
     }
-
     public void setCommandSize(Integer commandSize) {
-        this.COMMAND_SIZE = commandSize;
+        this.commandSize = commandSize;
     }
 
     public int getMaxPointLights() {
-        return MAX_POINT_LIGHTS;
+        return maxPointLights;
     }
-
     public void setMaxPointLights(Integer maxPointLights) {
-        this.MAX_POINT_LIGHTS = maxPointLights;
+        this.maxPointLights = maxPointLights;
     }
 
     public int getMaxSpotLights() {
-        return MAX_SPOT_LIGHTS;
+        return maxSpotLights;
+    }
+    public void setMaxSpotLights(Integer maxSpotLights) {
+        this.maxSpotLights = maxSpotLights;
     }
 
-    public void setMaxSpotLights(Integer maxSpotLights) {
-        this.MAX_SPOT_LIGHTS = maxSpotLights;
+    public GraphicsQuality getLightingQuality() {
+        return lightingQuality;
+    }
+    public void setLightingQuality(GraphicsQuality lightingQuality) {
+        this.lightingQuality = lightingQuality;
+    }
+
+    public GraphicsQuality getShadowQuality() {
+        return shadowQuality;
+    }
+    public void setShadowQuality(GraphicsQuality shadowQuality) {
+        this.shadowQuality = shadowQuality;
     }
 }

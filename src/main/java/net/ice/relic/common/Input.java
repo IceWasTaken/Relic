@@ -1,6 +1,6 @@
 package net.ice.relic.common;
 import net.ice.relic.Lifecycle;
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;

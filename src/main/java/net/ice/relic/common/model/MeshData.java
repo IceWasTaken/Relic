@@ -1,6 +1,6 @@
-package net.ice.relic.engine.opengl.model;
+package net.ice.relic.common.model;
 
-import net.ice.relic.engine.opengl.AABB;
+import net.ice.relic.common.AABB;
 import org.joml.Vector3f;
 
 public class MeshData {

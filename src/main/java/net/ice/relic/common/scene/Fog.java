@@ -1,25 +1,27 @@
 package net.ice.relic.common.scene;
 
+import net.ice.relic.engine.util.ColorUtil;
 import org.joml.Vector3f;
 
 public class Fog {
 
+    private ColorUtil.Color color;
+
     private boolean active;
-    private Vector3f color;
     private float density;
 
     public Fog() {
         active = false;
-        color = new Vector3f();
+        color = ColorUtil.ColorDefaults.BLACK.getColor();
     }
 
-    public Fog(boolean active, Vector3f color, float density) {
+    public Fog(boolean active, ColorUtil.Color color, float density) {
         this.color = color;
         this.density = density;
         this.active = active;
     }
 
-    public Vector3f getColor() {
+    public ColorUtil.Color getColor() {
         return color;
     }
 
@@ -35,7 +37,7 @@ public class Fog {
         this.active = active;
     }
 
-    public void setColor(Vector3f color) {
+    public void setColor(ColorUtil.Color color) {
         this.color = color;
     }
 

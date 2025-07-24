@@ -1,23 +1,29 @@
 package net.ice.relic.common.scene.light;
 
+import net.ice.relic.engine.util.ColorUtil;
 import org.joml.Vector3f;
 
 public class AmbientLight {
 
-    private Vector3f color;
+    private ColorUtil.Color color;
 
     private float intensity;
 
     public AmbientLight(float intensity, Vector3f color) {
         this.intensity = intensity;
+        this.color = ColorUtil.glVectorToColor(color);
+    }
+
+    public AmbientLight(float intensity, ColorUtil.Color color) {
+        this.intensity = intensity;
         this.color = color;
     }
 
     public AmbientLight() {
-        this(1.0f, new Vector3f(1.0f, 1.0f, 1.0f));
+        this(1.0f, new Vector3f(0.3f, 0.3f, 0.3f));
     }
 
-    public Vector3f getColor() {
+    public ColorUtil.Color getColor() {
         return color;
     }
 
@@ -25,15 +31,23 @@ public class AmbientLight {
         return intensity;
     }
 
-    public void setColor(Vector3f color) {
+    public AmbientLight setColor(ColorUtil.Color color) {
         this.color = color;
+        return this;
     }
 
-    public void setColor(float r, float g, float b) {
-        color.set(r, g, b);
+    public AmbientLight setColor(Vector3f color) {
+        this.color = ColorUtil.glVectorToColor(color);
+        return this;
     }
 
-    public void setIntensity(float intensity) {
+    public AmbientLight setColor(float r, float g, float b) {
+        this.color = new ColorUtil.Color(r, g, b);
+        return this;
+    }
+
+    public AmbientLight setIntensity(float intensity) {
         this.intensity = intensity;
+        return this;
     }
 }

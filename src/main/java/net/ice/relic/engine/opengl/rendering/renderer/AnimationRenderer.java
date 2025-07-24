@@ -1,10 +1,11 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
-import net.ice.relic.RelicApplication;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.Shader;
 import net.ice.relic.engine.opengl.model.Animation;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 
 import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL43.*;
@@ -41,8 +42,8 @@ public class AnimationRenderer extends AbstractRenderer {
         int dstOffset = 0;
         for (Model model : application.getCurrentScene().getModels().values()) {
             if (model.isAnimated()) {
-                for (RenderingBuffer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
-                    RenderingBuffer.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
+                for (RenderingBuffers.MeshDrawData meshDrawData : model.getMeshDrawData()) {
+                    RenderingBuffers.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
                     SceneObject entity = animMeshDrawData.entity();
                     Animation.AnimatedFrame frame = entity.getAnimationData().getCurrentFrame();
                     int groupSize = (int) Math.ceil((float) meshDrawData.sizeInBytes() / (14 * 4));
@@ -60,7 +61,7 @@ public class AnimationRenderer extends AbstractRenderer {
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         shaderProgram.unbind();
 
-        ensureNoErrorBeforeContinue();
+        assertNoError();
     }
 
     @Override
