@@ -1,6 +1,7 @@
 package net.ice.rune.scenes;
 
 import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.Input;
 import net.ice.relic.engine.opengl.model.ModelLoader;
 import net.ice.relic.engine.opengl.registry.ModelRegistry;
 import net.ice.relic.common.scene.Scene;
@@ -11,6 +12,8 @@ import net.ice.relic.engine.util.ColorUtil;
 import net.ice.relic.generation.Terrain;
 import net.ice.rune.GuiTest;
 import org.joml.Vector3f;
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
 
 public class SceneTest extends Scene {
 
@@ -39,7 +42,6 @@ public class SceneTest extends Scene {
 
     @Override
     protected void sceneUpdate(float deltaTime) {
-
     }
 
     @Override

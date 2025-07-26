@@ -185,6 +185,10 @@ public abstract class Scene implements Lifecycle {
         this.camera = new Camera(application);
         this.matrix = new ProjectionMatrix(application).init();
     }
+
+    public Map<String, SceneObject> getObjects() {
+        return objects;
+    }
 }
 
 

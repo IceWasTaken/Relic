@@ -11,4 +11,8 @@ public class ChunkPosition extends Vector3f {
     public ChunkPosition() {
         super();
     }
+
+    public static ChunkPosition fromVector3f(Vector3f vector3f) {
+        return new ChunkPosition(vector3f.x / 16, vector3f.y / 16, vector3f.z / 16);
+    }
 }
