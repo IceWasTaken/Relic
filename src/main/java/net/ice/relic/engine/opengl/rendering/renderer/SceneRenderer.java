@@ -242,10 +242,7 @@ public class SceneRenderer extends AbstractRenderer {
             uniforms.setUniform(prefix + ".textureHandle", texHandle);
             uniforms.setUniform(prefix + ".normalHandle", normalHandle);
 
-            System.out.println("Texture handle for terrain: " + material.getTextureHandle());
-            System.out.println("Texture path for terrain: " + material.getTexturePath());
-            System.out.println("Normal handle for terrain: " + material.getNormalHandle());
-            System.out.println("Normal path for terrain: " + material.getNormalMapPath());
+
         }
         shaderProgram.unbind();
     }

@@ -69,7 +69,7 @@ public abstract class RelicApplication implements ApplicationContext {
 
         window.init();
         renderer.init();
-        setupDebugMessageCallback();
+        //setupDebugMessageCallback();
         logGLCapabilities();
         clock.init();
         changeState(LOADING);

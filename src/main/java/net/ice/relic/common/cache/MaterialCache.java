@@ -15,6 +15,8 @@ public class MaterialCache {
     public MaterialCache() {
         materialList = new ArrayList<>();
         Material defaultMaterial = new Material();
+        defaultMaterial.setMaterialIndex(DEFAULT_MATERIAL_INDEX);
+        defaultMaterial.setTexturePath("resources/textures/default.png");
         materialList.add(defaultMaterial);
     }
 

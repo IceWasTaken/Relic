@@ -32,6 +32,7 @@ public class ModelLoader {
 
     }
 
+
     private static void buildFrameMatrices(AIAnimation aiAnimation, List<Bone> boneList, Animation.AnimatedFrame animatedFrame,
                                            int frame, Node node, Matrix4f parentTransformation, Matrix4f globalInverseTransform) {
         String nodeName = node.getName();
@@ -190,6 +191,8 @@ public class ModelLoader {
 
         return new Model(modelId, meshDataList, animations);
     }
+
+
 
     private static List<Animation> processAnimations(AIScene aiScene, List<Bone> boneList, Node rootNode, Matrix4f globalInverseTransformation) {
         List<Animation> animations = new ArrayList<>();

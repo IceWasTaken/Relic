@@ -30,7 +30,9 @@ public class Texture {
             ByteBuffer imageData = stbi_load(texturePath, widthBuf, heightBuf, channelsBuf, 4);
             if (imageData == null) {
                 Logger.error("Failed to load texture: {} - {}", texturePath, stbi_failure_reason());
-                throw new RuntimeException("Failed to load texture: " + texturePath);
+                this.textureID = 0;
+                this.bindlessHandle = 0L;
+                return;
             }
 
             int width = widthBuf.get(0);

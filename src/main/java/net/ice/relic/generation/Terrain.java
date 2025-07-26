@@ -9,17 +9,24 @@ import net.ice.relic.common.scene.SceneObject;
 import net.ice.relic.engine.opengl.model.Mesh;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.engine.opengl.model.texture.Texture;
+import net.ice.relic.engine.util.ColorUtil;
 import net.ice.relic.noise.FastNoiseLite;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.lwjgl.assimp.*;
+import org.lwjgl.system.MemoryStack;
 
+import java.io.File;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.ice.relic.common.model.Material.processMaterial;
+import static org.lwjgl.assimp.Assimp.*;
+
 public class Terrain {
 
-    private final int width = 1024;
-    private final int height = 1024;
+    private final int chunkSize = 1024;
 
     private final List<Vector3f> vertices = new ArrayList<>();
     private final List<Vector3f> normals = new ArrayList<>();
@@ -38,11 +45,11 @@ public class Terrain {
         TerrainGenerator.Desert desert = new TerrainGenerator.Desert();
         FastNoiseLite noise = desert.setupGenerator();
         // 1. Generate vertices, uvs, and placeholders
-        for (int z = 0; z < height; z++) {
-            for (int x = 0; x < width; x++) {
+        for (int z = 0; z < chunkSize; z++) {
+            for (int x = 0; x < chunkSize; x++) {
                 float y = noise.GetNoise(x, z) * 10f; // scale height
                 vertices.add(new Vector3f(x, y, z));
-                uvs.add(new Vector2f((float) x / width * 8.0f, (float) z / height * 8.0f));
+                uvs.add(new Vector2f((float) x / chunkSize * 8.0f, (float) z / chunkSize * 8.0f));
                 normals.add(new Vector3f(0, 0, 0));
                 tangents.add(new Vector3f(0, 0, 0));
                 bitangents.add(new Vector3f(0, 0, 0));
@@ -50,11 +57,11 @@ public class Terrain {
         }
 
         // 2. Generate triangle indices
-        for (int z = 0; z < height - 1; z++) {
-            for (int x = 0; x < width - 1; x++) {
-                int topLeft     = z * width + x;
+        for (int z = 0; z < chunkSize - 1; z++) {
+            for (int x = 0; x < chunkSize - 1; x++) {
+                int topLeft     = z * chunkSize + x;
                 int topRight    = topLeft + 1;
-                int bottomLeft  = (z + 1) * width + x;
+                int bottomLeft  = (z + 1) * chunkSize + x;
                 int bottomRight = bottomLeft + 1;
 
                 indices.add(topLeft);
@@ -131,23 +138,25 @@ public class Terrain {
         }
 
         MeshData meshData = new MeshData(getVertices(), getNormals(), getTangents(), getBitangents(), getUVs(), getIndices(), null, null, null);
-        meshData.setMaterialIndex(0);
 
         List<MeshData> meshDataList = new ArrayList<>();
         meshDataList.add(meshData);
 
         Material material = new Material();
+        material.setMaterialIndex(2);
 
-        Texture texture1 = textureCache.createTexture("resources/textures/terrain/" + "grass.png");
-        //Texture texture2 = textureCache.createTexture("resources/textures/terrain/" + "grass_normal.png");
+
+        Texture texture1 = textureCache.createTexture("resources/textures/terrain/grass/" + "grass.png");
+        Texture texture2 = textureCache.createTexture("resources/textures/terrain/grass/" + "grass_normal.png");
 
         material.setTexturePath(texture1.getTexturePath());
-        //material.setNormalMapPath(texture2.getTexturePath());
+        material.setNormalMapPath(texture2.getTexturePath());
 
         material.setDiffuseColor(Material.DEFAULT_COLOR);
 
+
         material.setTexture(texture1);
-        //material.setNormalMap(texture2);
+        material.setNormalMap(texture2);
 
 
         this.material = material;
@@ -156,6 +165,9 @@ public class Terrain {
         materialCache.addMaterial(material);
         modelCache.addModel(model);
     }
+
+
+
 
     // Accessors
     public float[] getVertices() {
@@ -222,5 +234,14 @@ public class Terrain {
 
     public Model getModel() {
         return model;
+    }
+
+    public void loadChunk() {
+
+    }
+
+    public void getChunk(ChunkPosition position) {
+
+
     }
 }
