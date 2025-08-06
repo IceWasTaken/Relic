@@ -1,6 +1,6 @@
 package net.ice.relic.engine.opengl.model;
 
-import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.cache.MaterialCache;
 import net.ice.relic.common.cache.ModelCache;
 import net.ice.relic.common.model.Material;
@@ -16,10 +16,11 @@ import java.nio.IntBuffer;
 import java.util.*;
 
 import static net.ice.relic.common.model.Material.processMaterial;
+import static net.ice.relic.util.AssimpUtil.*;
+import static net.ice.relic.util.IOUtil.loadRealFile;
 import static net.ice.relic.util.MatrixUtil.toMatrix4f;
 import static org.lwjgl.assimp.Assimp.*;
 
-@Rewrite
 public class ModelLoader {
 
     public static final int MAX_BONES = 150;
@@ -27,11 +28,13 @@ public class ModelLoader {
 
     private TextureCache textureCache;
     private MaterialCache materialCache;
+    private ModelCache modelCache;
 
-    private ModelLoader() {
-
+    public ModelLoader(RelicApplication relicApplication, TextureCache textureCache, MaterialCache materialCache, ModelCache modelCache) {
+        this.textureCache = textureCache;
+        this.materialCache = materialCache;
+        this.modelCache = modelCache;
     }
-
 
     private static void buildFrameMatrices(AIAnimation aiAnimation, List<Bone> boneList, Animation.AnimatedFrame animatedFrame,
                                            int frame, Node node, Matrix4f parentTransformation, Matrix4f globalInverseTransform) {
@@ -130,23 +133,19 @@ public class ModelLoader {
         return result;
     }
 
-    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, ModelCache cache,
-                                  boolean animation) {
-        return loadModel(modelId, modelPath, textureCache, materialCache, cache, aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
+    public Model loadModel(String modelId, String modelPath, boolean animation) {
+        return loadModel(modelId, modelPath, textureCache, materialCache, modelCache, aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
                 aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights |
                 aiProcess_GenBoundingBoxes | (animation ? 0 : aiProcess_PreTransformVertices));
     }
 
-    public static Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
-        File file = new File("resources/models/" + modelPath);
-        if (!file.exists()) {
-            throw new RuntimeException("Model path does not exist [" + modelPath + "]");
-        }
+    public Model loadModel(String modelId, String modelPath, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
+        File file = loadRealFile("resources", "models", modelPath);
         String modelDir = file.getParent();
 
         AIScene aiScene = aiImportFile("resources/models/" + modelPath, flags);
         if (aiScene == null) {
-            throw new RuntimeException("Error loading model [modelPath: " + modelPath + "]");
+            throw new RuntimeException("Error loading model [" + modelPath + "]");
         }
 
         int numMaterials = aiScene.mNumMaterials();
@@ -221,25 +220,6 @@ public class ModelLoader {
         return animations;
     }
 
-    private static float[] processBitangents(AIMesh aiMesh, float[] normals) {
-
-        AIVector3D.Buffer buffer = aiMesh.mBitangents();
-        float[] data = new float[buffer.remaining() * 3];
-        int pos = 0;
-        while (buffer.remaining() > 0) {
-            AIVector3D aiBitangent = buffer.get();
-            data[pos++] = aiBitangent.x();
-            data[pos++] = aiBitangent.y();
-            data[pos++] = aiBitangent.z();
-        }
-
-        // Assimp may not calculate tangents with models that do not have texture coordinates. Just create empty values
-        if (data.length == 0) {
-            data = new float[normals.length];
-        }
-        return data;
-    }
-
     private static AnimMeshData processBones(AIMesh aiMesh, List<Bone> boneList) {
         List<Integer> boneIds = new ArrayList<>();
         List<Float> weights = new ArrayList<>();
@@ -286,28 +266,14 @@ public class ModelLoader {
         return new AnimMeshData(listFloatToArray(weights), listIntToArray(boneIds));
     }
 
-    private static int[] processIndices(AIMesh aiMesh) {
-        List<Integer> indices = new ArrayList<>();
-        int numFaces = aiMesh.mNumFaces();
-        AIFace.Buffer aiFaces = aiMesh.mFaces();
-        for (int i = 0; i < numFaces; i++) {
-            AIFace aiFace = aiFaces.get(i);
-            IntBuffer buffer = aiFace.mIndices();
-            while (buffer.remaining() > 0) {
-                indices.add(buffer.get());
-            }
-        }
-        return indices.stream().mapToInt(Integer::intValue).toArray();
-    }
-
 
 
     private static MeshData processMesh(AIMesh aiMesh, List<Bone> boneList) {
-        float[] vertices = processVertices(aiMesh);
-        float[] normals = processNormals(aiMesh);
-        float[] tangents = processTangents(aiMesh, normals);
-        float[] bitangents = processBitangents(aiMesh, normals);
-        float[] textCoords = processTextCoords(aiMesh);
+        float[] vertices = processAIVectorBuffer(aiMesh.mVertices());
+        float[] normals = processAIVectorBuffer(aiMesh.mNormals());
+        float[] tangents = processAIVectorBufferBackup(aiMesh.mTangents(), normals);
+        float[] bitangents = processAIVectorBufferBackup(aiMesh.mBitangents(), normals);
+        float[] textCoords = aiMesh.mTextureCoords(0) != null ? processTextCoords(aiMesh.mTextureCoords(0)) : new float[]{};
         int[] indices = processIndices(aiMesh);
         AnimMeshData animMeshData = processBones(aiMesh, boneList);
 
@@ -323,66 +289,6 @@ public class ModelLoader {
 
         return new MeshData(vertices, normals, tangents, bitangents, textCoords, indices, animMeshData.boneIds,
                 animMeshData.weights, aabbMin, aabbMax);
-    }
-
-    private static float[] processNormals(AIMesh aiMesh) {
-        AIVector3D.Buffer buffer = aiMesh.mNormals();
-        float[] data = new float[buffer.remaining() * 3];
-        int pos = 0;
-        while (buffer.remaining() > 0) {
-            AIVector3D normal = buffer.get();
-            data[pos++] = normal.x();
-            data[pos++] = normal.y();
-            data[pos++] = normal.z();
-        }
-        return data;
-    }
-
-    private static float[] processTangents(AIMesh aiMesh, float[] normals) {
-
-        AIVector3D.Buffer buffer = aiMesh.mTangents();
-        float[] data = new float[buffer.remaining() * 3];
-        int pos = 0;
-        while (buffer.remaining() > 0) {
-            AIVector3D aiTangent = buffer.get();
-            data[pos++] = aiTangent.x();
-            data[pos++] = aiTangent.y();
-            data[pos++] = aiTangent.z();
-        }
-
-        // Assimp may not calculate tangents with models that do not have texture coordinates. Just create empty values
-        if (data.length == 0) {
-            data = new float[normals.length];
-        }
-        return data;
-    }
-
-    private static float[] processTextCoords(AIMesh aiMesh) {
-        AIVector3D.Buffer buffer = aiMesh.mTextureCoords(0);
-        if (buffer == null) {
-            return new float[]{};
-        }
-        float[] data = new float[buffer.remaining() * 2];
-        int pos = 0;
-        while (buffer.remaining() > 0) {
-            AIVector3D textCoord = buffer.get();
-            data[pos++] = textCoord.x();
-            data[pos++] = 1 - textCoord.y();
-        }
-        return data;
-    }
-
-    private static float[] processVertices(AIMesh aiMesh) {
-        AIVector3D.Buffer buffer = aiMesh.mVertices();
-        float[] data = new float[buffer.remaining() * 3];
-        int pos = 0;
-        while (buffer.remaining() > 0) {
-            AIVector3D textCoord = buffer.get();
-            data[pos++] = textCoord.x();
-            data[pos++] = textCoord.y();
-            data[pos++] = textCoord.z();
-        }
-        return data;
     }
 
     public record AnimMeshData(float[] weights, int[] boneIds) {
@@ -405,5 +311,17 @@ public class ModelLoader {
 
     public static int[] listIntToArray(List<Integer> list) {
         return list.stream().mapToInt((Integer v) -> v).toArray();
+    }
+
+    public ModelCache getModelCache() {
+        return modelCache;
+    }
+
+    public TextureCache getTextureCache() {
+        return textureCache;
+    }
+
+    public MaterialCache getMaterialCache() {
+        return materialCache;
     }
 }

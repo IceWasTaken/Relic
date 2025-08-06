@@ -11,7 +11,6 @@ public class Shader {
 
     private final int shaderID;
     private final ShaderType type;
-    private boolean isPostShader;
 
     private Shader(ShaderType type) {
         this.type = type;
@@ -19,9 +18,8 @@ public class Shader {
         this.shaderID = glCreateShader(type.getGlType());
     }
 
-    private static Shader createShader(ShaderType type, String source, boolean postShader) {
+    private static Shader createShader(ShaderType type, String source) {
         Shader shader = new Shader(type);
-        shader.isPostShader = postShader;
         shader.setSource(source);
         shader.compile();
 
@@ -53,7 +51,7 @@ public class Shader {
             throw new RuntimeException("Unable to load shader (or shader not found): " + fileName, exception);
         }
 
-        return createShader(type, shaderSource.toString(), postShader);
+        return createShader(type, shaderSource.toString());
     }
 
     private void validateShader(int shaderId) {

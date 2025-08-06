@@ -1,4 +1,4 @@
-#version 400
+#version 430
 
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : require
@@ -21,40 +21,48 @@ layout (location = 2) out vec4 buffSpecular;
 struct Material
 {
     vec4 diffuse;
-    vec4 specular;
-    float reflectance;
-    uint64_t textureHandle;
-    uint64_t normalHandle;
+    //vec4 specular;
+    //float reflectance;
+    //float _padding;
+    //float _padding2;
+    //float _padding3;
+    //uint64_t textureHandle;
+    //uint64_t normalHandle;
+    //uint64_t emissiveHandle;
+    //uint64_t specularHandle;
+    //uint64_t AOHandle;
 };
 
-uniform Material materials[MAX_MATERIALS];
+layout(std430, binding = 0) buffer MaterialBuffer {
+    Material materials[MAX_MATERIALS];
+};
 
-vec3 calcNormal(Material mat, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoords) {
-    mat3 TBN = mat3(tangent, bitangent, normal);
-    vec3 newNormal = texture(sampler2D(mat.normalHandle), textCoords).rgb;
-    newNormal = normalize(newNormal * 2.0 - 1.0);
-    newNormal = normalize(TBN * newNormal);
-    return newNormal;
-}
+//vec3 calcNormal(Material mat, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoords) {
+    //mat3 TBN = mat3(tangent, bitangent, normal);
+    //vec3 newNormal = texture(sampler2D(mat.normalHandle), textCoords).rgb;
+    //newNormal = normalize(newNormal * 2.0 - 1.0);
+    //newNormal = normalize(TBN * newNormal);
+    //return newNormal;
+//}
 
 void main() {
-    Material material = materials[outMaterialIdx];
+    Material material = materials[0];
 
-    sampler2D albedo = sampler2D(material.textureHandle);
+    //sampler2D albedo = sampler2D(material.textureHandle);
 
-    vec4 text_color = texture(albedo, outTextCoord);
-    vec4 diffuse = text_color + material.diffuse;
-    if (diffuse.a < 0.5) {
-        discard;
-    }
-    vec4 specular = text_color + material.specular;
+    //vec4 text_color = texture(albedo, outTextCoord);
+    //vec4 diffuse = text_color + material.diffuse;
+    //if (diffuse.a < 0.5) {
+        //discard;
+    //}
+    //vec4 specular = text_color + material.specular;
 
-    vec3 normal = outNormal;
-    if (material.normalHandle != 0u) {
-        normal = calcNormal(material, outNormal, outTangent, outBitangent, outTextCoord);
-    }
+    //vec3 normal = outNormal;
+    //if (material.normalHandle != 0u) {
+        //normal = calcNormal(material, outNormal, outTangent, outBitangent, outTextCoord);
+    //}
 
-    buffAlbedo   = vec4(diffuse.xyz, material.reflectance);
-    buffNormal   = vec4(0.5 * normal + 0.5, 1.0);
-    buffSpecular = specular;
+    buffAlbedo   = vec4(material.diffuse.x, 0, 0, 1);
+    //buffNormal = vec4(0.5 * normal + 0.5, 1.0);
+    //buffSpecular = specular;
 }

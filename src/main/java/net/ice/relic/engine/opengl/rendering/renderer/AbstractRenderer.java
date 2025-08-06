@@ -2,6 +2,7 @@ package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.config.configs.RendererConfig;
+import net.ice.relic.engine.opengl.ShaderStorageBufferObject;
 import net.ice.relic.engine.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.engine.opengl.Shader;
 import net.ice.relic.engine.opengl.ShaderProgram;
@@ -19,7 +20,11 @@ public abstract class AbstractRenderer {
 
     protected RelicApplication application;
     protected ShaderProgram shaderProgram;
+
+    @Deprecated(since = "0.3.0", forRemoval = true)
     protected UniformBufferObject uniforms;
+    protected ShaderStorageBufferObject shaderStorage;
+
     protected RendererConfig config;
 
     protected RenderingBuffers renderingBuffer;
@@ -39,6 +44,7 @@ public abstract class AbstractRenderer {
         initShaders();
         this.shaderProgram = new ShaderProgram(shaders);
         this.uniforms = new UniformBufferObject(shaderProgram);
+        this.shaderStorage = new ShaderStorageBufferObject();
         this.renderingBuffer = renderingBuffer;
         this.geometryBuffer = buffer;
         this.refractionBuffer = refractionBuffer;

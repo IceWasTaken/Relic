@@ -13,6 +13,7 @@ import net.ice.relic.common.ProjectionMatrix;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.common.cache.TextureCache;
 import net.ice.relic.common.scene.light.AmbientLight;
+import net.ice.relic.engine.opengl.model.ModelLoader;
 import net.ice.relic.engine.util.ColorUtil;
 import org.joml.Vector3f;
 import org.tinylog.Logger;
@@ -27,10 +28,6 @@ public abstract class Scene implements Lifecycle {
 
     private final String name;
 
-    private final TextureCache textureCache;
-    private final MaterialCache materialCache;
-    private final ModelCache modelCache;
-
     private AmbientLight ambientLight;
     private DirectionalLight directionalLight;
 
@@ -44,27 +41,21 @@ public abstract class Scene implements Lifecycle {
 
     private Skybox skybox;
     private Fog fog;
-
     private Gui GUI;
 
-    private boolean loaded;
     private boolean initialized;
 
+    protected ModelLoader modelLoader;
     protected RelicApplication application;
 
     protected abstract void sceneInit();
-
     protected abstract void sceneUpdate(float deltaTime);
-
     protected abstract void sceneDestroy();
 
     public Scene(String name, RelicApplication application) {
         this.name = name;
-
-        this.materialCache = new MaterialCache();
-        this.textureCache = new TextureCache();
-        this.modelCache = new ModelCache();
         this.application = application;
+        this.modelLoader = new ModelLoader(application, application.getTextureCache(), application.getMaterialCache(), application.getModelCache());
         this.camera = new Camera(application);
         this.matrix = new ProjectionMatrix(application);
         this.objects = new HashMap<>();
@@ -85,12 +76,12 @@ public abstract class Scene implements Lifecycle {
         sceneInit();
 
         Logger.info("Loaded scene: " + name);
-        loaded = true;
+        initialized = true;
     }
 
     @Override
     public void cleanup() {
-        if (!initialized || !loaded) {
+        if (!initialized) {
             throw new IllegalStateException("Scene not initialized or not loaded.");
         }
 
@@ -113,6 +104,10 @@ public abstract class Scene implements Lifecycle {
     public void addSceneObject(String id, SceneObject object) {
         objects.put(id, object);
         object.getModel().getSceneObjects().add(object);
+
+        if(initialized) {
+            application.getRenderer().setupData();
+        }
     }
 
     public void removeObject(String id) {
@@ -141,14 +136,8 @@ public abstract class Scene implements Lifecycle {
         this.directionalLight = directionalLight;
     }
 
-    public TextureCache getTextureCache() {
-        return textureCache;
-    }
-    public ModelCache getModelCache() {
-        return modelCache;
-    }
-    public MaterialCache getMaterialCache() {
-        return materialCache;
+    public ModelLoader getModelLoader() {
+        return modelLoader;
     }
 
     public ProjectionMatrix getMatrix() {
@@ -188,6 +177,10 @@ public abstract class Scene implements Lifecycle {
 
     public Map<String, SceneObject> getObjects() {
         return objects;
+    }
+
+    public SceneObject getObject(String id) {
+        return objects.get(id);
     }
 }
 

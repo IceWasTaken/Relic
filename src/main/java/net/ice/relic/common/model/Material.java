@@ -28,24 +28,40 @@ public class Material {
 
     public static final ColorUtil.Color DEFAULT_COLOR = new ColorUtil.Color(0.0f, 0.0f, 0.0f, 1.0f);
 
+    /**
+     * Size in bytes of the Material structure:
+     * <ul>
+     *   <li>Diffuse and specular colors: 2 × vec4 (4 floats each) = <b>32 bytes</b></li>
+     *   <li>Reflectance: 1 × float = <b>4 bytes</b> <i>(deprecated soon)</i></li>
+     *   <li>Texture handles: 5 × uint64_t (8 bytes each) = <b>40 bytes</b></li>
+     * </ul>
+     * <b>Total: 76 bytes</b>
+     */
+    public static final int MATERIAL_SIZE = 76;
+
     private int materialIndex;
     private float reflectance;
     private float emissiveStrength;
 
-    private ColorUtil.Color ambientColor;
     private ColorUtil.Color diffuseColor;
     private ColorUtil.Color specularColor;
+
+    @Deprecated
+    private ColorUtil.Color ambientColor;
+    @Deprecated
     private ColorUtil.Color emissiveColor;
 
     private String texturePath;
     private String normalMapPath;
-    private String ORMMapPath;
     private String emissiveMapPath;
+    private String specularMapPath;
+    private String AOMapPath;
 
     private Texture texture;
     private Texture normalMap;
-    private Texture ormMap;
     private Texture emissiveMap;
+    private Texture specularMap;
+    private Texture AOMap;
 
     public Material() {
         this.ambientColor = DEFAULT_COLOR;
@@ -57,34 +73,33 @@ public class Material {
 
     public static Material processMaterial(AIMaterial aiMaterial, String directory, TextureCache textureCache) {
         Material material = new Material();
+        float[] shininess = new float[]{0.0f};
+        int[] max = new int[]{1};
+        float reflectance = 0.0f;
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
             AIColor4D color = AIColor4D.create();
-            int result;
 
-            result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
+            int ambientResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, color);
+            if (ambientResult == aiReturn_SUCCESS) {
                 material.setAmbientColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
             }
-            result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
+            int diffuseResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color);
+            if (diffuseResult == aiReturn_SUCCESS) {
                 material.setDiffuseColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
             }
-            result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
+            int specularResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, color);
+            if (specularResult == aiReturn_SUCCESS) {
                 material.setSpecularColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
             }
-            result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_NONE, 0, color);
-            if (result == aiReturn_SUCCESS) {
+            int emissiveResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_NONE, 0, color);
+            if (emissiveResult == aiReturn_SUCCESS) {
                 material.setEmissiveColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
             }
-
-            float reflectance = 0.0f;
-            float[] shininessFactor = new float[]{0.0f};
-            int[] pMax = new int[]{1};
-
-            result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH, aiTextureType_NONE, 0, shininessFactor, pMax);
-            if (result != aiReturn_SUCCESS) {
-                reflectance = shininessFactor[0];
+            //dumb
+            int shininessResult = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH, aiTextureType_NONE, 0, shininess, max);
+            if (shininessResult != aiReturn_SUCCESS) {
+                reflectance = shininess[0];
             }
             material.setReflectance(reflectance);
 
@@ -105,6 +120,28 @@ public class Material {
                 material.setNormalMapPath(directory + File.separator + "textures/" + new File(normalMapPath).getName());
                 material.setNormalMap(textureCache.createTexture(material.getNormalMapPath()));
             }
+            AIString aiEmissiveMapPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_EMISSIVE, 0, aiEmissiveMapPath, (IntBuffer) null, null, null, null, null, null);
+            String emissiveMapPath = aiEmissiveMapPath.dataString();
+            if (!emissiveMapPath.isEmpty()) {
+                material.setEmissiveMapPath(directory + File.separator + "textures/" + new File(emissiveMapPath).getName());
+                material.setEmissiveMap(textureCache.createTexture(material.getNormalMapPath()));
+            }
+            AIString aiSpecularMapPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_SPECULAR, 1, aiSpecularMapPath, (IntBuffer) null, null, null, null, null, null);
+            String specularMapPath = aiSpecularMapPath.dataString();
+            if (!specularMapPath.isEmpty()) {
+                material.setSpecularMapPath(directory + File.separator + "textures/" + new File(specularMapPath).getName());
+                material.setSpecularMap(textureCache.createTexture(material.getNormalMapPath()));
+            }
+            AIString aiAOMapPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_AMBIENT, 1, aiAOMapPath, (IntBuffer) null, null, null, null, null, null);
+            String aoMapPath = aiAOMapPath.dataString();
+            if (!aoMapPath.isEmpty()) {
+                material.setAOMapPath(directory + File.separator + "textures/" + new File(aoMapPath).getName());
+                material.setAOMap(textureCache.createTexture(material.getNormalMapPath()));
+            }
+
             return material;
         }
     }
@@ -119,7 +156,6 @@ public class Material {
 
     public String getTexturePath() { return texturePath; }
     public String getNormalMapPath() { return normalMapPath; }
-    public String getORMMapPath() { return ORMMapPath; }
     public String getEmissiveMapPath() {
         return emissiveMapPath;
     }
@@ -128,15 +164,21 @@ public class Material {
 
     public Texture getTexture() { return texture; }
     public Texture getNormalMap() { return normalMap; }
-    public Texture getOrmMap() { return ormMap; }
     public Texture getEmissiveMap() {
         return emissiveMap;
+    }
+    public Texture getSpecularMap() {
+        return specularMap;
+    }
+    public Texture getAOMap() {
+        return AOMap;
     }
 
     public boolean hasTexture() { return texture != null; }
     public boolean hasNormalMap() { return normalMap != null; }
-    public boolean hasORMMap() { return ormMap != null; }
     public boolean hasEmissiveMap() { return emissiveMap != null; }
+    public boolean hasSpecularMap() { return specularMap != null; }
+    public boolean hasAOMap() { return AOMap != null; }
 
     public long getTextureHandle() {
         return hasTexture() ? texture.getBindlessHandle() : 0L;
@@ -146,12 +188,16 @@ public class Material {
         return hasNormalMap() ? normalMap.getBindlessHandle() : 0L;
     }
 
-    public long getORMHandle() {
-        return hasORMMap() ? ormMap.getBindlessHandle() : 0L;
-    }
-
     public long getEmissiveHandle() {
         return hasEmissiveMap() ? emissiveMap.getBindlessHandle() : 0L;
+    }
+
+    public long getSpecularHandle() {
+        return hasSpecularMap() ? specularMap.getBindlessHandle() : 0L;
+    }
+
+    public long getAOHandle() {
+        return hasAOMap() ? AOMap.getBindlessHandle() : 0L;
     }
 
     public void setAmbientColor(ColorUtil.Color ambientColor) { this.ambientColor = ambientColor; }
@@ -164,17 +210,27 @@ public class Material {
 
     public void setTexturePath(String texturePath) { this.texturePath = texturePath; }
     public void setNormalMapPath(String normalMapPath) { this.normalMapPath = normalMapPath; }
-    public void setORMMapPath(String ORMMapPath) { this.ORMMapPath = ORMMapPath; }
     public void setEmissiveMapPath(String emissiveMapPath) {
         this.emissiveMapPath = emissiveMapPath;
+    }
+    public void setSpecularMapPath(String specularMapPath) {
+        this.specularMapPath = specularMapPath;
+    }
+    public void setAOMapPath(String AOMapPath) {
+        this.AOMapPath = AOMapPath;
     }
 
     public void setMaterialIndex(int materialIndex) { this.materialIndex = materialIndex; }
 
     public void setTexture(Texture texture) { this.texture = texture; }
     public void setNormalMap(Texture normalMap) { this.normalMap = normalMap; }
-    public void setORMMap(Texture ormMap) { this.ormMap = ormMap; }
     public void setEmissiveMap(Texture emissiveMap) {
         this.emissiveMap = emissiveMap;
+    }
+    public void setSpecularMap(Texture specularMap) {
+        this.specularMap = specularMap;
+    }
+    public void setAOMap(Texture AOMap) {
+        this.AOMap = AOMap;
     }
 }

@@ -56,7 +56,7 @@ public class SkyboxRenderer extends AbstractRenderer {
         uniforms.setUniform("viewMatrix", viewMatrix);
 
         SceneObject skyBoxEntity = skyBox.getSceneObject();
-        TextureCache textureCache = scene.getTextureCache();
+        TextureCache textureCache = scene.getModelLoader().getTextureCache();
         Material material = skyBox.getMaterial();
         Mesh mesh = skyBox.getMesh();
         Texture texture = textureCache.getTexture(material.getTexturePath());

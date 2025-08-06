@@ -1,6 +1,6 @@
 package net.ice.relic.common;
 
-import static org.lwjgl.vulkan.VK10.VK_MAKE_VERSION;
+import static org.lwjgl.vulkan.VK10.VK_MAKE_API_VERSION;
 
 public class Version {
 
@@ -31,7 +31,8 @@ public class Version {
     }
 
     public int makeVulkanVersion() {
-        return VK_MAKE_VERSION(major, minor, patch);
+        //not sure what variant is. just going to do this.
+        return VK_MAKE_API_VERSION(0, major, minor, patch);
     }
 
     @Override

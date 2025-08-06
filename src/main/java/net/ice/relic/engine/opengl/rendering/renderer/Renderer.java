@@ -132,8 +132,6 @@ public class Renderer implements Lifecycle {
         renderingBuffer.loadAnimatedModels();
         sceneRenderer.setupData();
         shadowRenderer.setupData();
-        List<Model> models = new ArrayList<>(application.getCurrentScene().getModels().values());
-        models.forEach(model -> model.getMeshData().clear());
     }
 
     public void enablePostShader(ShaderProgram shaderProgram) {

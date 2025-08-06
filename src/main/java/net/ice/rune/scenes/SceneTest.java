@@ -2,6 +2,7 @@ package net.ice.rune.scenes;
 
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.Input;
+import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.engine.opengl.model.ModelLoader;
 import net.ice.relic.engine.opengl.registry.ModelRegistry;
 import net.ice.relic.common.scene.Scene;
@@ -13,14 +14,14 @@ import net.ice.relic.generation.Terrain;
 import net.ice.rune.GuiTest;
 import org.joml.Vector3f;
 
+import java.util.Random;
+
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
 
 public class SceneTest extends Scene {
 
-    private float lightAngle = 45f;
-
-    private final DirectionalLight sunLight = new DirectionalLight(ColorUtil.ColorDefaults.SUN_NOON.getColor(), new Vector3f(0, 1, 0), 1);
-    private final DirectionalLight moonLight = new DirectionalLight(ColorUtil.ColorDefaults.MOON_NIGHT.getColor(), new Vector3f(0, -1, 0), 1);
+    private int count = 0;
+    private Random random;
 
     public SceneTest(String name, RelicApplication application) {
         super(name, application);
@@ -28,12 +29,17 @@ public class SceneTest extends Scene {
 
     @Override
     protected void sceneInit() {
-        Skybox skybox = new Skybox("skybox/skybox.obj", this.getTextureCache(), this.getMaterialCache(), this.getModelCache());
+        this.random = new Random();
+        Skybox skybox = new Skybox("skybox/skybox.obj", modelLoader);
         skybox.getSceneObject().getTransform().setScale(500);
         setSkybox(skybox);
 
-        //addSceneObject("moon", new SceneObject("moon", ModelLoader.loadModel("test", "headcrab/headcrab_classic/headcrab_classic.obj", this.getTextureCache(), this.getMaterialCache(), this.getModelCache(), ModelRegistry.DEFAULT_FLAGS)));
-        addSceneObject("terrain", new SceneObject("terrain", new Terrain(233344444, this.getMaterialCache(), this.getTextureCache(), this.getModelCache()).getModel()));
+        Model moonModel = modelLoader.loadModel("test", "headcrab/headcrab_classic/headcrab_classic.obj", false);
+        SceneObject moonSceneObject = new SceneObject("moon", moonModel);
+        moonSceneObject.getTransform().setScale(100);
+        addSceneObject("test", moonSceneObject);
+        //addSceneObject("terrain", new SceneObject("terrain", new Terrain(233344444, application.getMaterialCache(), application.getTextureCache(), application.getModelCache()).getModel()));
+
 
         getDirectionalLight().setIntensity(1);
         getDirectionalLight().setDirection(new Vector3f(0,1,0));
@@ -42,6 +48,12 @@ public class SceneTest extends Scene {
 
     @Override
     protected void sceneUpdate(float deltaTime) {
+//        if(Input.isKeyDown(GLFW_KEY_T)) {
+//            addSceneObject("moon" + count, new SceneObject("moon" + count, modelLoader.loadModel("test", "3DSMoon/moon.obj", false)));
+//            getObject("moon" + count).getTransform().setScale(0.0001f);
+//            getObject("moon" + count).getTransform().setPosition(new Vector3f(random.nextFloat(), 0, random.nextFloat()));
+//            count++;
+//        }
     }
 
     @Override

@@ -203,6 +203,7 @@ void main()
     }
     vec4 ambient = calcAmbient(ambientLight, diffuse);
 
+
     fragColor = ambient + diffuseSpecularComp;
     fragColor.rgb = fragColor.rgb * shadowFactor;
 

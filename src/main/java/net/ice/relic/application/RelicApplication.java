@@ -6,6 +6,9 @@ import net.ice.relic.Window;
 import net.ice.relic.common.Clock;
 import net.ice.relic.common.Input;
 import net.ice.relic.common.Version;
+import net.ice.relic.common.cache.MaterialCache;
+import net.ice.relic.common.cache.ModelCache;
+import net.ice.relic.common.cache.TextureCache;
 import net.ice.relic.common.scene.Scene;
 import net.ice.relic.config.Config;
 import net.ice.relic.engine.opengl.rendering.renderer.Renderer;
@@ -20,36 +23,45 @@ import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public abstract class RelicApplication implements ApplicationContext {
 
+    private static final Version ENGINE_VERSION = new Version(0, 3, 0);
+
     protected Scene currentScene;
     protected EngineState currentState;
 
-    protected final Config config;
-    protected final Window window;
-    protected final Renderer renderer;
     protected final Clock clock;
     protected final Stats stats;
     protected final Input input;
+    protected final Config config;
+    protected final Window window;
+    protected final Renderer renderer;
     protected final ModManager modManager;
-    protected final Version engineVersion;
     protected final Version applicationVersion;
+
+    protected final ModelCache modelCache;
+    protected final TextureCache textureCache;
+    protected final MaterialCache materialCache;
 
     protected abstract void init(RelicApplication application);
     protected abstract void update(RelicApplication application);
     protected abstract void render(RelicApplication application);
     protected abstract void cleanup(RelicApplication application);
 
-    protected RelicApplication(Config config) {
+    protected RelicApplication(Config config, Version applicationVersion) {
         changeState(INITIALIZING);
 
         this.config = config;
+        this.applicationVersion = applicationVersion;
+
+        this.clock = new Clock();
+        this.modelCache = new ModelCache();
+        this.textureCache = new TextureCache();
+        this.materialCache = new MaterialCache();
+
         this.stats = new Stats(this);
+        this.input = new Input(this);
         this.window = new Window(this);
         this.renderer = new Renderer(this);
-        this.input = new Input(this);
         this.modManager = new ModManager(this);
-        this.engineVersion = new Version(0, 3, 0);
-        this.applicationVersion = new Version(0, 1, 0);
-        this.clock = new Clock();
     }
 
     public void run() {
@@ -69,7 +81,8 @@ public abstract class RelicApplication implements ApplicationContext {
 
         window.init();
         renderer.init();
-        //setupDebugMessageCallback();
+        textureCache.init();
+        setupDebugMessageCallback();
         logGLCapabilities();
         clock.init();
         changeState(LOADING);
@@ -161,7 +174,19 @@ public abstract class RelicApplication implements ApplicationContext {
         return applicationVersion;
     }
 
-    public Version getEngineVersion() {
-        return engineVersion;
+    public static Version getEngineVersion() {
+        return ENGINE_VERSION;
+    }
+
+    public TextureCache getTextureCache() {
+        return textureCache;
+    }
+
+    public MaterialCache getMaterialCache() {
+        return materialCache;
+    }
+
+    public ModelCache getModelCache() {
+        return modelCache;
     }
 }

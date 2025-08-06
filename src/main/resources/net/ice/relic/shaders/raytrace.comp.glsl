@@ -26,5 +26,5 @@ struct IntersectInfo {
 };
 
 void main(void) {
-    vec3 finalColor = mix()
+    vec3 finalColor = mix();
 }

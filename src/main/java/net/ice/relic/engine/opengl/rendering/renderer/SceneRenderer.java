@@ -8,13 +8,15 @@ import net.ice.relic.common.model.Material;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.common.scene.SceneObject;
 import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
+import org.joml.Vector4f;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import static org.lwjgl.opengl.ARBBindlessTexture.glMakeTextureHandleResidentARB;
 import static org.lwjgl.opengl.GL43.*;
-import static org.lwjgl.opengl.ARBBindlessTexture.*;
 
 @Rewrite
 public class SceneRenderer extends AbstractRenderer {
@@ -44,16 +46,6 @@ public class SceneRenderer extends AbstractRenderer {
     protected void initUniforms() {
         uniforms.createUniform("projectionMatrix");
         uniforms.createUniform("viewMatrix");
-
-        for (int i = 0; i < config.getMaxMaterials(); i++) {
-            String prefix = uniforms.formatUniform("materials", i);
-            uniforms.createUniform(prefix + ".diffuse");
-            uniforms.createUniform(prefix + ".specular");
-            uniforms.createUniform(prefix + ".reflectance");
-
-            uniforms.createUniform(prefix + ".textureHandle");
-            uniforms.createUniform(prefix + ".normalHandle");
-        }
 
         for (int i = 0; i < config.getMaxDrawElements(); i++) {
             String name = "drawElements[" + i + "]";
@@ -136,7 +128,7 @@ public class SceneRenderer extends AbstractRenderer {
         setupObjectData();
         setupStaticCommandBuffer();
         setupAnimationCommandBuffer();
-        setupMaterialUniforms(application.getCurrentScene().getMaterialCache());
+        setupMaterialUniforms(application.getCurrentScene().getModelLoader().getMaterialCache());
     }
 
     private void setupObjectData() {
@@ -223,27 +215,56 @@ public class SceneRenderer extends AbstractRenderer {
     public void setupMaterialUniforms(MaterialCache materialCache) {
         List<Material> materialList = materialCache.getMaterialsList();
         int materialCount = materialList.size();
+
+        //Four for buffer
+        ByteBuffer buffer = MemoryUtil.memAlloc((Material.MATERIAL_SIZE + 12) * materialCount);
+
         shaderProgram.bind();
+        shaderStorage.bind();
 
-        for (int i = 0; i < materialCount; i++) {
-            Material material = materialList.get(i);
-            String prefix = uniforms.formatUniform("materials", i);
+        shaderStorage.bindBase(0);
 
-            uniforms.setUniform(prefix + ".diffuse", material.getDiffuseColor().convertToGLVector4f());
-            uniforms.setUniform(prefix + ".specular", material.getSpecularColor().convertToGLVector4f());
-            uniforms.setUniform(prefix + ".reflectance", material.getReflectance());
+        for (Material material : materialList) {
+            //Diffuse Color
 
-            long texHandle = material.hasTexture() ? material.getTextureHandle() : 0L;
-            long normalHandle = material.hasNormalMap() ? material.getNormalHandle() : 0L;
-
-            if (texHandle != 0L && !material.getTexture().isResident()) glMakeTextureHandleResidentARB(texHandle);
-            if (normalHandle != 0L && !material.getNormalMap().isResident()) glMakeTextureHandleResidentARB(normalHandle);
-
-            uniforms.setUniform(prefix + ".textureHandle", texHandle);
-            uniforms.setUniform(prefix + ".normalHandle", normalHandle);
-
-
+            shaderStorage.bufferDataVec4f(new Vector4f(2,1,1,1), GL_STATIC_DRAW);
+            //Specular Color
+//            buffer.putFloat(material.getSpecularColor().red);
+//            buffer.putFloat(material.getSpecularColor().green);
+//            buffer.putFloat(material.getSpecularColor().blue);
+//            buffer.putFloat(material.getSpecularColor().alpha);
+//            //Reflectance
+//            buffer.putFloat(material.getReflectance());
+//            buffer.putFloat(0F); //padding
+//            buffer.putFloat(0F); //padding
+//            buffer.putFloat(0F); //padding
+//
+//            long texHandle = material.hasTexture() ? material.getTextureHandle() : 0L;
+//            long normalHandle = material.hasNormalMap() ? material.getNormalHandle() : 0L;
+//            long emissiveHandle = material.hasEmissiveMap() ? material.getEmissiveHandle() : 0L;
+//            long specularHandle = material.hasSpecularMap() ? material.getSpecularHandle() : 0L;
+//            long AOHandle = material.hasAOMap() ? material.getAOHandle() : 0L;
+//
+//            buffer.putLong(texHandle);
+//            buffer.putLong(normalHandle);
+//            buffer.putLong(emissiveHandle);
+//            buffer.putLong(specularHandle);
+//            buffer.putLong(AOHandle);
         }
+        buffer.rewind();
+        //shaderStorage.bufferDataByteBuffer(buffer, GL_STATIC_READ);
+        shaderStorage.unbind();
         shaderProgram.unbind();
+
+        MemoryUtil.memFree(buffer);
+
+        shaderStorage.bind();
+        ByteBuffer readBack = MemoryUtil.memAlloc(4);
+        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, readBack);
+
+        float r = readBack.getFloat(0);
+        System.out.println(r);
+
+        MemoryUtil.memFree(readBack);
     }
 }

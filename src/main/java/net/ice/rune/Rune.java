@@ -1,12 +1,13 @@
 package net.ice.rune;
 
 import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.Version;
 import net.ice.relic.config.Config;
 
 public class Rune extends RelicApplication {
 
     public Rune(Config config) {
-        super(config);
+        super(config, new Version(0, 1, 0));
         config.getWindowConfig().setFullscreen(false);
     }
 

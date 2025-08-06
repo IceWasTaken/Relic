@@ -9,7 +9,7 @@ import java.util.Objects;
 public class ModelCache {
 
     public static final String DEFAULT_MODEL = "resources/models/default.obj";
-    private Map<String, Model> modelMap;
+    private final Map<String, Model> modelMap;
 
     public ModelCache() {
         modelMap = new HashMap<>();

@@ -25,7 +25,6 @@ struct DrawElement
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform mat4 modelMatrix;
 uniform DrawElement drawElements[MAX_DRAW_ELEMENTS];
 uniform mat4 modelMatrices[MAX_ENTITIES];
 

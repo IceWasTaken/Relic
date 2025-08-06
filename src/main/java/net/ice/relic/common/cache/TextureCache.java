@@ -13,6 +13,10 @@ public class TextureCache {
 
     public TextureCache() {
         textureMap = new HashMap<>();
+
+    }
+
+    public void init() {
         textureMap.put(DEFAULT_TEXTURE, new Texture(DEFAULT_TEXTURE));
         textureMap.put("grass", new Texture("resources/textures/terrain/grass/grass.png"));
         textureMap.put("grass_normal", new Texture("resources/textures/terrain/grass/grass_normal.png"));
