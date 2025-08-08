@@ -14,3 +14,4 @@ newmtl material_02FDF718
 	Ke 0.0000 0.0000 0.0000
 	map_Ka moon_00_0.png
 	map_Kd moon_00_0.png
+	map_Ks moon_00_0_sp.png

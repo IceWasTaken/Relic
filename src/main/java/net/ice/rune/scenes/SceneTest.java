@@ -34,9 +34,9 @@ public class SceneTest extends Scene {
         skybox.getSceneObject().getTransform().setScale(500);
         setSkybox(skybox);
 
-        Model moonModel = modelLoader.loadModel("test", "headcrab/headcrab_classic/headcrab_classic.obj", false);
+        Model moonModel = modelLoader.loadModel("test", "3DSMoon/moon.obj", false);
         SceneObject moonSceneObject = new SceneObject("moon", moonModel);
-        moonSceneObject.getTransform().setScale(100);
+        moonSceneObject.getTransform().setScale(0.00001f);
         addSceneObject("test", moonSceneObject);
         //addSceneObject("terrain", new SceneObject("terrain", new Terrain(233344444, application.getMaterialCache(), application.getTextureCache(), application.getModelCache()).getModel()));
 

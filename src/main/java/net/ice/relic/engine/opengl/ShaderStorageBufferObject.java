@@ -49,6 +49,7 @@ public class ShaderStorageBufferObject {
         glBufferData(GL_SHADER_STORAGE_BUFFER, data, glEnum);
      }
 
+     //rewrite
      public void bufferDataVec4f(Vector4f data, int glEnum) {
         float[] dumb = new float[4];
         dumb[0] = data.x;

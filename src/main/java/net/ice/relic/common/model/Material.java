@@ -131,6 +131,7 @@ public class Material {
             Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_SPECULAR, 1, aiSpecularMapPath, (IntBuffer) null, null, null, null, null, null);
             String specularMapPath = aiSpecularMapPath.dataString();
             if (!specularMapPath.isEmpty()) {
+                System.out.println(specularMapPath);
                 material.setSpecularMapPath(directory + File.separator + "textures/" + new File(specularMapPath).getName());
                 material.setSpecularMap(textureCache.createTexture(material.getNormalMapPath()));
             }

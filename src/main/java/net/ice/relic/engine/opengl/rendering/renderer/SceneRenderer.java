@@ -216,55 +216,51 @@ public class SceneRenderer extends AbstractRenderer {
         List<Material> materialList = materialCache.getMaterialsList();
         int materialCount = materialList.size();
 
-        //Four for buffer
+        //ByteBuffer buffer = MemoryUtil.memAlloc((Material.MATERIAL_SIZE + 12) * materialCount);
         ByteBuffer buffer = MemoryUtil.memAlloc((Material.MATERIAL_SIZE + 12) * materialCount);
 
         shaderProgram.bind();
         shaderStorage.bind();
 
-        shaderStorage.bindBase(0);
+        shaderStorage.bindBase(5);
 
         for (Material material : materialList) {
             //Diffuse Color
-
-            shaderStorage.bufferDataVec4f(new Vector4f(2,1,1,1), GL_STATIC_DRAW);
+            buffer.putFloat(material.getDiffuseColor().red);
+            buffer.putFloat(material.getDiffuseColor().green);
+            buffer.putFloat(material.getDiffuseColor().blue);
+            buffer.putFloat(material.getDiffuseColor().alpha);
             //Specular Color
-//            buffer.putFloat(material.getSpecularColor().red);
-//            buffer.putFloat(material.getSpecularColor().green);
-//            buffer.putFloat(material.getSpecularColor().blue);
-//            buffer.putFloat(material.getSpecularColor().alpha);
-//            //Reflectance
-//            buffer.putFloat(material.getReflectance());
-//            buffer.putFloat(0F); //padding
-//            buffer.putFloat(0F); //padding
-//            buffer.putFloat(0F); //padding
-//
-//            long texHandle = material.hasTexture() ? material.getTextureHandle() : 0L;
-//            long normalHandle = material.hasNormalMap() ? material.getNormalHandle() : 0L;
+            buffer.putFloat(material.getSpecularColor().red);
+            buffer.putFloat(material.getSpecularColor().green);
+            buffer.putFloat(material.getSpecularColor().blue);
+            buffer.putFloat(material.getSpecularColor().alpha);
+            //Reflectance
+            buffer.putFloat(material.getReflectance());
+
+            // I think this is how this works...?
+            buffer.putFloat(0);
+            buffer.putFloat(0);
+            buffer.putFloat(0);
+
+            long texHandle = material.hasTexture() ? material.getTextureHandle() : 0L;
+            long normalHandle = material.hasNormalMap() ? material.getNormalHandle() : 0L;
 //            long emissiveHandle = material.hasEmissiveMap() ? material.getEmissiveHandle() : 0L;
 //            long specularHandle = material.hasSpecularMap() ? material.getSpecularHandle() : 0L;
 //            long AOHandle = material.hasAOMap() ? material.getAOHandle() : 0L;
 //
-//            buffer.putLong(texHandle);
-//            buffer.putLong(normalHandle);
+
+            buffer.putLong(texHandle);
+            buffer.putLong(normalHandle);
 //            buffer.putLong(emissiveHandle);
 //            buffer.putLong(specularHandle);
 //            buffer.putLong(AOHandle);
         }
         buffer.rewind();
-        //shaderStorage.bufferDataByteBuffer(buffer, GL_STATIC_READ);
+        shaderStorage.bufferDataByteBuffer(buffer, GL_STATIC_DRAW);
         shaderStorage.unbind();
         shaderProgram.unbind();
 
         MemoryUtil.memFree(buffer);
-
-        shaderStorage.bind();
-        ByteBuffer readBack = MemoryUtil.memAlloc(4);
-        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, readBack);
-
-        float r = readBack.getFloat(0);
-        System.out.println(r);
-
-        MemoryUtil.memFree(readBack);
     }
 }
