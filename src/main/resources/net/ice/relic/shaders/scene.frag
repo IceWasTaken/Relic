@@ -55,7 +55,6 @@ void main() {
     if (diffuse.a < 0.5) {
         discard;
     }
-    //vec4 specular = text_color + texture(sampler2D(material.specularHandle), outTextCoord);
     vec4 specular = text_color + material.specular;
     vec3 normal = outNormal;
     if (material.normalHandle != 0u) {

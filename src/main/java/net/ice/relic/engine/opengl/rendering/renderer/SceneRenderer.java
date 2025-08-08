@@ -25,6 +25,7 @@ public class SceneRenderer extends AbstractRenderer {
 
     private VertexBufferObject staticVBO;
     private VertexBufferObject animatedVBO;
+    private ShaderStorageBufferObject shaderStorage;
 
     private int animationDrawCount;
     private int staticDrawCount;
@@ -214,53 +215,31 @@ public class SceneRenderer extends AbstractRenderer {
 
     public void setupMaterialUniforms(MaterialCache materialCache) {
         List<Material> materialList = materialCache.getMaterialsList();
-        int materialCount = materialList.size();
 
-        //ByteBuffer buffer = MemoryUtil.memAlloc((Material.MATERIAL_SIZE + 12) * materialCount);
-        ByteBuffer buffer = MemoryUtil.memAlloc((Material.MATERIAL_SIZE + 12) * materialCount);
-
+        ShaderStorageBufferObject.Builder shaderStorageBuilder = new ShaderStorageBufferObject.Builder();
         shaderProgram.bind();
-        shaderStorage.bind();
-
-        shaderStorage.bindBase(5);
 
         for (Material material : materialList) {
-            //Diffuse Color
-            buffer.putFloat(material.getDiffuseColor().red);
-            buffer.putFloat(material.getDiffuseColor().green);
-            buffer.putFloat(material.getDiffuseColor().blue);
-            buffer.putFloat(material.getDiffuseColor().alpha);
-            //Specular Color
-            buffer.putFloat(material.getSpecularColor().red);
-            buffer.putFloat(material.getSpecularColor().green);
-            buffer.putFloat(material.getSpecularColor().blue);
-            buffer.putFloat(material.getSpecularColor().alpha);
-            //Reflectance
-            buffer.putFloat(material.getReflectance());
+            shaderStorageBuilder.addVec4f(material.getDiffuseColor().convertToGLVector4f())
+                    .addVec4f(material.getSpecularColor().convertToGLVector4f())
+                    .addFloat(material.getReflectance())
+                    .addFloat(0)
+                    .addFloat(0)
+                    .addFloat(0)
+                    .addLong(material.hasTexture() ? material.getTextureHandle() : 0L)
+                    .addLong(material.hasNormalMap() ? material.getNormalHandle() : 0L);
 
-            // I think this is how this works...?
-            buffer.putFloat(0);
-            buffer.putFloat(0);
-            buffer.putFloat(0);
-
-            long texHandle = material.hasTexture() ? material.getTextureHandle() : 0L;
-            long normalHandle = material.hasNormalMap() ? material.getNormalHandle() : 0L;
-//            long emissiveHandle = material.hasEmissiveMap() ? material.getEmissiveHandle() : 0L;
+            //long emissiveHandle = material.hasEmissiveMap() ? material.getEmissiveHandle() : 0L;
 //            long specularHandle = material.hasSpecularMap() ? material.getSpecularHandle() : 0L;
 //            long AOHandle = material.hasAOMap() ? material.getAOHandle() : 0L;
-//
-
-            buffer.putLong(texHandle);
-            buffer.putLong(normalHandle);
 //            buffer.putLong(emissiveHandle);
 //            buffer.putLong(specularHandle);
 //            buffer.putLong(AOHandle);
         }
-        buffer.rewind();
-        shaderStorage.bufferDataByteBuffer(buffer, GL_STATIC_DRAW);
-        shaderStorage.unbind();
-        shaderProgram.unbind();
+        shaderStorage = shaderStorageBuilder.build();
+        shaderStorage.bind();
+        shaderStorage.bindBase(5);
+        shaderStorage.bufferData(GL_STATIC_DRAW);
 
-        MemoryUtil.memFree(buffer);
     }
 }

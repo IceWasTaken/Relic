@@ -19,6 +19,7 @@ import org.tinylog.Logger;
 import static net.ice.relic.EngineState.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.GL_SHADING_LANGUAGE_VERSION;
+import static org.lwjgl.opengl.GL43.GL_MAX_SHADER_STORAGE_BLOCK_SIZE;
 import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public abstract class RelicApplication implements ApplicationContext {
@@ -124,11 +125,13 @@ public abstract class RelicApplication implements ApplicationContext {
         String renderer = glGetString(GL_RENDERER);
         String version = glGetString(GL_VERSION);
         String glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+        int bufferObjectSize = glGetInteger(GL_MAX_SHADER_STORAGE_BLOCK_SIZE);
 
         Logger.info("OpenGL vendor: " + vendor);
         Logger.info("OpenGL renderer: " + renderer);
         Logger.info("OpenGL version: " + version);
         Logger.info("GLSL version: " + glslVersion);
+        Logger.info("Maximum buffer object size: " + bufferObjectSize);
     }
 
     private void changeState(EngineState state) {

@@ -1,24 +1,23 @@
 package net.ice.relic.engine.opengl;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
+import java.nio.ByteOrder;
 
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
-import static org.lwjgl.opengl.GL45.glCreateBuffers;
 
 public class ShaderStorageBufferObject {
 
     private final int handle;
+    private final ByteBuffer data;
 
-    public ShaderStorageBufferObject() {
+    public ShaderStorageBufferObject(Builder builder) {
         this.handle = glGenBuffers();
+        this.data = builder.data;
     }
 
      public void bind() {
@@ -37,57 +36,95 @@ public class ShaderStorageBufferObject {
         glDeleteBuffers(handle);
      }
 
-     public void bufferDataLong(LongBuffer data, int glEnum) {
+     public void bufferData(int glEnum) {
         glBufferData(GL_SHADER_STORAGE_BUFFER, data, glEnum);
      }
 
-     public void bufferDataInt(IntBuffer data, int glEnum) {
-        glBufferData(GL_SHADER_STORAGE_BUFFER, data, glEnum);
-     }
+     public static class Builder {
 
-     public void bufferDataByteBuffer(ByteBuffer data, int glEnum) {
-        glBufferData(GL_SHADER_STORAGE_BUFFER, data, glEnum);
-     }
+        private static final int INITIAL_CAPACITY = 4096;
 
-     //rewrite
-     public void bufferDataVec4f(Vector4f data, int glEnum) {
-        float[] dumb = new float[4];
-        dumb[0] = data.x;
-        dumb[1] = data.y;
-        dumb[2] = data.z;
-        dumb[3] = data.w;
-        glBufferData(GL_SHADER_STORAGE_BUFFER, dumb, glEnum);
-     }
+        private ByteBuffer data;
+        private int size;
+        private int bindingIndex;
 
-     public void bufferDataVec3f(Vector3f data, int glEnum) {
-        glBufferData(GL_SHADER_STORAGE_BUFFER, new float[]{data.x, data.y, data.z}, glEnum);
-     }
+        public Builder() {
+            this.size = 0;
+            this.data = ByteBuffer.allocateDirect(INITIAL_CAPACITY).order(ByteOrder.nativeOrder());
+        }
 
-     public void bufferMatrix4f(Matrix4f matrix4f, int glEnum) {
-        glBufferData(GL_SHADER_STORAGE_BUFFER, matrix4fToFloatArray(matrix4f), glEnum);
-     }
+         private void ensureCapacity(int additionalBytes) {
+             if (data.remaining() < additionalBytes) {
+                 int newCapacity = Math.max(data.capacity() << 1, size + additionalBytes);
+                 ByteBuffer newBuffer = ByteBuffer.allocateDirect(newCapacity).order(ByteOrder.nativeOrder());
+                 data.flip(); // Prepare old buffer for reading
+                 newBuffer.put(data); // Copy old data
+                 data = newBuffer;
+             }
+         }
 
-     private float[] matrix4fToFloatArray(Matrix4f matrix4f) {
-        float[] data = new float[16];
-        data[0] = matrix4f.m00();
-        data[1] = matrix4f.m01();
-        data[2] = matrix4f.m02();
-        data[3] = matrix4f.m03();
+        public Builder addFloat(float value) {
+            //ensureCapacity(Float.BYTES);
+            size += Float.BYTES;
+            data.putFloat(value);
+            return this;
+        }
 
-        data[4] = matrix4f.m10();
-        data[5] = matrix4f.m11();
-        data[6] = matrix4f.m12();
-        data[7] = matrix4f.m13();
+        public Builder addInt(int value) {
+            //ensureCapacity(Integer.BYTES);
+            size += Integer.BYTES;
+            data.putInt(value);
+            return this;
+        }
 
-        data[8] = matrix4f.m20();
-        data[9] = matrix4f.m21();
-        data[10] = matrix4f.m22();
-        data[11] = matrix4f.m23();
+        public Builder addLong(long value) {
+            //ensureCapacity(Long.BYTES);
+            size += Long.BYTES;
+            data.putLong(value);
+            return this;
+        }
 
-        data[12] = matrix4f.m30();
-        data[13] = matrix4f.m31();
-        data[14] = matrix4f.m32();
-        data[15] = matrix4f.m33();
-        return data;
+        public Builder addVec3f(Vector3f value) {
+            //ensureCapacity(3 * Float.BYTES);
+            size += 3 * Float.BYTES;
+            data.putFloat(value.x);
+            data.putFloat(value.y);
+            data.putFloat(value.z);
+            return this;
+        }
+
+        public Builder addVec4f(Vector4f value) {
+            //ensureCapacity(4 * Float.BYTES);
+            size += 4 * Float.BYTES;
+            data.putFloat(value.x);
+            data.putFloat(value.y);
+            data.putFloat(value.z);
+            data.putFloat(value.w);
+            return this;
+        }
+
+        public Builder addPadding(int bytes) {
+            //ensureCapacity(bytes);
+            for (int i = 0; i < bytes; i++) {
+                data.put((byte) 0);
+            }
+            size += bytes;
+            return this;
+        }
+
+        public ShaderStorageBufferObject build() {
+            data.rewind();
+            return new ShaderStorageBufferObject(this);
+        }
+
+        public ShaderStorageBufferObject buildAndBufferData(int glEnum, int bindingIndex) {
+            ShaderStorageBufferObject shaderStorageBufferObject = new ShaderStorageBufferObject(this);
+            shaderStorageBufferObject.bind();
+            shaderStorageBufferObject.bufferData(glEnum);
+            shaderStorageBufferObject.bindBase(bindingIndex);
+            return shaderStorageBufferObject;
+        }
      }
 }
+
+

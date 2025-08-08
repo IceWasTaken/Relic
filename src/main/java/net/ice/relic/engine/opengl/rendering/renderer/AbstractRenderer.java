@@ -21,9 +21,7 @@ public abstract class AbstractRenderer {
     protected RelicApplication application;
     protected ShaderProgram shaderProgram;
 
-    @Deprecated(since = "0.3.0", forRemoval = true)
     protected UniformBufferObject uniforms;
-    protected ShaderStorageBufferObject shaderStorage;
 
     protected RendererConfig config;
 
@@ -44,7 +42,6 @@ public abstract class AbstractRenderer {
         initShaders();
         this.shaderProgram = new ShaderProgram(shaders);
         this.uniforms = new UniformBufferObject(shaderProgram);
-        this.shaderStorage = new ShaderStorageBufferObject();
         this.renderingBuffer = renderingBuffer;
         this.geometryBuffer = buffer;
         this.refractionBuffer = refractionBuffer;
