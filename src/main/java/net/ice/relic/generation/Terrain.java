@@ -1,29 +1,17 @@
 package net.ice.relic.generation;
 
-import net.ice.relic.common.cache.MaterialCache;
-import net.ice.relic.common.cache.ModelCache;
-import net.ice.relic.common.cache.TextureCache;
-import net.ice.relic.common.model.Material;
-import net.ice.relic.common.model.MeshData;
-import net.ice.relic.common.scene.SceneObject;
-import net.ice.relic.engine.opengl.model.Mesh;
+import net.ice.relic.core.cache.MaterialCache;
+import net.ice.relic.core.cache.ModelCache;
+import net.ice.relic.core.cache.TextureCache;
+import net.ice.relic.core.model.Material;
+import net.ice.relic.core.model.MeshData;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.engine.opengl.model.texture.Texture;
-import net.ice.relic.engine.util.ColorUtil;
 import net.ice.relic.noise.FastNoiseLite;
 import net.ice.relic.util.NoiseUtil;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.lwjgl.assimp.*;
-import org.lwjgl.system.MemoryStack;
 
-import java.io.File;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.ice.relic.common.model.Material.processMaterial;
-import static org.lwjgl.assimp.Assimp.*;
 
 public class Terrain {
 

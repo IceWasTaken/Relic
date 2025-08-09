@@ -1,6 +1,6 @@
 package net.ice.relic.util;
 
-import net.ice.relic.common.model.MeshData;
+import net.ice.relic.core.model.MeshData;
 import net.ice.relic.noise.FastNoiseLite;
 import org.joml.Vector2f;
 import org.joml.Vector3f;

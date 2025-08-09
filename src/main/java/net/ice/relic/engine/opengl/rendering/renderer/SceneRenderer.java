@@ -2,20 +2,17 @@ package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.annotations.Rewrite;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.cache.MaterialCache;
+import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.engine.opengl.*;
-import net.ice.relic.common.model.Material;
+import net.ice.relic.core.model.Material;
 import net.ice.relic.engine.opengl.model.Model;
-import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.core.scene.SceneObject;
 import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
-import org.joml.Vector4f;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static org.lwjgl.opengl.ARBBindlessTexture.glMakeTextureHandleResidentARB;
 import static org.lwjgl.opengl.GL43.*;
 
 @Rewrite

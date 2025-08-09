@@ -1,8 +1,8 @@
 package net.ice.relic.engine.opengl.model;
 
-import net.ice.relic.common.model.MeshData;
+import net.ice.relic.core.model.MeshData;
 import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
-import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.core.scene.SceneObject;
 
 import java.util.ArrayList;
 import java.util.List;

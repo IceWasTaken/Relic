@@ -1,7 +1,7 @@
 package net.ice.relic.engine.test;
 
 import net.ice.relic.Window;
-import net.ice.relic.common.scene.Camera;
+import net.ice.relic.core.scene.Camera;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 

@@ -1,11 +1,11 @@
 package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.Shadow;
+import net.ice.relic.core.Shadow;
 import net.ice.relic.engine.opengl.*;
 import net.ice.relic.engine.opengl.model.Model;
 import net.ice.relic.engine.opengl.rendering.buffer.*;
-import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.core.scene.SceneObject;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;

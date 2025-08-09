@@ -1,6 +1,6 @@
 package net.ice.relic.modding;
 
-import net.ice.relic.common.Version;
+import net.ice.relic.core.Version;
 
 public class ModData {
 

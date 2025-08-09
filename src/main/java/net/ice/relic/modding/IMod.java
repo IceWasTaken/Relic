@@ -1,7 +1,7 @@
 package net.ice.relic.modding;
 
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.Input;
+import net.ice.relic.core.Input;
 import net.ice.relic.engine.opengl.rendering.renderer.Renderer;
 
 public interface IMod {

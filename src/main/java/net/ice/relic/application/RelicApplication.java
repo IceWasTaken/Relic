@@ -1,15 +1,15 @@
 package net.ice.relic.application;
 
 import net.ice.relic.EngineState;
-import net.ice.relic.common.Stats;
+import net.ice.relic.core.Stats;
 import net.ice.relic.Window;
-import net.ice.relic.common.Clock;
-import net.ice.relic.common.Input;
-import net.ice.relic.common.Version;
-import net.ice.relic.common.cache.MaterialCache;
-import net.ice.relic.common.cache.ModelCache;
-import net.ice.relic.common.cache.TextureCache;
-import net.ice.relic.common.scene.Scene;
+import net.ice.relic.core.Clock;
+import net.ice.relic.core.Input;
+import net.ice.relic.core.Version;
+import net.ice.relic.core.cache.MaterialCache;
+import net.ice.relic.core.cache.ModelCache;
+import net.ice.relic.core.cache.TextureCache;
+import net.ice.relic.core.scene.Scene;
 import net.ice.relic.config.Config;
 import net.ice.relic.engine.opengl.rendering.renderer.Renderer;
 import net.ice.relic.modding.ModManager;

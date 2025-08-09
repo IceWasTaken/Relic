@@ -1,7 +1,7 @@
 package net.ice.relic.engine.vulkan;
 
-import net.ice.relic.common.Version;
-import net.ice.relic.common.util.OSUtil;
+import net.ice.relic.core.Version;
+import net.ice.relic.core.util.OSUtil;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVulkan;
 import org.lwjgl.system.MemoryStack;

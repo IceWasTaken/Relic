@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiCond;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.gui.Gui;
+import net.ice.relic.core.gui.Gui;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 

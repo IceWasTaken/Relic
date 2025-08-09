@@ -4,9 +4,9 @@ import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.VertexArrayObject;
 import net.ice.relic.engine.opengl.VertexBufferObject;
 import net.ice.relic.engine.opengl.model.Animation;
-import net.ice.relic.common.model.MeshData;
+import net.ice.relic.core.model.MeshData;
 import net.ice.relic.engine.opengl.model.Model;
-import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.core.scene.SceneObject;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 

@@ -4,7 +4,7 @@ import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.Shader;
 import net.ice.relic.engine.opengl.model.Animation;
 import net.ice.relic.engine.opengl.model.Model;
-import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.core.scene.SceneObject;
 import net.ice.relic.engine.opengl.rendering.buffer.RenderingBuffers;
 
 import static org.lwjgl.opengl.GL30.glBindBufferBase;

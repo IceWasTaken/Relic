@@ -2,13 +2,13 @@ package net.ice.relic.engine.opengl.rendering.renderer;
 
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.engine.opengl.Shader;
-import net.ice.relic.common.model.Material;
+import net.ice.relic.core.model.Material;
 import net.ice.relic.engine.opengl.model.Mesh;
 import net.ice.relic.engine.opengl.model.texture.Texture;
-import net.ice.relic.common.cache.TextureCache;
-import net.ice.relic.common.scene.Scene;
-import net.ice.relic.common.scene.SceneObject;
-import net.ice.relic.common.scene.Skybox;
+import net.ice.relic.core.cache.TextureCache;
+import net.ice.relic.core.scene.Scene;
+import net.ice.relic.core.scene.SceneObject;
+import net.ice.relic.core.scene.Skybox;
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.*;

@@ -1,7 +1,7 @@
 package net.ice.relic.engine.opengl.rendering.buffer;
 
 import net.ice.relic.engine.opengl.FrameBufferObject;
-import net.ice.relic.common.Shadow;
+import net.ice.relic.core.Shadow;
 import net.ice.relic.engine.opengl.model.texture.ArrayTexture;
 import org.joml.Vector2i;
 

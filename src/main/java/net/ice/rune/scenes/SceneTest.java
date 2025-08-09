@@ -1,22 +1,14 @@
 package net.ice.rune.scenes;
 
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.Input;
 import net.ice.relic.engine.opengl.model.Model;
-import net.ice.relic.engine.opengl.model.ModelLoader;
-import net.ice.relic.engine.opengl.registry.ModelRegistry;
-import net.ice.relic.common.scene.Scene;
-import net.ice.relic.common.scene.SceneObject;
-import net.ice.relic.common.scene.Skybox;
-import net.ice.relic.common.scene.light.DirectionalLight;
-import net.ice.relic.engine.util.ColorUtil;
-import net.ice.relic.generation.Terrain;
+import net.ice.relic.core.scene.Scene;
+import net.ice.relic.core.scene.SceneObject;
+import net.ice.relic.core.scene.Skybox;
 import net.ice.rune.GuiTest;
 import org.joml.Vector3f;
 
 import java.util.Random;
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
 
 public class SceneTest extends Scene {
 

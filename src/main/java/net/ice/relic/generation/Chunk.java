@@ -1,7 +1,7 @@
 package net.ice.relic.generation;
 
-import net.ice.relic.common.model.MeshData;
-import net.ice.relic.common.scene.SceneObject;
+import net.ice.relic.core.model.MeshData;
+import net.ice.relic.core.scene.SceneObject;
 
 import java.util.ArrayList;
 import java.util.List;

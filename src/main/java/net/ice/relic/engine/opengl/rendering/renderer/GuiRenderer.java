@@ -8,7 +8,7 @@ import imgui.flag.ImGuiKey;
 import imgui.type.ImInt;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.Window;
-import net.ice.relic.common.gui.Gui;
+import net.ice.relic.core.gui.Gui;
 import net.ice.relic.engine.opengl.Shader;
 import net.ice.relic.engine.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.engine.opengl.rendering.GuiMesh;

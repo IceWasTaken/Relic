@@ -1,21 +1,20 @@
 package net.ice.relic.engine.opengl.model;
 
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.cache.MaterialCache;
-import net.ice.relic.common.cache.ModelCache;
-import net.ice.relic.common.model.Material;
-import net.ice.relic.common.cache.TextureCache;
-import net.ice.relic.common.model.MeshData;
+import net.ice.relic.core.cache.MaterialCache;
+import net.ice.relic.core.cache.ModelCache;
+import net.ice.relic.core.model.Material;
+import net.ice.relic.core.cache.TextureCache;
+import net.ice.relic.core.model.MeshData;
 import org.joml.*;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
 import java.io.File;
 import java.lang.Math;
-import java.nio.IntBuffer;
 import java.util.*;
 
-import static net.ice.relic.common.model.Material.processMaterial;
+import static net.ice.relic.core.model.Material.processMaterial;
 import static net.ice.relic.util.AssimpUtil.*;
 import static net.ice.relic.util.IOUtil.loadRealFile;
 import static net.ice.relic.util.MatrixUtil.toMatrix4f;
