@@ -3,7 +3,7 @@ package net.ice.relic.application;
 import net.ice.relic.Window;
 import net.ice.relic.core.Clock;
 import net.ice.relic.core.Input;
-import net.ice.relic.engine.opengl.rendering.renderer.Renderer;
+import net.ice.relic.core.rendering.Renderer;
 
 public interface ApplicationContext {
 

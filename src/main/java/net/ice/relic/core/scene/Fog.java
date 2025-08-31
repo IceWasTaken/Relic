@@ -1,6 +1,6 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.engine.util.ColorUtil;
+import net.ice.relic.common.util.ColorUtil;
 
 public class Fog {
 

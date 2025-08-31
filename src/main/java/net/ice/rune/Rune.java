@@ -2,7 +2,8 @@ package net.ice.rune;
 
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.Version;
-import net.ice.relic.config.Config;
+import net.ice.relic.core.config.Config;
+import net.ice.rune.scenes.SceneTest;
 
 public class Rune extends RelicApplication {
 
@@ -14,16 +15,16 @@ public class Rune extends RelicApplication {
     @Override
     protected void init(RelicApplication application) {
         modManager.loadMods();
+
+        application.loadScene(new SceneTest("test", application));
     }
 
     @Override
     protected void update(RelicApplication application) {
-
     }
 
     @Override
     protected void render(RelicApplication application) {
-
     }
 
     @Override

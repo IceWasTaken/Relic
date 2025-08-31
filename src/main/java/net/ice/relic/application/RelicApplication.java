@@ -1,5 +1,7 @@
 package net.ice.relic.application;
 
+import imgui.ImGui;
+import imgui.ImGuiIO;
 import net.ice.relic.EngineState;
 import net.ice.relic.core.Stats;
 import net.ice.relic.Window;
@@ -10,13 +12,16 @@ import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.scene.Scene;
-import net.ice.relic.config.Config;
-import net.ice.relic.engine.opengl.rendering.renderer.Renderer;
-import net.ice.relic.modding.ModManager;
+import net.ice.relic.core.config.Config;
+import net.ice.relic.core.rendering.Renderer;
+import net.ice.relic.core.modding.ModManager;
 import net.ice.rune.scenes.SceneTest;
+import org.joml.Vector2f;
 import org.tinylog.Logger;
 
 import static net.ice.relic.EngineState.*;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.GL_SHADING_LANGUAGE_VERSION;
 import static org.lwjgl.opengl.GL43.GL_MAX_SHADER_STORAGE_BLOCK_SIZE;
@@ -83,16 +88,11 @@ public abstract class RelicApplication implements ApplicationContext {
         window.init();
         renderer.init();
         textureCache.init();
-        setupDebugMessageCallback();
+        //setupDebugMessageCallback();
         logGLCapabilities();
         clock.init();
         changeState(LOADING);
-        currentScene = new SceneTest("test", this);
-        currentScene.setApplication(this);
-        currentScene.init();
         input.init();
-        renderer.setupData();
-
         init(this);
     }
 
@@ -101,13 +101,27 @@ public abstract class RelicApplication implements ApplicationContext {
         resume();
         while(!window.shouldClose()) {
             clock.updateTime();
-            this.currentScene.getCamera().newFrame();
-            this.currentScene.getCamera().update(clock.getDeltaTime());
-            this.currentScene.update(clock.getDeltaTime());
-            this.update(this);
-            renderer.render();
+
+            if(currentScene != null) {
+                this.currentScene.getCamera().newFrame();
+                this.currentScene.getCamera().update(clock.getDeltaTime());
+                this.currentScene.update(clock.getDeltaTime());
+                this.update(this);
+                handleGUI();
+                renderer.render();
+            }
+
             window.update();
         }
+    }
+
+    public void loadScene(Scene scene) {
+        pause();
+        this.currentScene = scene;
+        currentScene.setApplication(this);
+        currentScene.init();
+        renderer.setupData();
+        resume();
     }
 
     public void pause() {
@@ -139,6 +153,14 @@ public abstract class RelicApplication implements ApplicationContext {
             currentState = state;
             Logger.info("Application state changed to: " + currentState);
         }
+    }
+
+    private void handleGUI() {
+        ImGuiIO imGuiIO = ImGui.getIO();
+        Vector2f mousePos = input.getMousePosition();
+        imGuiIO.addMousePosEvent(mousePos.x, mousePos.y);
+        imGuiIO.addMouseButtonEvent(0, input.getMouseButtonsDown().contains(GLFW_MOUSE_BUTTON_LEFT));
+        imGuiIO.addMouseButtonEvent(1, input.getMouseButtonsDown().contains(GLFW_MOUSE_BUTTON_RIGHT));
     }
 
 

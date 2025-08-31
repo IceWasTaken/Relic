@@ -1,17 +1,17 @@
 package net.ice.relic.core.scene;
 
 import net.ice.relic.Lifecycle;
-import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.gui.Gui;
 import net.ice.relic.core.scene.light.DirectionalLight;
 import net.ice.relic.core.scene.light.PointLight;
 import net.ice.relic.core.scene.light.SpotLight;
 import net.ice.relic.core.ProjectionMatrix;
-import net.ice.relic.engine.opengl.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.model.Model;
 import net.ice.relic.core.scene.light.AmbientLight;
-import net.ice.relic.engine.opengl.model.ModelLoader;
-import net.ice.relic.engine.util.ColorUtil;
+import net.ice.relic.core.rendering.backend.opengl.model.ModelLoader;
+import net.ice.relic.common.util.ColorUtil;
 import org.joml.Vector3f;
 import org.tinylog.Logger;
 

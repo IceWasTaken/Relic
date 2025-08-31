@@ -1,6 +1,6 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.Input;
 import org.joml.Matrix4f;
@@ -23,7 +23,7 @@ public class Camera {
 
     public void update(float deltaTime) {
         if (!hasUpdated) {
-            float speed = Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) ? 200f : 20f;
+            float speed = Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) ? 20f : 5f;
             float rotateZ = 0f;
             float rotateX = 0f;
             float rotateY = 0f;

@@ -1,8 +1,8 @@
 package net.ice.relic.core.model;
 
 import net.ice.relic.core.cache.TextureCache;
-import net.ice.relic.engine.opengl.model.texture.Texture;
-import net.ice.relic.engine.util.ColorUtil;
+import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
+import net.ice.relic.common.util.ColorUtil;
 import org.lwjgl.assimp.AIColor4D;
 import org.lwjgl.assimp.AIMaterial;
 import org.lwjgl.assimp.AIString;
@@ -57,11 +57,11 @@ public class Material {
     private String specularMapPath;
     private String AOMapPath;
 
-    private Texture texture;
-    private Texture normalMap;
-    private Texture emissiveMap;
-    private Texture specularMap;
-    private Texture AOMap;
+    private GLTexture texture;
+    private GLTexture normalMap;
+    private GLTexture emissiveMap;
+    private GLTexture specularMap;
+    private GLTexture AOMap;
 
     public Material() {
         this.ambientColor = DEFAULT_COLOR;
@@ -108,7 +108,7 @@ public class Material {
             String texturePath = aiTexturePath.dataString();
             if (!texturePath.isEmpty()) {
                 material.setTexturePath(directory + File.separator + "textures/" + new File(texturePath).getName());
-                Texture texture = textureCache.createTexture(material.getTexturePath());
+                GLTexture texture = textureCache.createTexture(material.getTexturePath());
                 material.setDiffuseColor(Material.DEFAULT_COLOR);
                 material.setTexture(texture);
             }
@@ -163,15 +163,15 @@ public class Material {
 
     public int getMaterialIndex() { return materialIndex; }
 
-    public Texture getTexture() { return texture; }
-    public Texture getNormalMap() { return normalMap; }
-    public Texture getEmissiveMap() {
+    public GLTexture getTexture() { return texture; }
+    public GLTexture getNormalMap() { return normalMap; }
+    public GLTexture getEmissiveMap() {
         return emissiveMap;
     }
-    public Texture getSpecularMap() {
+    public GLTexture getSpecularMap() {
         return specularMap;
     }
-    public Texture getAOMap() {
+    public GLTexture getAOMap() {
         return AOMap;
     }
 
@@ -223,15 +223,15 @@ public class Material {
 
     public void setMaterialIndex(int materialIndex) { this.materialIndex = materialIndex; }
 
-    public void setTexture(Texture texture) { this.texture = texture; }
-    public void setNormalMap(Texture normalMap) { this.normalMap = normalMap; }
-    public void setEmissiveMap(Texture emissiveMap) {
+    public void setTexture(GLTexture texture) { this.texture = texture; }
+    public void setNormalMap(GLTexture normalMap) { this.normalMap = normalMap; }
+    public void setEmissiveMap(GLTexture emissiveMap) {
         this.emissiveMap = emissiveMap;
     }
-    public void setSpecularMap(Texture specularMap) {
+    public void setSpecularMap(GLTexture specularMap) {
         this.specularMap = specularMap;
     }
-    public void setAOMap(Texture AOMap) {
+    public void setAOMap(GLTexture AOMap) {
         this.AOMap = AOMap;
     }
 }

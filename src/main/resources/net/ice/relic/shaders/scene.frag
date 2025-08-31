@@ -64,4 +64,5 @@ void main() {
     buffAlbedo = vec4(diffuse.xyz, material.reflectance);
     buffNormal = vec4(0.5 * normal + 0.5, 1.0);
     buffSpecular = specular;
+
 }

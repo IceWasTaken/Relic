@@ -1,6 +1,6 @@
 package net.ice.relic.core;
 
-import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.common.annotations.Rewrite;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

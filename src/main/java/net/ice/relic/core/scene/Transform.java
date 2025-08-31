@@ -33,11 +33,13 @@ public class Transform {
         return position;
     }
     public Transform setPosition(Vector3f position) {
-        this.position = position;
+        position.set(position);
+        update();
         return this;
     }
     public Transform setPosition(float x, float y, float z) {
-        this.position.set(x, y, z);
+        position.set(x, y, z);
+        update();
         return this;
     }
 

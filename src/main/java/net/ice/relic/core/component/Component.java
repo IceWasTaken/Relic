@@ -6,7 +6,7 @@ public abstract class Component {
 
     private boolean active;
 
-    private SceneObject attachedObject;
+    protected SceneObject attachedObject;
 
     public Component() {
     }

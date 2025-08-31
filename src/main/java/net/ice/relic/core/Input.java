@@ -1,4 +1,6 @@
 package net.ice.relic.core;
+import imgui.ImGui;
+import imgui.ImGuiIO;
 import net.ice.relic.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import org.joml.Vector2f;
@@ -10,6 +12,7 @@ import org.lwjgl.glfw.GLFWScrollCallback;
 import java.util.HashSet;
 import java.util.Set;
 
+import static net.ice.relic.core.rendering.GuiRenderer.getImKey;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Input implements Lifecycle {
@@ -49,6 +52,16 @@ public class Input implements Lifecycle {
                     keysDown.add(key);
                 } else if(action == GLFW_RELEASE) {
                     keysDown.remove(key);
+                }
+
+                ImGuiIO io = ImGui.getIO();
+                if (!io.getWantCaptureKeyboard()) {
+                    return;
+                }
+                if (action == GLFW_PRESS) {
+                    io.addKeyEvent(getImKey(key), true);
+                } else if (action == GLFW_RELEASE) {
+                    io.addKeyEvent(getImKey(key), false);
                 }
             }
         });

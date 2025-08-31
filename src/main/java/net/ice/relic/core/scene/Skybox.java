@@ -1,9 +1,9 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.annotations.Rewrite;
+import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.core.model.Material;
 import net.ice.relic.core.model.MeshData;
-import net.ice.relic.engine.opengl.model.*;
+import net.ice.relic.core.rendering.backend.opengl.model.*;
 import org.joml.Vector3f;
 
 @Rewrite

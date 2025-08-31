@@ -1,8 +1,8 @@
 package net.ice.glyph;
 
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.modding.IMod;
-import net.ice.relic.modding.ModData;
+import net.ice.relic.core.modding.IMod;
+import net.ice.relic.core.modding.ModData;
 
 public class Glyph implements IMod {
 

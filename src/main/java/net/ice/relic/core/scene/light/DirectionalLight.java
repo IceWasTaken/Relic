@@ -1,6 +1,6 @@
 package net.ice.relic.core.scene.light;
 
-import net.ice.relic.engine.util.ColorUtil;
+import net.ice.relic.common.util.ColorUtil;
 import org.joml.Vector3f;
 
 public class DirectionalLight {
