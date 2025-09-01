@@ -275,8 +275,126 @@ public class GuiBuilderConfig {
         }
     }
     public static class Controls {
-        private boolean save(String file, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {}
-        private boolean load(String file, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs, int[] theIds) {}
+        private boolean save(String fileName, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {
+            File file = new File(fileName);
+            if(file.exists()) {
+                file.delete();
+            }
+            try(BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                for(GuiBuilderClasses.Form form : forms) {
+                    writer.write("#forms\n");
+                    writer.write(form.id + "," + form.name + "," + form.size.x + "," + form.size.y + "\n");
+                    for(GuiBuilderClasses.Child child : form.child) {
+                        writer.write("#child\n");
+                        writer.write(child.id + "," + child.father + "," + child.name + "," + child.size.x + "," + child.size.y + "," + child.pos.x + "," + child.pos.y + "\n");
+                    }
+                    for(GuiBuilderClasses.BasicOBJ obj : objs) {
+                        if ( form.id == obj.form )
+                        {
+                            writer.write("#obj\n");
+                            writer.write(obj.id + "," + obj.form + "," + obj.child + "," + obj.name + "," + obj.myType + "," + obj.size.x + "," + obj.size.y + "," + obj.pos.x + "," + obj.pos.y + "\n");
+                        }
+                    }
+                }
+                writer.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                return false;
+            }
+            return checkFileExists(fileName);
+        }
+        private boolean loadControls(String file, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs, int[] last_ids) {
+            if (last_ids == null) return false;
+
+            try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                if(reader.ready()) {
+                    String line;
+                    var menu = 0;
+
+                    while((line = reader.readLine()) != null) {
+                        GuiBuilderClasses.Form formLoad = new GuiBuilderClasses.Form();
+                        GuiBuilderClasses.Child childLoad = new GuiBuilderClasses.Child();
+                        GuiBuilderClasses.BasicOBJ objLoad = new GuiBuilderClasses.BasicOBJ();
+
+                        if(!line.equals("#forms")) {
+                            menu = 0;
+                            continue;
+                        }
+                        if (!line.equals("#child")) {
+                            menu = 1;
+                            continue;
+                        }
+                        if (!line.equals("#obj")) {
+                            menu = 2;
+                            continue;
+                        }
+                        if(!line.isEmpty()) {
+                            menu = 5;
+                            continue;
+                        }
+
+                        var varString = line.split(",");
+                        switch(menu) {
+                            case 0 -> {
+                                formLoad.id = Integer.parseInt(varString[0]);
+                                last_ids[0]			= formLoad.id;
+                                //id_ = form_load.id;
+                                formLoad.name = varString[ 1 ];
+                                formLoad.size.x	= Float.parseFloat(varString[2]);
+                                formLoad.size.y	= Float.parseFloat(varString[3]);
+
+                                forms.addLast(formLoad);
+
+                                System.out.println( "Loading form\n" );
+                                break;
+                            }
+                            case 1 -> {
+                                childLoad.id = Integer.parseInt(varString[0]);
+                                last_ids[1] = childLoad.id;
+                                //child_id = child_load.id;
+                                childLoad.father	= Integer.parseInt(varString[1]);
+                                childLoad.name		= varString[2];
+                                childLoad.size.x	= Float.parseFloat(varString[3]);
+                                childLoad.size.y	= Float.parseFloat(varString[4]);
+                                childLoad.pos.x	= Float.parseFloat(varString[5]);
+                                childLoad.pos.y	= Float.parseFloat(varString[6]);
+                                forms.get(childLoad.father).child.addLast(childLoad);
+
+                                System.out.println( "Loading child\n" );
+                                break;
+                            }
+                            case 2 -> {
+                                objLoad.id = Integer.parseInt(varString[0]);
+                                last_ids[2] = objLoad.id;
+                                //obj_id = obj_load.id;
+                                objLoad.form = Integer.parseInt(varString[1]);
+                                objLoad.child = Integer.parseInt(varString[2]);
+                                objLoad.name = varString[3];
+                                objLoad.myType = Integer.parseInt(varString[4]);
+                                objLoad.size.x = Float.parseFloat(varString[5]);
+                                objLoad.size.y = Float.parseFloat(varString[6]);
+                                objLoad.pos.x = Float.parseFloat(varString[7]);
+                                objLoad.pos.y = Float.parseFloat(varString[8]);
+
+                                objs.addLast(objLoad);
+
+                                System.out.println("Loading obj\n");
+                                break;
+                            }
+                            default -> {
+                                break;
+                            }
+                        }
+                    }
+                    reader.close();
+                    return true;
+                }
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                return false;
+            }
+            return false;
+        }
         private boolean createCode(String fileName, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {
             int fctn = 0;
             StringBuilder fileBuilder = new StringBuilder(
@@ -308,7 +426,7 @@ public class GuiBuilderConfig {
             // Loop over forms
             for (GuiBuilderClasses.Form form : forms) {
                 fileBuilder.append("void gui_builder").append(fctn).append("() {\n");
-                fileBuilder.append("    ImGui::SetNextWindowSize({")
+                fileBuilder.append("    setNextWindowSize({")
                         .append((int) form.size.x).append(".f,")
                         .append((int) form.size.y).append(".f});\n");
                 fileBuilder.append("    ImGui::Begin(\"").append(form.name).append("\");\n");
@@ -328,7 +446,7 @@ public class GuiBuilderConfig {
                         if (obj.child == chl.id) {
                             if (writerChild == 0) {
                                 coutChild++;
-                                fileBuilder.append("    ImGui::SetCursorPos({")
+                                fileBuilder.append("    setCursorPos({")
                                         .append((int) chl.pos.x).append(".f,")
                                         .append((int) chl.pos.y).append(".f});\n");
                                 fileBuilder.append("    ImGui::BeginChild(\"").append(chl.name).append("\",{")
@@ -337,7 +455,7 @@ public class GuiBuilderConfig {
                             }
 
                             if (obj.child == chl.id && obj.form == form.id && chl.father == form.id) {
-                                fileBuilder.append("    ImGui::SetCursorPos({")
+                                fileBuilder.append("    setCursorPos({")
                                         .append((int) obj.pos.x).append(".f,")
                                         .append((int) obj.pos.y).append(".f});\n");
 
@@ -357,12 +475,12 @@ public class GuiBuilderConfig {
                                     }
                                     case 4 -> {
                                         fileBuilder.append("    ImGui::PushItemWidth(").append(obj.size.x).append(");\n");
-                                        fileBuilder.append("    ImGui::SliderInt(\"").append(obj.name).append("\", &valueI, 0, 100);\n");
+                                        fileBuilder.append("    sliderInt(\"").append(obj.name).append("\", &valueI, 0, 100);\n");
                                         fileBuilder.append("    ImGui::PopItemWidth();\n\n");
                                     }
                                     case 5 -> {
                                         fileBuilder.append("    ImGui::PushItemWidth(").append(obj.size.x).append(");\n");
-                                        fileBuilder.append("    ImGui::SliderFloat(\"").append(obj.name).append("\", &valueF, 0, 100);\n");
+                                        fileBuilder.append("    sliderFloat(\"").append(obj.name).append("\", &valueF, 0, 100);\n");
                                         fileBuilder.append("    ImGui::PopItemWidth();\n\n");
                                     }
                                     case 6 -> fileBuilder.append("    ImGui::Checkbox(\"").append(obj.name).append("\", &the_bool);\n");
@@ -384,7 +502,7 @@ public class GuiBuilderConfig {
 
                     // Obj without child
                     if (obj.child == -1 && obj.form == form.id) {
-                        fileBuilder.append("    ImGui::SetCursorPos({")
+                        fileBuilder.append("    setCursorPos({")
                                 .append((int) obj.pos.x).append(".f,")
                                 .append((int) obj.pos.y).append(".f});\n");
 
@@ -404,12 +522,12 @@ public class GuiBuilderConfig {
                             }
                             case 4 -> {
                                 fileBuilder.append("    ImGui::PushItemWidth(").append(obj.size.x).append(");\n");
-                                fileBuilder.append("    ImGui::SliderInt(\"").append(obj.name).append("\", &valueI, 0, 100);\n");
+                                fileBuilder.append("    sliderInt(\"").append(obj.name).append("\", &valueI, 0, 100);\n");
                                 fileBuilder.append("    ImGui::PopItemWidth();\n");
                             }
                             case 5 -> {
                                 fileBuilder.append("    ImGui::PushItemWidth(").append(obj.size.x).append(");\n");
-                                fileBuilder.append("    ImGui::SliderFloat(\"").append(obj.name).append("\", &valueF, 0, 100);\n");
+                                fileBuilder.append("    liderFloat(\"").append(obj.name).append("\", &valueF, 0, 100);\n");
                                 fileBuilder.append("    ImGui::PopItemWidth();\n");
                             }
                             case 6 -> fileBuilder.append("    ImGui::Checkbox(\"").append(obj.name).append("\", &the_bool);\n");
@@ -437,140 +555,4 @@ public class GuiBuilderConfig {
             return checkFileExists(fileName);
         }
     }
-
-    private boolean loadControls(String file, std::vector<form> & forms, std::vector<basic_obj> & objs, int * last_ids )
-    {
-        if ( !last_ids ) return false;
-
-        std::ifstream f_read( file );
-        if ( f_read.is_open( ) )
-        {
-            std::string line;
-            auto menu = 0;
-
-            while ( !f_read.eof( ) )
-            {
-                form		form_load;
-                child		child_load;
-                basic_obj	obj_load;
-
-                std::getline( f_read, line );
-                if ( !line.compare( "#forms" ) )
-                {
-                    menu = 0;
-                    continue;
-                }
-                if ( !line.compare( "#child" ) )
-                {
-                    menu = 1;
-                    continue;
-                }
-                if ( !line.compare( "#obj" ) )
-                {
-                    menu = 2;
-                    continue;
-                }
-                if ( !line.compare( "" ) )
-                {
-                    menu = 5;
-                    continue;
-                }
-
-                // VAR STRING
-                auto vstr = utils::split( line, ',' );
-                switch ( menu )
-                {
-                    case 0:
-
-                        form_load.id		= std::stoi( vstr[ 0 ] );
-                        last_ids[0]			= form_load.id;
-                        //id_ = form_load.id;
-                        form_load.name		= vstr[ 1 ];
-                        form_load.size.x	= std::stof( vstr[ 2 ] );
-                        form_load.size.y	= std::stof( vstr[ 3 ] );
-
-                        forms.push_back( form_load );
-
-                        printf( "Loading form\n" );
-                        break;
-
-                    case 1:
-                        child_load.id		= std::stoi( vstr[ 0 ] );
-                        last_ids[ 1 ]		= child_load.id;
-                        //child_id = child_load.id;
-                        child_load.father	= std::stoi( vstr[ 1 ] );
-                        child_load.name		= vstr[ 2 ];
-                        child_load.size.x	= std::stof( vstr[ 3 ] );
-                        child_load.size.y	= std::stof( vstr[ 4 ] );
-                        child_load.pos.x	= std::stof( vstr[ 5 ] );
-                        child_load.pos.y	= std::stof( vstr[ 6 ] );
-                        forms[ child_load.father ].child.push_back( child_load );
-
-                        printf( "Loading child\n" );
-                        break;
-
-                    case 2:
-                        obj_load.id			= std::stoi( vstr[ 0 ] );
-                        last_ids[ 2 ]		= obj_load.id;
-                        //obj_id = obj_load.id;
-                        obj_load.form		= std::stoi( vstr[ 1 ] );
-                        obj_load.child		= std::stoi( vstr[ 2 ] );
-                        obj_load.name		= vstr[ 3 ];
-                        obj_load.my_type	= std::stoi( vstr[ 4 ] );
-                        obj_load.size.x		= std::stof( vstr[ 5 ] );
-                        obj_load.size.y		= std::stof( vstr[ 6 ] );
-                        obj_load.pos.x		= std::stof( vstr[ 7 ] );
-                        obj_load.pos.y		= std::stof( vstr[ 8 ] );
-
-                        objs.push_back( obj_load );
-
-                        printf( "Loading obj\n" );
-                        break;
-                    default:
-
-                        break;
-                }
-            }
-            f_read.close( );
-            return true;
-        }
-        return false;
-    }
-
-    private boolean saveControls( std::string& file, std::vector<form> forms, std::vector<basic_obj> objs )
-    {
-        remove( file.c_str( ) );
-        std::ofstream f_write( file );
-
-        if ( f_write.is_open( ) )
-        {
-            for ( const auto& form : forms )
-            {
-                f_write << "#forms\n";
-                f_write << form.id << "," << form.name << "," << form.size.x << "," << form.size.y << "\n";
-
-                for ( const auto& ch : form.child )
-                {
-                    f_write << "#child\n";
-                    f_write << ch.id << "," << ch.father << "," << ch.name << "," << ch.size.x << "," << ch.size.y << "," <<
-                            ch.pos.x << "," << ch.pos.y << "\n";
-                }
-
-                for ( const auto& obj : objs )
-                {
-                    if ( form.id == obj.form )
-                    {
-                        f_write << "#obj\n";
-                        f_write << obj.id << "," << obj.form << "," << obj.child << "," << obj.name << "," << obj.my_type <<
-                                "," << obj.size.x << "," << obj.size.y << "," << obj.pos.x << "," << obj.pos.y << "\n";
-                    }
-                }
-            }
-
-            f_write.close( );
-        }
-        return checkFileExists(file);
-    }
-
-
 }

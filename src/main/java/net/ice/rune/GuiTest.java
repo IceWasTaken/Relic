@@ -17,7 +17,7 @@ import static imgui.flag.ImGuiCol.Text;
 import static imgui.flag.ImGuiColorEditFlags.*;
 import static imgui.flag.ImGuiInputTextFlags.*;
 import static imgui.flag.ImGuiStyleVar.*;
-import static imgui.flag.ImGuiWindowFlags.AlwaysAutoResize;
+import static imgui.flag.ImGuiWindowFlags.AlwaysvarResize;
 import static net.ice.rune.GuiTest.palette.*;
 
 public class GuiTest implements Gui {
