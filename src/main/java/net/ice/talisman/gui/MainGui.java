@@ -5,6 +5,7 @@ import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiTableFlags;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.gui.Gui;
+import net.ice.talisman.gui.builder.GuiBuilder;
 import net.ice.talisman.io.Drive;
 import net.ice.talisman.util.FileUtil;
 
@@ -17,6 +18,7 @@ import static imgui.flag.ImGuiTableFlags.*;
 public class MainGui implements Gui {
 
     private final FilePickerGUI filePickerGUI;
+    private final GuiBuilder guiBuilder;
 
     private boolean borders = true;
     private boolean bordersOuter = true;
@@ -30,9 +32,11 @@ public class MainGui implements Gui {
     private boolean contextMenuInBody = true;
 
     private boolean openFilePicker = false;
+    private boolean openGuiBuilder = false;
 
-    public MainGui() {
+    public MainGui(RelicApplication application) {
         this.filePickerGUI = new FilePickerGUI();
+        this.guiBuilder = new GuiBuilder(application);
     }
 
     @Override
@@ -42,8 +46,9 @@ public class MainGui implements Gui {
 
         mainBar();
         fileWindow();
+        guiBuilder();
 
-        showDemoWindow();
+        //showDemoWindow();
         endFrame();
         render();
     }
@@ -84,6 +89,11 @@ public class MainGui implements Gui {
 
                 endMenu();
             }
+
+            if(beginMenu("Tools")) {
+                if(menuItem("GUI Builder")) { openGuiBuilder = true; }
+                endMenu();
+            }
             endMainMenuBar();
         }
     }
@@ -109,6 +119,12 @@ public class MainGui implements Gui {
         if(openFilePicker) {
             filePickerGUI.onOpen();
             filePickerGUI.draw(calculateFlags());
+        }
+    }
+
+    private void guiBuilder() {
+        if(openGuiBuilder) {
+            guiBuilder.draw();
         }
     }
 }

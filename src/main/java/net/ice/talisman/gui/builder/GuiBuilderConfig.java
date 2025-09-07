@@ -3,6 +3,8 @@ package net.ice.talisman.gui.builder;
 import imgui.ImGuiStyle;
 import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
+import imgui.type.ImString;
+import net.ice.talisman.gui.builder.objs.Form;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ public class GuiBuilderConfig {
     }
 
     public static class WindowFlags {
-        private boolean load(String style, ImGuiStyle guiStyle) {
+        public static boolean loadFlags(String style, ImGuiStyle guiStyle) {
             try (BufferedReader reader = new BufferedReader(new FileReader(style))) {
                 String line;
                 int fileIndex = 0;
@@ -103,7 +105,7 @@ public class GuiBuilderConfig {
             }
         }
 
-        private boolean save(String style, ImGuiStyle guiStyle) {
+        public static boolean saveFlags(String style, ImGuiStyle guiStyle) {
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(style))) {
                 writer.write(guiStyle.getWindowPadding().x + "," + guiStyle.getWindowPadding().y + "\n");
                 writer.write(guiStyle.getFramePadding().x + "," + guiStyle.getFramePadding().y + "\n");
@@ -144,7 +146,7 @@ public class GuiBuilderConfig {
             return checkFileExists( style );
         }
 
-        private void toClipboard(ImGuiStyle guiStyle) {
+        public static void flagsToClipboard(ImGuiStyle guiStyle) {
             logToClipboard();
 
             logText("namespace ImGui {\n void CustomStyle() {\n");
@@ -192,8 +194,7 @@ public class GuiBuilderConfig {
         }
     }
     public static class Color {
-
-        private boolean saveColor(String style, ImGuiStyle guiStyle)
+        public static boolean saveColors(String style, ImGuiStyle guiStyle)
         {
             File file = new File(style);
             if (file.exists()) {
@@ -212,7 +213,7 @@ public class GuiBuilderConfig {
             return checkFileExists(style);
         }
 
-        private boolean loadColor(String style, ImGuiStyle guiStyle) {
+        public static boolean loadColors(String style, ImGuiStyle guiStyle) {
             File file = new File(style);
 
             if (!file.exists()) {
@@ -243,7 +244,7 @@ public class GuiBuilderConfig {
             }
         }
 
-        private void colorsToClipboard(ImGuiStyle guiStyle )
+        public static void colorsToClipboard(ImGuiStyle guiStyle )
         {
             logToClipboard();
 
@@ -269,28 +270,27 @@ public class GuiBuilderConfig {
             logFinish();
         }
 
-        private ImVec4[] getColor()
+        public static ImVec4[] getSavedColors()
         {
             return savedStyle.getColors();
         }
     }
     public static class Controls {
-        private boolean save(String fileName, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {
+        public static boolean saveControls(String fileName, List<Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {
             File file = new File(fileName);
             if(file.exists()) {
                 file.delete();
             }
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                for(GuiBuilderClasses.Form form : forms) {
+                for(Form form : forms) {
                     writer.write("#forms\n");
-                    writer.write(form.id + "," + form.name + "," + form.size.x + "," + form.size.y + "\n");
-                    for(GuiBuilderClasses.Child child : form.child) {
+                    writer.write(form.getID() + "," + form.getName() + "," + form.getSize().x + "," + form.getSize().y + "\n");
+                    for(GuiBuilderClasses.Child child : form.getChildren()) {
                         writer.write("#child\n");
                         writer.write(child.id + "," + child.father + "," + child.name + "," + child.size.x + "," + child.size.y + "," + child.pos.x + "," + child.pos.y + "\n");
                     }
                     for(GuiBuilderClasses.BasicOBJ obj : objs) {
-                        if ( form.id == obj.form )
-                        {
+                        if (form.getID() == obj.form ) {
                             writer.write("#obj\n");
                             writer.write(obj.id + "," + obj.form + "," + obj.child + "," + obj.name + "," + obj.myType + "," + obj.size.x + "," + obj.size.y + "," + obj.pos.x + "," + obj.pos.y + "\n");
                         }
@@ -303,7 +303,7 @@ public class GuiBuilderConfig {
             }
             return checkFileExists(fileName);
         }
-        private boolean loadControls(String file, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs, int[] last_ids) {
+        public static boolean loadControls(String file, List<Form> forms, List<GuiBuilderClasses.BasicOBJ> objs, int[] last_ids) {
             if (last_ids == null) return false;
 
             try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -312,7 +312,7 @@ public class GuiBuilderConfig {
                     var menu = 0;
 
                     while((line = reader.readLine()) != null) {
-                        GuiBuilderClasses.Form formLoad = new GuiBuilderClasses.Form();
+                        Form formLoad = new Form();
                         GuiBuilderClasses.Child childLoad = new GuiBuilderClasses.Child();
                         GuiBuilderClasses.BasicOBJ objLoad = new GuiBuilderClasses.BasicOBJ();
 
@@ -336,12 +336,13 @@ public class GuiBuilderConfig {
                         var varString = line.split(",");
                         switch(menu) {
                             case 0 -> {
-                                formLoad.id = Integer.parseInt(varString[0]);
-                                last_ids[0]			= formLoad.id;
+                                formLoad.setID(Integer.parseInt(varString[0]));
+                                last_ids[0]			= formLoad.getID();
                                 //id_ = form_load.id;
-                                formLoad.name = varString[ 1 ];
-                                formLoad.size.x	= Float.parseFloat(varString[2]);
-                                formLoad.size.y	= Float.parseFloat(varString[3]);
+                                formLoad.setName(varString[1]);
+                                formLoad.getSize().x = Float.parseFloat(varString[2]);
+                                formLoad.getSize().y = Float.parseFloat(varString[3]);
+
 
                                 forms.addLast(formLoad);
 
@@ -358,7 +359,7 @@ public class GuiBuilderConfig {
                                 childLoad.size.y	= Float.parseFloat(varString[4]);
                                 childLoad.pos.x	= Float.parseFloat(varString[5]);
                                 childLoad.pos.y	= Float.parseFloat(varString[6]);
-                                forms.get(childLoad.father).child.addLast(childLoad);
+                                forms.get(childLoad.father).getChildren().addLast(childLoad);
 
                                 System.out.println( "Loading child\n" );
                                 break;
@@ -369,7 +370,7 @@ public class GuiBuilderConfig {
                                 //obj_id = obj_load.id;
                                 objLoad.form = Integer.parseInt(varString[1]);
                                 objLoad.child = Integer.parseInt(varString[2]);
-                                objLoad.name = varString[3];
+                                objLoad.name = new ImString(varString[3]);
                                 objLoad.myType = Integer.parseInt(varString[4]);
                                 objLoad.size.x = Float.parseFloat(varString[5]);
                                 objLoad.size.y = Float.parseFloat(varString[6]);
@@ -395,7 +396,7 @@ public class GuiBuilderConfig {
             }
             return false;
         }
-        private boolean createCode(String fileName, List<GuiBuilderClasses.Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {
+        public static boolean createCode(String fileName, List<Form> forms, List<GuiBuilderClasses.BasicOBJ> objs) {
             int fctn = 0;
             StringBuilder fileBuilder = new StringBuilder(
                     " /* GENERATED WITH IMGUI BUILDER :) HAS " + objs.size() + " Objs & " + forms.size() + " forms */\n\n\n"
@@ -424,16 +425,16 @@ public class GuiBuilderConfig {
             }
 
             // Loop over forms
-            for (GuiBuilderClasses.Form form : forms) {
+            for (Form form : forms) {
                 fileBuilder.append("void gui_builder").append(fctn).append("() {\n");
                 fileBuilder.append("    setNextWindowSize({")
-                        .append((int) form.size.x).append(".f,")
-                        .append((int) form.size.y).append(".f});\n");
-                fileBuilder.append("    ImGui::Begin(\"").append(form.name).append("\");\n");
+                        .append((int) form.getSize().x).append(".f,")
+                        .append((int) form.getSize().y).append(".f});\n");
+                fileBuilder.append("    ImGui::Begin(\"").append(form.getName()).append("\");\n");
 
                 // Prepare child counts
                 List<Integer> xild = new ArrayList<>();
-                for (GuiBuilderClasses.Child child : form.child) {
+                for (GuiBuilderClasses.Child child : form.getChildren()) {
                     int itemOnChild = (int) objs.stream().filter(o -> o.child == child.id).count();
                     xild.add(itemOnChild);
                 }
@@ -442,7 +443,7 @@ public class GuiBuilderConfig {
                 int coutChild = -1;
 
                 for (GuiBuilderClasses.BasicOBJ obj : objs) {
-                    for (GuiBuilderClasses.Child chl : form.child) {
+                    for (GuiBuilderClasses.Child chl : form.getChildren()) {
                         if (obj.child == chl.id) {
                             if (writerChild == 0) {
                                 coutChild++;
@@ -454,7 +455,7 @@ public class GuiBuilderConfig {
                                         .append((int) chl.size.y).append(".f}, true);\n\n");
                             }
 
-                            if (obj.child == chl.id && obj.form == form.id && chl.father == form.id) {
+                            if (obj.child == chl.id && obj.form == form.getID() && chl.father == form.getID()) {
                                 fileBuilder.append("    setCursorPos({")
                                         .append((int) obj.pos.x).append(".f,")
                                         .append((int) obj.pos.y).append(".f});\n");
@@ -501,7 +502,7 @@ public class GuiBuilderConfig {
                     }
 
                     // Obj without child
-                    if (obj.child == -1 && obj.form == form.id) {
+                    if (obj.child == -1 && obj.form == form.getID()) {
                         fileBuilder.append("    setCursorPos({")
                                 .append((int) obj.pos.x).append(".f,")
                                 .append((int) obj.pos.y).append(".f});\n");

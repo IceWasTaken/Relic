@@ -8,11 +8,12 @@ public class EditorScene extends Scene {
 
     public EditorScene(String name, RelicApplication application) {
         super(name, application);
+
     }
 
     @Override
     protected void sceneInit() {
-        setGUI(new MainGui());
+        setGUI(new MainGui(application));
     }
 
     @Override

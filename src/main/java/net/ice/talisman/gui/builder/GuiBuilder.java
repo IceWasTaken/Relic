@@ -1,16 +1,55 @@
 package net.ice.talisman.gui.builder;
 
-import imgui.ImGuiStyle;
-import imgui.ImVec2;
+import imgui.*;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiKey;
+import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import imgui.type.ImString;
+import net.ice.relic.application.RelicApplication;
+import net.ice.relic.core.Input;
+import net.ice.relic.core.gui.Gui;
+import net.ice.talisman.gui.TextBox;
+import net.ice.talisman.gui.builder.objs.Form;
+import net.ice.talisman.gui.builder.objs.GuiOBJTypes;
+import net.ice.talisman.gui.builder.registry.WinRegistry;
+import org.joml.Vector2f;
+import org.lwjgl.glfw.GLFW;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static imgui.ImGui.*;
-import static imgui.extension.imguifiledialog.ImGuiFileDialog.openDialog;
+import static imgui.extension.imguifiledialog.ImGuiFileDialog.*;
+import static imgui.flag.ImGuiCol.COUNT;
+import static imgui.flag.ImGuiColorEditFlags.*;
+import static imgui.flag.ImGuiCond.Once;
 import static imgui.flag.ImGuiWindowFlags.*;
+import static imgui.flag.ImGuiWindowFlags.None;
+import static imgui.internal.ImGui.calcItemSize;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static net.ice.relic.common.util.VectorUtil.vector2fToImVec2;
+import static net.ice.talisman.gui.builder.GuiBuilderAdditional.*;
+import static net.ice.talisman.gui.builder.GuiBuilderConfig.Color.*;
+import static net.ice.talisman.gui.builder.GuiBuilderConfig.Controls.*;
+import static net.ice.talisman.gui.builder.GuiBuilderConfig.WindowFlags.*;
+import static net.ice.talisman.gui.builder.registry.WinRegistry.HKEY_CURRENT_USER;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 public class GuiBuilder {
 
@@ -22,384 +61,374 @@ public class GuiBuilder {
     private int family = 0;
     private int grandchild = -1;
     private int type = -1;
+    private boolean myFormsActive = false;
     private boolean colorMenu = false;
     private boolean styleMenu = false;
     private boolean fontMenu = false;
     private String currentItem = "";
-    private String name = "";
+    private ImString name = new ImString("");
     private ImVec2 formPos = new ImVec2();
     private ImVec2 itemSize = new ImVec2();
     private ImVec2 posOBJ = new ImVec2();
-    private List<GuiBuilderClasses.Form> forms = new ArrayList<>();
+    private ImVec2 oldPos = new ImVec2();
+    private List<Form> forms = new ArrayList<>();
     private List<GuiBuilderClasses.BasicOBJ> objs = new ArrayList<>();
     private ImGuiStyle darkStyle = new ImGuiStyle();
     private ImGuiStyle customGUIStyle = new ImGuiStyle();
+    private List<ImVec2> oldPosObjs = new ArrayList<>();
 
+    private TextBox formTextBox = new TextBox();
 
-    boolean	movingObj	= false;
+    private GuiBuilderClasses.ResizeOptions resizeOption = GuiBuilderClasses.ResizeOptions.OFF;
+
+    boolean	movingObj = false;
     boolean resizeObj = false;
+    boolean noMove = false;
+    int inResizeID = 0;
     long tickMove = 0;
+    long tickResize = 0;
 
-    class moveOBJ {
+    private RelicApplication relicApplication;
+
+    public GuiBuilder(RelicApplication relicApplication) {
+        this.relicApplication = relicApplication;
+
+        styleColorsDark(darkStyle);
+        for (int i = 0; i < COUNT; i++ )
+            customGUIStyle.getColors()[i] = darkStyle.getColors()[i];
+
+        forms.clear();
+        objs.clear();
+    }
+
+//    imgui_builder::imgui_builder( )
+//    {
+//        this->cursor.m_arrow_top_or_bottom				= LoadCursor( NULL, IDC_SIZENS );
+//        this->cursor.m_arrow_left_or_right				= LoadCursor( NULL, IDC_SIZEWE );
+//        this->cursor.m_arrow_northwest_and_southeast	= LoadCursor( NULL, IDC_SIZENWSE );
+//        this->cursor.m_arrow_northeast_and_southwest	= LoadCursor( NULL, IDC_SIZENESW );
+//        this->cursor.m_arrow_all						= LoadCursor( NULL, IDC_SIZEALL );
+//    }
+
+    class MoveOBJ {
         int index = 0;
         ImVec2 pos = new ImVec2();
     }
 
-    private String getNameType(int type)
+    private GuiOBJTypes getNameType(int type)
     {
         return switch (type) {
-            case 1 -> "button";
-            case 2 -> "label";
-            case 3 -> "edit";
-            case 4 -> "sliderI";
-            case 5 -> "sliderF";
-            case 6 -> "checkbox";
-            case 7 -> "radio";
-            case 8 -> "toggle";
-            default -> "";
+            case 1 -> GuiOBJTypes.BUTTON;
+            case 2 -> GuiOBJTypes.LABEL;
+            case 3 -> GuiOBJTypes.EDIT;
+            case 4 -> GuiOBJTypes.SLIDER_I;
+            case 5 -> GuiOBJTypes.SLIDER_F;
+            case 6 -> GuiOBJTypes.CHECKBOX;
+            case 7 -> GuiOBJTypes.RADIO;
+            case 8 -> GuiOBJTypes.TOGGLE;
+            default -> GuiOBJTypes.NONE;
         };
     }
 
-    resize_opt limit_bordering_control( ImVec2 obj_pos, ImVec2 obj_size, float thickness = 3.f )
-    {
-        var current_win_pos	= getWindowPos( );
-
-        var control_win_pos	= ImVec2( current_win_pos.x + obj_pos.x, current_win_pos.y + obj_pos.y );
-
-        var pos				= window::i( )->get_relative_cursor_pos( );
-
-        var top				= ( pos.y >= (long)( control_win_pos.y - thickness ) && pos.y <= (long)( control_win_pos.y ) );
-
-        var bottom				= ( pos.y >= (long)( control_win_pos.y + obj_size.y ) && pos.y <= (long)( control_win_pos.y + obj_size.y + thickness ) );
-
-        var left				= ( pos.x >= (long)( control_win_pos.x - thickness ) && pos.x <= (long)( control_win_pos.x ) );
-
-        var right				= ( pos.x >= (long)( control_win_pos.x + obj_size.x ) && pos.x <= (long)( control_win_pos.x + obj_size.x + thickness ) );
-
-        if ( ( bottom && right ) || ( top && left ) )
-        {
-            return ( bottom && right ) ? resize_opt::bottom_right : resize_opt::top_left;
-        }
-        else
-        if ( ( top && right ) || ( bottom && left ) )
-        {
-            return ( top && right ) ? resize_opt::top_right : resize_opt::bottom_left;
-        }
-        else
-        {
-            if ( top || bottom )
-                return ( top ) ? resize_opt::top : resize_opt::bottom;
-            else
-            if ( left || right )
-                return ( left ) ? resize_opt::left : resize_opt::right;
-
-        }
-        return resize_opt::off;
+    private GuiBuilderClasses.ResizeOptions limitBorderingControl(ImVec2 objectPos, ImVec2 objectSize) {
+       return limitBorderingControl(objectPos, objectSize, 3f);
     }
 
-    boolean isItemHovered(ImVec2 obj_pos, ImVec2 obj_size, float distance) {
+    private ImVec2 getRelativeCursorPos() {
+        return new ImVec2(relicApplication.getInput().getMousePosition().x, flipY(relicApplication.getInput().getMousePosition().y));
+    }
+
+    private float flipY(float y) {
+        return relicApplication.getWindow().getHeight() - y;
+    }
+
+    private GuiBuilderClasses.ResizeOptions limitBorderingControl(ImVec2 obj_pos, ImVec2 obj_size, float thickness) {
+        var current_win_pos	= getWindowPos( );
+
+        var control_win_pos	= new ImVec2(current_win_pos.x + obj_pos.x, current_win_pos.y + obj_pos.y);
+
+        var pos	= getRelativeCursorPos();
+
+        var top	= (pos.y >= (long)(control_win_pos.y - thickness) && pos.y <= (long)(control_win_pos.y));
+
+        var bottom = (pos.y >= (long)(control_win_pos.y + obj_size.y) && pos.y <= (long)(control_win_pos.y + obj_size.y + thickness));
+
+        var left = (pos.x >= (long)(control_win_pos.x - thickness) && pos.x <= (long)(control_win_pos.x));
+
+        var right = (pos.x >= (long)(control_win_pos.x + obj_size.x) && pos.x <= (long)(control_win_pos.x + obj_size.x + thickness));
+
+        if ((bottom && right) || (top && left))
+        {
+            return (bottom && right) ? GuiBuilderClasses.ResizeOptions.BOTTOM_RIGHT : GuiBuilderClasses.ResizeOptions.TOP_LEFT;
+        }
+        else
+        if ((top && right) || (bottom && left))
+        {
+            return (top && right) ? GuiBuilderClasses.ResizeOptions.TOP_RIGHT : GuiBuilderClasses.ResizeOptions.BOTTOM_LEFT;
+        }
+        else
+        {
+            if (top || bottom)
+                return (top) ? GuiBuilderClasses.ResizeOptions.TOP : GuiBuilderClasses.ResizeOptions.BOTTOM;
+            else
+            if (left || right)
+                return (left) ? GuiBuilderClasses.ResizeOptions.LEFT : GuiBuilderClasses.ResizeOptions.RIGHT;
+
+        }
+        return GuiBuilderClasses.ResizeOptions.OFF;
+    }
+
+    private boolean isItemHovered(ImVec2 obj_pos, ImVec2 obj_size, float distance) {
         var current_win_pos	= getWindowPos();
         var control_win_pos	= new ImVec2(current_win_pos.x + ( obj_pos.x - distance ), current_win_pos.y + ( obj_pos.y - distance ) );
-        var pos				= window::i( )->get_relative_cursor_pos( );
+        var pos	= getRelativeCursorPos();
         return ( pos.y >= control_win_pos.y && pos.y <= ( control_win_pos.y + (obj_size.y  + ( distance * 2 ) ) ) && pos.x >= control_win_pos.x && pos.x <= ( control_win_pos.x + obj_size.x + ( distance * 2 ) ) );
     }
 
-    void move_item( ImVec2& obj_pos, bool& continue_edt );
-    void move_items( std::vector<move_obj>& mto, bool& continue_edt );
-
-    imgui_builder::imgui_builder( )
-    {
-
-
-        this->cursor.m_arrow_top_or_bottom				= LoadCursor( NULL, IDC_SIZENS );
-        this->cursor.m_arrow_left_or_right				= LoadCursor( NULL, IDC_SIZEWE );
-        this->cursor.m_arrow_northwest_and_southeast	= LoadCursor( NULL, IDC_SIZENWSE );
-        this->cursor.m_arrow_northeast_and_southwest	= LoadCursor( NULL, IDC_SIZENESW );
-        this->cursor.m_arrow_all						= LoadCursor( NULL, IDC_SIZEALL );
-
-        styleColorsDark( &m_dark_style );
-        for ( auto i = 0; i < ImGuiCol_COUNT; i++ )
-            customGUIStyle.Colors[ i ] = m_dark_style.Colors[ i ];
-
-        m_forms.clear( );
-        m_objs.clear( );
-    }
-
-    /// <summary>
-/// here will show the dialogs for saving or uploading files
-/// </summary>
-///
-    void imgui_builder::draw_dialogs_save_open( )
-    {
-
-        static std::vector<std::string> dialogs_keys = {
-            "SaveProjectFileDlgKey",
-            "OpenProjectFileDlgKey",
-            "GenCodeProjectFileDlgKey",
-            "SaveColorsDlgKey",
-            "OpenColorsDlgKey",
-            "SaveFlagsDlgKey",
-            "OpenFlagsDlgKey"
-    };
-
-        var DeleteKey = [ & ] ( const std::string& keyname ) -> void {
-        HKEY hKey;
-        RegOpenKeyExA( HKEY_CURRENT_USER, NULL, 0, KEY_SET_VALUE, &hKey );
-
-        RegDeleteKeyExA( hKey, keyname.c_str( ), KEY_WOW64_64KEY, NULL );
-
-        RegCloseKey( hKey );
-    };
-
-        var SetValue = [ & ] ( const std::string& keyname, const std::string& value ) -> void {
-        DeleteKey( keyname );
-
-        HKEY hKey;
-        RegOpenKeyExA( HKEY_CURRENT_USER, NULL, 0, KEY_SET_VALUE, &hKey );
-
-        var status = RegSetValueExA( hKey, keyname.c_str( ), NULL, REG_SZ, (LPBYTE)value.c_str( ), value.size( ) + 1 );
-
-        printf_s( "RegSetValueEx: %d\n", status );
-
-        RegCloseKey( hKey );
-    };
-
-        var i = 0;
-        for ( var key : dialogs_keys )
-        {
-            if ( ImGuiFileDialog::Instance( )->Display( key.c_str(), 32, { 350.f, 300.f } ) )
-            {
-                if ( ImGuiFileDialog::Instance( )->IsOk( ) )
-                {
-                    std::string file_full_path	= ImGuiFileDialog::Instance( )->GetFilePathName( );
-                    std::string full_path		= ImGuiFileDialog::Instance( )->GetCurrentPath( );
-
-                    SetValue( "ImGuiBuilderPath", full_path );
-
-                    switch ( i )
-                    {
-                        case 0:
-                        {
-                            if ( im_config::controls::save( file_full_path, m_forms, m_objs ) )
-                            MessageBoxA( nullptr, "Project saved!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        case 1:
-                        {
-                            m_forms.clear( );
-                            m_objs.clear( );
-                            if ( im_config::controls::load( file_full_path, m_forms, m_objs, &m_id ) )
-                            MessageBoxA( nullptr, "Project loaded!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        case 2:
-                        {
-                            if ( im_config::controls::create_code( file_full_path, m_forms, m_objs ) )
-                            MessageBoxA( nullptr, "Code been generated!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        case 3:
-                        {
-                            if ( im_config::color::save( file_full_path, customGUIStyle ) )
-                            MessageBoxA( nullptr, "Colors saved!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        case 4:
-                        {
-                            if ( im_config::color::load( file_full_path, customGUIStyle ) )
-                            MessageBoxA( nullptr, "Colors loaded!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        case 5:
-                        {
-                            if ( im_config::window_flags::save( file_full_path, customGUIStyle ) )
-                            MessageBoxA( nullptr, "Flags saved!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        case 6:
-                        {
-                            if ( im_config::window_flags::load( file_full_path, customGUIStyle ) )
-                            MessageBoxA( nullptr, "Flags loaded!", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
-                            break;
-                        }
-                        default:
-                            break;
-                    }
+    private void saveConfigPath(String key, String value) {
+        // Example using Properties file
+        try {
+            Properties props = new Properties();
+            File configFile = new File("config.properties");
+            if (configFile.exists()) {
+                try (FileInputStream in = new FileInputStream(configFile)) {
+                    props.load(in);
                 }
-
-                ImGuiFileDialog::Instance( )->Close( );
             }
-            ++i;
+            props.setProperty(key, value);
+            try (FileOutputStream out = new FileOutputStream(configFile)) {
+                props.store(out, "Saved paths for ImGui Builder");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    String RegeditGetPath ( const std::string& keyname ) -> std::string {
-        HKEY hKey;
-        RegOpenKeyExA( HKEY_CURRENT_USER, NULL, 0, KEY_SET_VALUE, &hKey );
+    private void drawDialogsSaveOpen() {
+        String[] dialogKeys = {
+                "SaveProjectFileDlgKey",
+                "OpenProjectFileDlgKey",
+                "GenCodeProjectFileDlgKey",
+                "SaveColorsDlgKey",
+                "OpenColorsDlgKey",
+                "SaveFlagsDlgKey",
+                "OpenFlagsDlgKey"
+        };
 
-        char buffer[ MAX_PATH ];
-        DWORD dwBufferSize = sizeof( buffer );
+        for (int i = 0; i < dialogKeys.length; i++) {
+            String key = dialogKeys[i];
+            if (display(key, 32, 350.f, 300.f) && isOk()) {
+                String fullFilePath = ImGuiFileDialog.getFilePathName();
+                String fullPath = ImGuiFileDialog.getCurrentPath();
 
-        var status = RegQueryValueExA( hKey, keyname.c_str( ), NULL, NULL, (LPBYTE)buffer, &dwBufferSize );
+                // Save the path in config for all dialogs
+                saveConfigPath("ImGuiBuilderPath", fullPath);
 
-        RegCloseKey( hKey );
+                switch (i) {
+                    case 0:
+                        if (saveControls(fullFilePath, forms, objs))
+                            messageBoxA(null, "Project saved!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    case 1:
+                        forms.clear();
+                        objs.clear();
+                        if (loadControls(fullFilePath, forms, objs, new int[]{id}))
+                            messageBoxA(null, "Project loaded!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    case 2:
+                        if (createCode(fullFilePath, forms, objs))
+                            messageBoxA(null, "Code been generated!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    case 3:
+                        if (saveColors(fullFilePath, customGUIStyle))
+                            messageBoxA(null, "Colors saved!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    case 4:
+                        if (loadColors(fullFilePath, customGUIStyle))
+                            messageBoxA(null, "Colors loaded!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    case 5:
+                        if (saveFlags(fullFilePath, customGUIStyle))
+                            messageBoxA(null, "Flags saved!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    case 6:
+                        if (loadFlags(fullFilePath, customGUIStyle))
+                            messageBoxA(null, "Flags loaded!", "ImGui Builder", INFORMATION_MESSAGE);
+                        break;
+                    default:
+                        break;
+                }
 
-        return std::string( buffer );
+                close();
+            }
+        }
     }
 
-    /// <summary>
-/// this function is for displaying the project's flags editing window.
-/// </summary>
-    void formWindowFlag()
+    private void messageBoxA(Component parent, String text, String caption, int type) {
+        JOptionPane.showMessageDialog(parent, text, caption, type);
+    }
+
+    private String RegeditGetPath(String keyname) {
+        try {
+            return WinRegistry.readString(HKEY_CURRENT_USER, keyname, keyname);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void formWindowFlag()
     {
-        begin( "Style Window Editor", &m_style_menu );
+        begin("Style Window Editor", new ImBoolean(styleMenu));
         if ( button( "Export" ) )
         {
-            im_config::window_flags::to_clipboard( customGUIStyle );
-            MessageBoxA( nullptr, "Code exported to clipboard !", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
+            flagsToClipboard( customGUIStyle );
+            messageBoxA(null, "Code exported to clipboard !", "ImGui Builder", INFORMATION_MESSAGE);
         }
 
         sameLine( );
 
         if (button("Load"))
         {
-            openDialog("OpenFlagsDlgKey", "Open File", ".flags", RegeditGetPath( "ImGuiBuilderPath" ), "style_flags" );
+            openDialog("OpenFlagsDlgKey", "Open File", ".flags", RegeditGetPath("ImGuiBuilderPath"), "style_flags" );
         }
 
         sameLine();
         if (button("Save"))
         {
-            openDialog("SaveFlagsDlgKey", "Save File", ".flags", RegeditGetPath( "ImGuiBuilderPath" ), "style_flags" );
+            openDialog("SaveFlagsDlgKey", "Save File", ".flags", RegeditGetPath("ImGuiBuilderPath"), "style_flags" );
         }
 
         text("First");
-        if (sliderFloat( "FrameRounding", &customGUIStyle.FrameRounding, 0.0f, 12.0f, "%.0f" ) )
-        customGUIStyle.getGrabRounding() = customGUIStyle.FrameRounding;
-        // Make GrabRounding always the same value as FrameRounding
+        if (sliderFloat( "FrameRounding", new float[]{customGUIStyle.getFrameRounding()}, 0.0f, 12.0f, "%.0f" )) {
+            customGUIStyle.setGrabRounding(customGUIStyle.getFrameRounding());
+        }
         {
-            var border = (customGUIStyle.getWindowBorderSize() > 0.0f );
-            if (checkbox("WindowBorder", &border ) ) { customGUIStyle.WindowBorderSize = border ? 1.0f : 0.0f; }
+            boolean border = (customGUIStyle.getWindowBorderSize() > 0.0f);
+            if (checkbox("WindowBorder", border)) {
+                customGUIStyle.setWindowBorderSize(border ? 1.0f : 0.0f);
+            }
         }
         sameLine( );
         {
-            var border = ( customGUIStyle.FrameBorderSize > 0.0f );
-            if ( checkbox( "FrameBorder", &border ) ) { customGUIStyle.FrameBorderSize = border ? 1.0f : 0.0f; }
+            boolean border = (customGUIStyle.getFrameBorderSize() > 0.0f);
+            if (checkbox( "FrameBorder", border)) {
+                customGUIStyle.setFrameBorderSize(border ? 1.0f : 0.0f);
+            }
         }
         sameLine( );
         {
-            var border = ( customGUIStyle.PopupBorderSize > 0.0f );
-            if ( checkbox( "PopupBorder", &border ) ) { customGUIStyle.PopupBorderSize = border ? 1.0f : 0.0f; }
+            boolean border = (customGUIStyle.getPopupBorderSize() > 0.0f);
+            if (checkbox( "PopupBorder", border)) {
+                customGUIStyle.setPopupBorderSize(border ? 1.0f : 0.0f);
+            }
         }
 
         text("Main");
-        sliderFloat2( "WindowPadding",		reinterpret_cast<float*>( &customGUIStyle.WindowPadding		), 0.0f, 20.0f, "%.0f" );
-        sliderFloat2( "FramePadding",		reinterpret_cast<float*>( &customGUIStyle.FramePadding		), 0.0f, 20.0f, "%.0f" );
-        sliderFloat2( "CellPadding",			reinterpret_cast<float*>( &customGUIStyle.CellPadding		), 0.0f, 20.0f, "%.0f" );
-        sliderFloat2( "ItemSpacing",			reinterpret_cast<float*>( &customGUIStyle.ItemSpacing		), 0.0f, 20.0f, "%.0f" );
-        sliderFloat2( "ItemInnerSpacing",	reinterpret_cast<float*>( &customGUIStyle.ItemInnerSpacing	), 0.0f, 20.0f, "%.0f" );
-        sliderFloat2( "TouchExtraPadding",	reinterpret_cast<float*>( &customGUIStyle.TouchExtraPadding ), 0.0f, 10.0f, "%.0f" );
-        sliderFloat( "IndentSpacing",		&customGUIStyle.IndentSpacing,		0.0f, 30.0f, "%.0f" );
-        sliderFloat( "ScrollbarSize",		&customGUIStyle.ScrollbarSize,		1.0f, 20.0f, "%.0f" );
-        sliderFloat( "GrabMinSize",			&customGUIStyle.GrabMinSize,		1.0f, 20.0f, "%.0f" );
-        text( "Borders" );
-        sliderFloat( "WindowBorderSize",		&customGUIStyle.WindowBorderSize,	0.0f, 1.0f, "%.0f" );
-        sliderFloat( "ChildBorderSize",		&customGUIStyle.ChildBorderSize,	0.0f, 1.0f, "%.0f" );
-        sliderFloat( "PopupBorderSize",		&customGUIStyle.PopupBorderSize,	0.0f, 1.0f, "%.0f" );
-        sliderFloat( "FrameBorderSize",		&customGUIStyle.FrameBorderSize,	0.0f, 1.0f, "%.0f" );
-        sliderFloat( "TabBorderSize",		&customGUIStyle.TabBorderSize,		0.0f, 1.0f, "%.0f" );
-        text( "Rounding" );
-        sliderFloat( "WindowRounding",		&customGUIStyle.WindowRounding,		0.0f, 12.0f, "%.0f" );
-        sliderFloat( "ChildRounding",		&customGUIStyle.ChildRounding,		0.0f, 12.0f, "%.0f" );
-        sliderFloat( "FrameRounding",		&customGUIStyle.FrameRounding,		0.0f, 12.0f, "%.0f" );
-        sliderFloat( "PopupRounding",		&customGUIStyle.PopupRounding,		0.0f, 12.0f, "%.0f" );
-        sliderFloat( "ScrollbarRounding",	&customGUIStyle.ScrollbarRounding,	0.0f, 12.0f, "%.0f" );
-        sliderFloat( "GrabRounding",			&customGUIStyle.GrabRounding,		0.0f, 12.0f, "%.0f" );
-        sliderFloat( "LogSliderDeadzone",	&customGUIStyle.LogSliderDeadzone,	0.0f, 12.0f, "%.0f" );
-        sliderFloat( "TabRounding",			&customGUIStyle.TabRounding,		0.0f, 12.0f, "%.0f" );
-        ImGui::Text( "Alignment" );
-        sliderFloat2( "WindowTitleAlign",	reinterpret_cast<float*>( &customGUIStyle.WindowTitleAlign ), 0.0f, 1.0f, "%.2f" );
-        var window_menu_button_position = customGUIStyle.WindowMenuButtonPosition + 1;
-        if ( combo( "WindowMenuButtonPosition", static_cast<int*>( &window_menu_button_position ), "None\0Left\0Right\0" ) )
-        customGUIStyle.WindowMenuButtonPosition = window_menu_button_position - 1;
-        combo( "ColorButtonPosition",		static_cast<int*>( &customGUIStyle.ColorButtonPosition ), "Left\0Right\0" );
-        sliderFloat2( "ButtonTextAlign",		reinterpret_cast<float*>( &customGUIStyle.ButtonTextAlign ), 0.0f, 1.0f, "%.2f" );
-
-        sliderFloat2( "SelectableTextAlign", reinterpret_cast<float*>( &customGUIStyle.SelectableTextAlign ), 0.0f, 1.0f, "%.2f" );
-        ImGui::Text( "Safe Area Padding" );
-        sliderFloat2( "DisplaySafeAreaPadding", reinterpret_cast<float*>( &customGUIStyle.DisplaySafeAreaPadding ), 0.0f, 30.0f, "%.0f" );
+        sliderFloat2( "WindowPadding",  new float[]{customGUIStyle.getWindowPadding().x, customGUIStyle.getWindowPadding().y}, 0.0f, 20.0f, "%.0f" );
+        sliderFloat2( "FramePadding", new float[]{customGUIStyle.getFramePadding().x, customGUIStyle.getFramePadding().y}, 0.0f, 20.0f, "%.0f");
+        sliderFloat2( "CellPadding", new float[]{customGUIStyle.getCellPadding().x, customGUIStyle.getCellPadding().y}, 0.0f, 20.0f, "%.0f" );
+        sliderFloat2( "ItemSpacing", new float[]{customGUIStyle.getItemSpacing().x, customGUIStyle.getItemSpacing().y}, 0.0f, 20.0f, "%.0f" );
+        sliderFloat2( "ItemInnerSpacing", new float[]{customGUIStyle.getItemInnerSpacing().x, customGUIStyle.getItemInnerSpacing().y}, 0.0f, 20.0f, "%.0f" );
+        sliderFloat2( "TouchExtraPadding", new float[]{customGUIStyle.getTouchExtraPadding().x, customGUIStyle.getTouchExtraPadding().y}, 0.0f, 10.0f, "%.0f" );
+        sliderFloat( "IndentSpacing", new float[]{customGUIStyle.getIndentSpacing()}, 0.0f, 30.0f, "%.0f" );
+        sliderFloat( "ScrollbarSize", new float[]{customGUIStyle.getScrollbarSize()}, 1.0f, 20.0f, "%.0f" );
+        sliderFloat( "GrabMinSize",	new float[]{customGUIStyle.getGrabMinSize()}, 1.0f, 20.0f, "%.0f" );
+        text("Borders");
+        sliderFloat("WindowBorderSize", new float[]{customGUIStyle.getWindowBorderSize()}, 0.0f, 1.0f, "%.0f" );
+        sliderFloat( "ChildBorderSize", new float[]{customGUIStyle.getChildBorderSize()}, 0.0f, 1.0f, "%.0f" );
+        sliderFloat( "PopupBorderSize", new float[]{customGUIStyle.getPopupBorderSize()}, 0.0f, 1.0f, "%.0f" );
+        sliderFloat( "FrameBorderSize", new float[]{customGUIStyle.getFrameBorderSize()},  0.0f, 1.0f, "%.0f" );
+        sliderFloat( "TabBorderSize", new float[]{customGUIStyle.getTabBorderSize()}, 0.0f, 1.0f, "%.0f" );
+        text("Rounding");
+        sliderFloat("WindowRounding", new float[]{customGUIStyle.getWindowRounding()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("ChildRounding", new float[]{customGUIStyle.getChildRounding()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("FrameRounding", new float[]{customGUIStyle.getFrameRounding()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("PopupRounding", new float[]{customGUIStyle.getPopupRounding()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("ScrollbarRounding", new float[]{customGUIStyle.getScrollbarRounding()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("GrabRounding", new float[]{customGUIStyle.getGrabRounding()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("LogSliderDeadzone", new float[]{customGUIStyle.getLogSliderDeadzone()}, 0.0f, 12.0f, "%.0f" );
+        sliderFloat("TabRounding",	new float[]{customGUIStyle.getTabRounding()}, 0.0f, 12.0f, "%.0f" );
+        text("Alignment");
+        sliderFloat2( "WindowTitleAlign", new float[]{customGUIStyle.getWindowTitleAlign().x, customGUIStyle.getWindowTitleAlign().y}, 0.0f, 1.0f, "%.2f" );
+        var windowMenuButtonPosition = customGUIStyle.getWindowMenuButtonPosition() + 1;
+        if (combo( "WindowMenuButtonPosition", new ImInt(windowMenuButtonPosition), "None\0Left\0Right\0" ) ) {
+            customGUIStyle.setWindowMenuButtonPosition(windowMenuButtonPosition - 1);
+        }
+        combo( "ColorButtonPosition", new ImInt(customGUIStyle.getColorButtonPosition()), "Left\0Right\0" );
+        sliderFloat2( "ButtonTextAlign", new float[]{customGUIStyle.getButtonTextAlign().x, customGUIStyle.getButtonTextAlign().y}, 0.0f, 1.0f, "%.2f");
+        sliderFloat2( "SelectableTextAlign", new float[]{customGUIStyle.getSelectableTextAlign().x, customGUIStyle.getSelectableTextAlign().y}, 0.0f, 1.0f, "%.2f");
+        text( "Safe Area Padding" );
+        sliderFloat2("DisplaySafeAreaPadding", new float[]{customGUIStyle.getDisplaySafeAreaPaddingX(), customGUIStyle.getDisplaySafeAreaPaddingY()}, 0.0f, 30.0f, "%.0f" );
 
         end( );
     }
 
-    void imgui_builder::form_color_editor( )
+    private void formColorEditor( )
     {
-        var& style = ImGui::GetStyle( );
+        ImGuiStyle style = getStyle();
 
-        setNextWindowSize( { 400.f, 500.f }, ImGuiCond_Once );
+        setNextWindowSize(400.f, 500.f, Once);
 
-        begin( "Gui Builder color export/import ", &m_color_menu );
+        begin("Gui Builder color export/import ", new ImBoolean(colorMenu));
 
         if ( button( "Export" ) )
         {
-            im_config::color::to_clipboard( customGUIStyle );
-            MessageBoxA( nullptr, "Code exported to clipboard !", "ImGui Builder", MB_OK | MB_ICONINFORMATION );
+            colorsToClipboard(customGUIStyle);
+            messageBoxA(null, "Code exported to clipboard !", "ImGui Builder", INFORMATION_MESSAGE);
         }
 
-        sameLine( );
+        sameLine();
 
         if ( button( "Load" ) )
         {
-            ImGuiFileDialog::Instance( )->OpenDialog( "OpenColorsDlgKey", "Open File", ".colors", RegeditGetPath( "ImGuiBuilderPath" ), "style_colors" );
+            openDialog( "OpenColorsDlgKey", "Open File", ".colors", RegeditGetPath( "ImGuiBuilderPath" ), "style_colors" );
         }
 
-        sameLine( );
+        sameLine();
         if ( button( "Save" ) )
         {
-            ImGuiFileDialog::Instance( )->OpenDialog( "SaveColorsDlgKey", "Save File", ".colors", RegeditGetPath( "ImGuiBuilderPath" ), "style_colors" );
+            openDialog( "SaveColorsDlgKey", "Save File", ".colors", RegeditGetPath( "ImGuiBuilderPath" ), "style_colors" );
         }
 
 
-        static ImGuiTextFilter filter;
-        filter.Draw( "Filter colors", ImGui::GetFontSize( ) * 16 );
+        ImGuiTextFilter filter = new ImGuiTextFilter();
+        filter.draw("Filter colors", getFontSize() * 16);
 
-        static var alpha_flags = 0;
-        if ( radioButton( "Opaque", alpha_flags == ImGuiColorEditFlags_None ) )
-        alpha_flags = ImGuiColorEditFlags_None;
-
-
-        sameLine( );
-        if ( radioButton( "Alpha", alpha_flags == ImGuiColorEditFlags_AlphaPreview ) )
-        alpha_flags = ImGuiColorEditFlags_AlphaPreview;
+        int alpha_flags = 0;
+        if ( radioButton( "Opaque", alpha_flags == None)) alpha_flags = None;
 
 
-        sameLine( );
-        if ( radioButton( "Both", alpha_flags == ImGuiColorEditFlags_AlphaPreviewHalf ) )
-        alpha_flags = ImGuiColorEditFlags_AlphaPreviewHalf;
+        sameLine();
+        if ( radioButton( "Alpha", alpha_flags == AlphaPreview)) alpha_flags = AlphaPreview;
 
 
-        beginChild( "##colors", ImVec2( 0, 0 ), true,
-            ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar |
-                    ImGuiWindowFlags_NavFlattened );
+        sameLine();
+        if ( radioButton( "Both", alpha_flags == AlphaPreviewHalf)) alpha_flags = AlphaPreviewHalf;
+
+
+        beginChild( "##colors", new ImVec2(0, 0), true, AlwaysVerticalScrollbar | AlwaysHorizontalScrollbar | NavFlattened );
 
         pushItemWidth( -160 );
-        for ( var i = 0; i < ImGuiCol_COUNT; i++ )
-        {
-		const var* name = ImGui::GetStyleColorName( i );
-            //std::cout << "Name: " << name << " Index: " << i << std::endl;
-            if ( !filter.PassFilter( name ) )
+        for ( var i = 0; i < COUNT; i++ ) {
+		    String name = getStyleColorName(i);
+
+            if (!filter.passFilter(name)) {
                 continue;
-            pushID( i );
-            colorEdit4( "##color", reinterpret_cast<float*>( &customGUIStyle.Colors[ i ] ),
-            ImGuiColorEditFlags_AlphaBar | alpha_flags );
-            if ( memcmp( &customGUIStyle.Colors[ i ], &im_config::color::saved_colors()[ i ], sizeof( ImVec4 ) ) != 0 )
-            {
-                sameLine( 0.0f, style.ItemInnerSpacing.x );
-                if ( button( "Save" ) ) { im_config::color::saved_colors( )[ i ] = customGUIStyle.Colors[ i ]; }
-                sameLine( 0.0f, style.ItemInnerSpacing.x );
-                if ( button( "Revert" ) ) { customGUIStyle.Colors[ i ] = im_config::color::saved_colors( )[ i ]; }
             }
-            sameLine( 0.0f, style.ItemInnerSpacing.x );
-            ImGui::TextUnformatted( name );
+            pushID( i );
+            colorEdit4("##color", new float[]{customGUIStyle.getColors()[i].x, customGUIStyle.getColors()[i].y, customGUIStyle.getColors()[i].z, customGUIStyle.getColors()[i].w}, AlphaBar | alpha_flags );
+            if (!customGUIStyle.getColors()[i].equals(getSavedColors()[i])) {
+                sameLine(0.0f, style.getItemInnerSpacing().x);
+                if (button( "Save")) {
+                    getSavedColors()[i] = customGUIStyle.getColors()[i];
+                }
+                sameLine(0.0f, style.getItemInnerSpacing().x);
+                if (button( "Revert" )) {
+                    customGUIStyle.getColors()[i] = getSavedColors()[i];
+                }
+            }
+            sameLine( 0.0f, style.getItemInnerSpacing().x );
+            textUnformatted(name);
             popID( );
         }
         popItemWidth( );
@@ -409,66 +438,59 @@ public class GuiBuilder {
     }
 
 
+
+
     void formFontEditor( )
     {
-        begin( "Font Editor", &m_font_menu);
+        begin( "Font Editor", new ImBoolean(fontMenu));
 
         if (button("Import font from file")) {
 
         }
 
-        text("Current font: " + "123")).c_str( ) );
+        text("Current font: " + "123");
 
         end();
     }
 
-
-    private void draw() {
-        pushAllColorsDark( m_dark_style );
+    public void draw() {
+        pushAllColorsDark(darkStyle);
         int width = 1280;
-        RECT rect;
-        if ( GetWindowRect( window::i()->get_win32_window(), &rect ) )
-        {
-            width = rect.right - rect.left;
-        }
 
-        draw_dialogs_save_open( );
+        drawDialogsSaveOpen();
 
         if (colorMenu)
-            form_color_editor();
+            formColorEditor();
 
         if (styleMenu)
-            form_window_flag( );
+            formWindowFlag();
 
         if (fontMenu)
-            form_font_editor( );
+            formFontEditor();
 
-        paste_obj( );
+        pasteOBJ();
 
-        setNextWindowSize( { static_cast<float>( width - 16 ), 100 } );
-        setNextWindowPos( { 0, 0 } );
+        setNextWindowSize(( width - 16 ), 100);
+        setNextWindowPos(0, 0);
         begin( "BUILDER", null, NoBringToFrontOnFocus | MenuBar);
-        m_my_forms_active = isWindowFocused();
+        myFormsActive = isWindowFocused();
         if (beginMenuBar()) {
             if (beginMenu( "Project")){
                 if (menuItem("Save")) {
                     openDialog( "SaveProjectFileDlgKey", "Save File", ".builder", RegeditGetPath( "ImGuiBuilderPath" ), "project" );
                 }
 
-                if ( menuItem( "Open" ) )
-                {
+                if (menuItem( "Open")) {
                     openDialog( "OpenProjectFileDlgKey", "Open File", ".builder", RegeditGetPath( "ImGuiBuilderPath" ), "project" );
                 }
 
-                if ( menuItem( "Generate Code" ) )
-                {
+                if (menuItem( "Generate Code")) {
                     openDialog( "GenCodeProjectFileDlgKey", "Open File", ".cpp,.h,.hpp", RegeditGetPath( "ImGuiBuilderPath" ), "imgui_builder" );
                 }
 
-                endMenu( );
+                endMenu();
             }
-            if ( beginMenu( "Editor" ) )
-            {
+            if (beginMenu( "Editor" )) {
                 if (menuItem("Color")) {
                     colorMenu = !colorMenu;
                 }
@@ -485,8 +507,7 @@ public class GuiBuilder {
             endMenuBar();
         }
 
-        if (button("New Form"))
-        {
+        if (button("New Form")) {
             createForm();
         }
         sameLine();
@@ -527,23 +548,19 @@ public class GuiBuilder {
         }
 
         objectProperty();
-        popAllColorsCustom( );
-
+        popAllColorsCustom();
         pushAllColorsCustom(customGUIStyle);
-
         showForm();
-
-        popAllColorsCustom( );
-
-        end( );
+        popAllColorsCustom();
+        end();
     }
 
-    private void createForm( ) {
+    private void createForm() {
         id++;
-        GuiBuilderClasses.Form frm = new GuiBuilderClasses.Form();
-        frm.id = id;
-        frm.name = "form" + id;
-        frm.size = new ImVec2(50.f, 50.f);
+        Form frm = new Form();
+        frm.setID(id);
+        frm.setName("form" + id);
+        frm.setSize(50.f, 50.f);
         forms.addLast(frm);
     }
 
@@ -552,7 +569,7 @@ public class GuiBuilder {
             return;
         }
 
-        childID = forms.get(id).child.size();
+        childID = forms.get(id).getChildren().size();
         GuiBuilderClasses.Child child = new GuiBuilderClasses.Child();
         child.id = childID;
         child.name = "child" + childID;
@@ -560,76 +577,88 @@ public class GuiBuilder {
         child.border = true;
         child.size = new ImVec2(50,50);
         child.pos = new ImVec2(15,15);
-        forms.get(id).child.addLast(child);
+        forms.get(id).getChildren().addLast(child);
     }
 
-    void createObject(int type)
-    {
-        if (forms.isEmpty()) {
-            return;
+    private int childID() {
+        for (GuiBuilderClasses.Child child : forms.get(activeWindowID).getChildren()) {
+            if (child.selected) {
+                return child.id;
+            }
         }
-
-        objID++;
-        var name = getNameType(type);
-
-        name += objID;
-
-        var child_id = [ & ] ( ) -> int {
-        for ( var& chl : m_forms[ m_active_window_id ].child )
-        if ( chl.selected )
-            return chl.id;
         return -1;
-    };
-
-	const basic_obj new_obj = { m_obj_id, m_active_window_id, child_id(), name, type, { }, { 30, 30 } };
-        //form_[id_].obj_render_me.push_back(new_obj);
-        m_objs.push_back( new_obj );
     }
 
-    private void pasteOBJ( ) //NOT NEED  OVERLOAD FOR THAT!
+    private void createObject(int type) {
+        GuiBuilderClasses.BasicOBJ newObj = new GuiBuilderClasses.BasicOBJ();
+        newObj.id = objID;
+        newObj.form = activeWindowID;
+        newObj.child = childID();
+        newObj.name = name;
+        newObj.myType = type;
+        newObj.size = new ImVec2();
+        newObj.pos = new ImVec2(30, 30);
+        objs.add(newObj);
+    }
+
+    private boolean isNumber(String s) {
+        if (s == null || s.isEmpty()) return false;
+        try {
+            Double.parseDouble(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private void pasteOBJ()
     {
-        if ( m_my_forms_active ) return;
-        if ( window::i( )->pressed_bind_keys( VK_LCONTROL, 'V' )  )
-        {
-		const var* psz_text = ImGui::GetClipboardText( );
-
-		const std::string text( psz_text );
-            var m_copy = utils::split( text, '\n' );
-            ImVec2 pos = { 30, 30 };
-            for ( const auto& n_text : m_copy )
+        if (myFormsActive) return;
+        if (ImGui.isKeyDown(ImGuiKey.LeftCtrl) && ImGui.isKeyDown(ImGuiKey.V)) {
+            String clipboardText = ImGui.getClipboardText();
+            String[] splitClipboard = clipboardText.split("\n");
+            ImVec2 pos = new ImVec2(30,30);
+            for (String text : splitClipboard)
             {
-                auto o = utils::split( n_text, ',' );
+                String[] o = text.split(",");
 
-                if ( o.size( ) != 7 )
+                if (o.length != 7)
                     return;
 
-                for ( auto tx : o )
-                {
-                    if ( !utils::is_number( tx ) )
+                for (String tx : o) {
+                    if (isNumber(tx));
                     return;
                 }
 
-                auto name = get_name_type( std::stoi( o[ 0 ] ) );
+                String name = getNameType(Integer.parseInt(o[0])).getAsString();
 
-                if ( std::stoi( o[ 0 ] ) == 10 )
-                {
-                    m_child_id = static_cast<int>( m_forms[ m_active_window_id ].child.size( ) );
-                    m_forms[ m_active_window_id ].child.push_back( {
-                            m_child_id, "child" + std::to_string( m_child_id ), m_active_window_id,
-                            std::stoi( o[ 4 ] ) != 0, { std::stof( o[ 2 ] ), std::stof( o[ 3 ] ) },
-                            { std::stof( o[ 4 ] ), std::stof( o[ 5 ] ) }
-                    } );
-                    std::cout << "child obj\n";
+                if (Integer.parseInt(o[0]) == 10) {
+                    int mChildId = forms.get(activeWindowID).getChildren().size();
+
+                    GuiBuilderClasses.Child newChild = new GuiBuilderClasses.Child();
+                    newChild.id = mChildId;
+                    newChild.name = "child" + mChildId;
+                    newChild.father = activeWindowID;
+                    newChild.selected = Integer.parseInt(o[4]) != 0;
+                    newChild.pos = new ImVec2(java.lang.Float.parseFloat(o[2]), java.lang.Float.parseFloat(o[3]));
+                    newChild.size = new ImVec2(java.lang.Float.parseFloat(o[4]), java.lang.Float.parseFloat(o[5]));
+
+                    forms.get(activeWindowID).getChildren().add(newChild);
+                    System.out.println("child obj\n");
                 }
-			else if ( !name.empty( ) )
-            {
-                m_obj_id++;
-                name += std::to_string( m_obj_id );
-				const basic_obj new_obj = {
-                    m_obj_id, m_active_window_id, std::stoi( o[ 1 ] ), name, std::stoi( o[ 0 ] ), { std::stof( o[ 3 ] ), std::stof( o[ 4 ] ) },
-                    { std::stof( o[ 5 ] ), std::stof( o[ 6 ] ) }
-            };
-                m_objs.push_back( new_obj );
+			else if (!name.isEmpty()) {
+                objID++;
+                name += objID ;
+                GuiBuilderClasses.BasicOBJ newOBJ = new GuiBuilderClasses.BasicOBJ();
+                newOBJ.id = objID;
+                newOBJ.form = activeWindowID;
+                newOBJ.child = Integer.parseInt(o[1]);
+                newOBJ.name = new ImString(name);
+                newOBJ.myType = Integer.parseInt(o[0]);
+                newOBJ.size = new ImVec2(java.lang.Float.parseFloat(o[3]), java.lang.Float.parseFloat(o[4]));
+                newOBJ.pos = new ImVec2(java.lang.Float.parseFloat(o[5]), java.lang.Float.parseFloat(o[6]));
+
+                objs.addLast(newOBJ);
                 System.out.println("paste obj\n");
             }
                 pos.x += 15;
@@ -639,7 +668,7 @@ public class GuiBuilder {
     }
 
     private void copyOBJ(int type, int child, ImVec2 size, ImVec2 pos, boolean border, boolean selected, boolean pass_key_check ) {
-        if ((!m_my_forms_active && window::i( )->pressed_bind_keys(VK_CONTROL, 'C' ) ) || pass_key_check) {
+        if ((!myFormsActive && ImGui.isKeyDown(ImGuiKey.LeftCtrl) && ImGui.isKeyDown(ImGuiKey.V) || pass_key_check)) {
             String buffer = "";
             logToClipboard();
             if ( !selected ) {
@@ -664,42 +693,38 @@ public class GuiBuilder {
     }
 
     private void showForm() {
-        for (GuiBuilderClasses.Form form : forms) {
-            setNextWindowSize(form.size);
-            //	if any other obj is moving position
-            //freezer form because if obj dont have much area for hover like label form move too
-            //
+        for (Form form : forms) {
+            setNextWindowSize(vector2fToImVec2(form.getSize()));
 
-            if (form.deleteMe)
+            if (form.shouldDelete())
             {
-                deleteForm(form.id);
+                deleteForm(form.getID());
                 break;
             }
-            begin(form.name, null, movingObj ? (NoCollapse | NoMove) : (NoCollapse));
+            begin(form.getName(), null, movingObj ? (NoCollapse | NoMove) : (NoCollapse));
 
-            form.pos = getWindowPos(); // get value position form
-            form.size = getWindowSize(); // get value size form
+            form.setPos(getWindowPos());
+            form.setSize(getWindowSize());
 
-            // get propriety of form with user double click mouse
             if ( isWindowHovered( ) && isMouseDoubleClicked( 0 ) )
             {
-                name = form.name;
-                currentItem = form.name + ":" + form.id;
-                family = form.id;
+                name =  new ImString(form.getName());
+                currentItem = form.getName() + ":" + form.getID();
+                family = form.getID();
                 type = 0;
             }
-            m_my_forms_active = !isWindowFocused();
+            myFormsActive = !isWindowFocused();
             if ( isWindowFocused( ) || isWindowAppearing( ) || isWindowHovered( ) )
             {
-                activeWindowID = form.id;
+                activeWindowID = form.getID();
             }
 
             for (GuiBuilderClasses.BasicOBJ obj : objs) {
-                if ( obj.form == form.id && obj.child < 0 ) {
-                    renderOBJ(obj, form.id);
+                if ( obj.form == form.getID() && obj.child < 0 ) {
+                    renderOBJ(obj, form.getID());
                 }
             }
-            for (GuiBuilderClasses.Child container : form.child) {
+            for (GuiBuilderClasses.Child container : form.getChildren()) {
                 setCursorPos(container.pos);
 
                 if (container.deleteMe) {
@@ -713,12 +738,12 @@ public class GuiBuilder {
                         }
                     }
 
-                    form.child.erase( form.child.begin( ) + container.id );
-                    childID = form.child.size( ) - 1;
+                    form.getChildren().remove(container.id);
+                    childID = form.getChildren().size( ) - 1;
 
-                    for (int newID = container.id - 1; newID < form.child.size( ); ++newID ) {
-                        form.child.get(newID).name = ("child" + newID);
-                        form.child.get(newID).id = newID;
+                    for (int newID = container.id - 1; newID < form.getChildren().size( ); ++newID ) {
+                        form.getChildren().get(newID).name = ("child" + newID);
+                        form.getChildren().get(newID).id = newID;
                     }
                     break;
                 }
@@ -733,8 +758,8 @@ public class GuiBuilder {
                 float scrollPosY = getScrollY();
 
                 for (GuiBuilderClasses.BasicOBJ obj : objs) {
-                    if ( obj.form == form.id && obj.child == container.id ) {
-                        renderOBJ( obj, form.id );
+                    if ( obj.form == form.getID() && obj.child == container.id ) {
+                        renderOBJ( obj, form.getID());
 
                         ImVec2 oldPos = obj.pos;
 
@@ -752,70 +777,75 @@ public class GuiBuilder {
 
                 // check if selected
                 // container.hover = isItemHovered( );
-                container.hover = my_IsItemHovered( container.pos, container.size, 5.f ) && !hover;
+                container.hover = isItemHovered(container.pos, container.size, 5.f) && !hover;
                 //if ( container.hover && limit_bordering_control( container.pos, container.size, -15.f ) != resize_opt::off ) //I don't know if you were good with that
                 //	container.hover = false;
 
-                auto left_clicked = isMouseClicked( 0, false );
-                auto right_clicked = isMouseClicked( 1, false );
-                auto show_context = normal_select;
+                boolean left_clicked = isMouseClicked( 0, false );
+                boolean right_clicked = isMouseClicked( 1, false );
+                boolean show_context = normal_select;
 
                 // thats is shame but... work good....
                 if ( container.hover && ( left_clicked || right_clicked ) && show_context == false )
                 {
                     show_context = !left_clicked;
-                    if ( GetKeyState( VK_CONTROL ) & 0x8000 )
+                    if (ImGui.isKeyDown(ImGuiKey.LeftCtrl)) {
                         container.selected = !container.selected;
-                    else
-                    {
-                        for ( auto& o_obj : m_objs )
-                        o_obj.selected = false;
+                    } else {
+                        for (GuiBuilderClasses.BasicOBJ basicOBJ : objs) {
+                            basicOBJ.selected = false;
+                        }
                     }
-                    currentItem	= container.name + ':' + form.id;
+
+                    currentItem	= container.name + ':' + form.getID();
                     family = container.father;
                     index = container.id;
                     type = 10;
                 }
                 if (container.hover) {
-                    SetCursor( this->cursor.m_arrow_all );
+                    //SetCursor( this->cursor.m_arrow_all );
                 }
 
-                container.selected = ( m_current_item == ( container.name + ":" + std::to_string( form.id ) ) );
-                if ( container.selected && form.id == m_active_window_id )
-                {
-                    ImGui::DrawObjBorder( container.pos, container.size );
+                container.selected = (Objects.equals(currentItem, container.name + ":" + form.getID()));
+                if (container.selected && form.getID() == activeWindowID) {
+                    drawObjBorder(container.pos, container.size);
                 }
                 if ( !container.locked )
-                    resize_obj( container.pos, container.size, container.hover, container.selected );
+                    resizeOBJ(container.pos, container.size, container.hover, container.selected);
 
-                pushAllColorsDark( m_dark_style );
+                pushAllColorsDark(darkStyle);
 
-                if ( show_context && beginPopupContextItem( "##obj_context" ) )
-                {
-                    //style.ButtonTextAlign
-                    auto& g = *GImGui;
-                    auto backup1_y = g.Style.ButtonTextAlign.y;
-                    auto backup2_y = g.Style.FramePadding.y;
-                    g.Style.FramePadding.y = -1.3f;
-                    g.Style.ButtonTextAlign.y = 0.f;
-                    ImVec2 btn_size = { 60.f, 12.f };
-                    if ( button( "delete", btn_size ) )
-                    {
-                        container.delete_me = true;
-                        m_current_item = "";
-                        m_type = -1;
+                if (show_context && beginPopupContextItem("##obj_context")) {
+                    // Backup style values
+                    float backupBtnTextAlignY = ImGui.getStyle().getButtonTextAlign().y;
+                    float backupFramePaddingY = ImGui.getStyle().getFramePadding().y;
+
+                    // Modify style temporarily
+                    ImGui.getStyle().setFramePadding(ImGui.getStyle().getFramePaddingX(), -1.3f);
+                    ImGui.getStyle().setButtonTextAlign(ImGui.getStyle().getButtonTextAlignX(), 0f);
+
+                    ImVec2 btnSize = new ImVec2(60f, 12f);
+
+                    if (button("delete", btnSize)) {
+                        container.deleteMe = true;
+                        currentItem = "";
+                        type = -1;
                     }
-                    //if ( button( "copy", btn_size ) )
-                    //{
-                    //	copy_obj( container.my_type, obj.child, obj.size, obj.pos, false, false, true );
-                    //}
-                    checkbox( "lock", &container.locked );
-                    g.Style.ButtonTextAlign.y = backup1_y;
-                    g.Style.FramePadding.y = backup2_y;
-                    endPopup( );
+
+//                    if (button("copy", btnSize)) {
+//                        copyOBJ(obj.myType, obj.child, obj.size, obj.pos, false, false, true);
+//                    }
+
+                    checkbox("lock", container.locked);
+
+                    // Restore previous style
+                    ImGui.getStyle().setFramePadding(ImGui.getStyle().getFramePaddingX(), backupFramePaddingY);
+                    ImGui.getStyle().setButtonTextAlign(ImGui.getStyle().getButtonTextAlignX(), backupBtnTextAlignY);
+
+                    endPopup();
                 }
 
-                popAllColorsCustom( );
+                popAllColorsCustom();
             }
             end( );
         }
@@ -823,130 +853,125 @@ public class GuiBuilder {
 
     private void deleteForm(int formID)
     {
-        forms.erase( m_forms.begin( ) + form_id );
+        forms.remove(formID);
         id = forms.size( ) - 1;
-        std::cout << "size id " << m_id << std::endl;
+        System.out.println("size id " + id + "\n");
 
-        if ( !m_objs.empty( ) && !m_forms.empty( ) )
-        {
-            for ( auto i = m_objs.size( ) - 1; i > -1; --i )
+        if (!objs.isEmpty() && !forms.isEmpty()) {
+            for (int i = objs.size( ) - 1; i > -1; --i )
             {
-                std::cout << i << std::endl;
-                if ( m_objs[ i ].form == form_id )
+                System.out.println(i + "\n");
+                if (objs.get(i).form == formID)
                 {
-                    std::cout << "Obj id: " << m_objs[ i ].id << " \t form id: " << m_objs[ i ].form << std::endl;
-                    m_objs.erase( m_objs.begin( ) + i );
-                    m_obj_id = m_objs.size( ) - 1;
+                    System.out.println("Obj id: " + objs.get(i).id + " \t form id: " + objs.get(i).form + "\n");
+                    objs.remove(i);
+                    objID = objs.size() - 1;
 
-                    for ( auto x = i - 1; x < m_objs.size( ); ++x )
-                        m_objs[ x ].id = x;
+                    for (int x = i - 1; x < objs.size(); x++)
+                        objs.get(x).id = x;
                 }
             }
 
-            std::cout << "delete file finish\n";
+            System.out.println("delete file finish\n");
         }
         else
         {
-            m_objs.clear( );
-            m_obj_id = -1;
-            std::cout << "delete all\n";
+            objs.clear();
+            objID = -1;
+            System.out.println("delete all\n");
         }
 
 
-        for ( auto id = ( form_id - 1 ); m_id >= id; ++id )
+        for (int id1 = ( formID - 1 ); id >= id1; ++id )
         {
-            if ( id < 0 )
+            if ( id1 < 0 )
                 continue;
 
-            for ( auto& obj : m_objs )
-            {
-                if ( obj.form == form_id )
-                    obj.delete_me = true;
+            for (GuiBuilderClasses.BasicOBJ obj : objs) {
+                if (obj.form == formID)
+                    obj.deleteMe = true;
 
-                if ( obj.form == m_forms[ id ].id )
-                    obj.form = id;
+                if (obj.form == forms.get(id1).getID()) {
+                    obj.form = id1;
+                }
             }
-            m_forms[ id ].id = id;
+            forms.get(id).setID(id1);
         }
     }
 
-    void imgui_builder::resize_obj( basic_obj& current_obj, bool selected )
+    void resizeOBJ(GuiBuilderClasses.BasicOBJ currentObj, boolean selected)
     {
-        if ( current_obj.locked ) return;
-        resize_obj( current_obj.pos, current_obj.size_obj, current_obj.hover, selected );
-        current_obj.size = current_obj.size_obj;
+        if (currentObj.locked) return;
+        resizeOBJ(currentObj.pos, currentObj.size, currentObj.hover, selected);
+        currentObj.size = currentObj.sizeObj;
     }
 
-    void resizeOBJ(ImVec2 objPos, ImVec2 objSize, boolean hover, boolean selected)
+    void resizeOBJ(ImVec2 objectPos, ImVec2 objSize, boolean hover, boolean selected)
     {
-        //if ( obj.my_type != button ) return;
-        //printf( "pos { %.f, %.f }, size { %.f, %.f }, hover %d, selected %d\n", obj_pos.x, obj_pos.y, obj_size.x, obj_size.y, hover, selected );
-        auto resze_opt = resize_opt::off;
+        GuiBuilderClasses.ResizeOptions resizeOption = GuiBuilderClasses.ResizeOptions.OFF;
 
-        bool scrollEnableY = ImGui::GetScrollMaxY( ) > 0.f;
-        auto scrollPosY = ImGui::GetScrollY( );
+        boolean scrollEnableY = getScrollMaxY() > 0.f;
+        float scrollPosY = getScrollY();
 
-        if ( hover && !m_tick_resize )
-        {
-            ImVec2 oldPos = obj_pos;
+        if (hover && tickResize == 0) {
+            ImVec2 oldPos = objectPos;
 
             if ( scrollEnableY )
             {
-                obj_pos.y -= scrollPosY;
+                objectPos.y -= scrollPosY;
             }
 
-            resze_opt = limit_bordering_control( obj_pos, obj_size, 3.f );
+            resizeOption = limitBorderingControl(objectPos, objSize, 3.f);
 
-            obj_pos = oldPos;
+            objectPos = oldPos;
 
-            switch ( resze_opt )
-            {
-                case resize_opt::bottom_right:
-                case resize_opt::top_left:
-                    this->cursor.m_current_icon	= this->cursor.m_arrow_northwest_and_southeast;
-                    break;
-                case resize_opt::top_right:
-                case resize_opt::bottom_left:
-                    this->cursor.m_current_icon	= this->cursor.m_arrow_northeast_and_southwest;
-                    break;
-                case resize_opt::top:
-                case resize_opt::bottom:
-                    this->cursor.m_current_icon	= this->cursor.m_arrow_top_or_bottom;
-                    break;
-                case resize_opt::left:
-                case resize_opt::right:
-                    this->cursor.m_current_icon	= this->cursor.m_arrow_left_or_right;
-                    break;
-                default:
-                    break;
-            }
-            if ( resze_opt != resize_opt::off )
-            {
-                SetCursor( this->cursor.m_current_icon );
-            }
+//            switch (resizeOption)
+//            {
+//                case BOTTOM_RIGHT:
+//                case TOP_LEFT:
+//                    this->cursor.m_current_icon	= this->cursor.m_arrow_northwest_and_southeast;
+//                    break;
+//                case TOP_RIGHT:
+//                case BOTTOM_LEFT:
+//                    this->cursor.m_current_icon	= this->cursor.m_arrow_northeast_and_southwest;
+//                    break;
+//                case TOP:
+//                case BOTTOM:
+//                    this->cursor.m_current_icon	= this->cursor.m_arrow_top_or_bottom;
+//                    break;
+//                case LEFT:
+//                case RIGHT:
+//                    this->cursor.m_current_icon	= this->cursor.m_arrow_left_or_right;
+//                    break;
+//                default:f
+//                    break;
+//            }
+
+//            if (resizeOption != GuiBuilderClasses.ResizeOptions.OFF)
+//            {
+//                SetCursor( this->cursor.m_current_icon );
+//            }
         }
 
-        m_no_move = (m_tick_resize ) || ( resze_opt != resize_opt::off );
+        noMove = (tickResize != 0) || (resizeOption != GuiBuilderClasses.ResizeOptions.OFF);
 
         //printf( "pos { %.f, %.f }, size { %.f, %.f }, hover %d, selected %d, moving %d\n", obj_pos.x, obj_pos.y, obj_size.x, obj_size.y, hover, selected, g_moving_obj );
-        if ( g_moving_obj || !window::i( )->holding_key( VK_LBUTTON )  )
-        {
+        if (movingObj || !relicApplication.getInput().getMouseButtonsDown().contains(GLFW_MOUSE_BUTTON_LEFT)) {
             resizeObj = false;
-            m_tick_resize	= 0;
-            m_resize_opt	= resize_opt::off;
+            tickResize = 0;
+            resizeOption = GuiBuilderClasses.ResizeOptions.OFF;
             //m_in_resize_id	= 0;
             return;
 
         }
 
         if ( !selected  ) return;
-        auto current_pos	= window::i( )->get_relative_cursor_pos( );
-        auto tick_now		= GetTickCount64( );
+        ImVec2 currentPos	= getRelativeCursorPos();
+        long tick_now		= getTickCount();
 
-        if ( m_tick_resize == 0 && resze_opt != resize_opt::off )
-        {
-            m_resize_opt	= resze_opt;
-            m_tick_resize	= tick_now + 80;
+        if (tickResize == 0 && resizeOption != GuiBuilderClasses.ResizeOptions.OFF ) {
+            resizeOption = resizeOption;
+            tickResize	= tick_now + 80;
             //m_in_resize_id	= obj.id + obj.my_type;
             return;
         }
@@ -954,335 +979,275 @@ public class GuiBuilder {
 
         //printf( "pos { %.f, %.f }, size { %.f, %.f }, hover %d, selected %d\n", obj_pos.x, obj_pos.y, obj_size.x, obj_size.y, hover, selected );
 
-        if ( m_tick_resize && tick_now > m_tick_resize )
+        if (tickResize != 0 && tick_now > tickResize )
         {
             resizeObj = true;
-            auto current_win_pos	= ImGui::GetWindowPos( );
-            SetCursor( this->cursor.m_current_icon );
+            ImVec2 currentWinPos = getWindowPos();
+            //SetCursor( this->cursor.m_current_icon );
 
-            auto normalize_diff		= []( float diff, float val = 100.f ) -> float //at some point it retains an exorbitant value, it will help to control that
-            {
-                if ( diff > val )
+            BiFunction<Float, Float, Float> normalizeDiff = (diff, val) -> {
+                if (diff > val) {
                     diff = val;
-                else if ( diff < -val )
+                } else if (diff < -val) {
                     diff = -val;
+                }
                 return diff;
             };
 
-            auto basic_margins = [&]( resize_opt rs_opt ) -> void
-            {
-                switch ( rs_opt )
-                {
-                    case resize_opt::right:
-                    {
-                        auto end_pos_x	= current_win_pos.x + obj_pos.x + obj_size.x;
-                        auto dif		= normalize_diff( current_pos.x - end_pos_x );
-                        obj_size.x		+= dif;
-                        break;
-                    }
-                    case resize_opt::left:
-                    {
-                        auto end_pos_x	= current_win_pos.x + obj_pos.x;
-                        auto dif		= normalize_diff( end_pos_x - current_pos.x );
-                        obj_pos.x		-= dif;
-                        obj_size.x		+= dif;
-                        break;
-                    }
-                    case resize_opt::top:
-                    {
-                        auto end_pos_y	= ( current_win_pos.y + obj_pos.y ) - scrollPosY;
-                        auto dif		= normalize_diff( end_pos_y - current_pos.y );
-                        obj_pos.y		-= dif;
-                        obj_size.y		+= dif;
-                        break;
-                    }
-                    case resize_opt::bottom:
-                    {
-                        auto end_pos_y	= current_win_pos.y + obj_pos.y + obj_size.y;
-                        auto dif		= normalize_diff( current_pos.y - end_pos_y );
-                        obj_size.y		+= dif;
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            };
+            Function<Float, Float> normalizeDiff100 = diff -> normalizeDiff.apply(diff, 100f);
 
-            switch ( m_resize_opt )
+
+            switch (resizeOption)
             {
-                case resize_opt::bottom_right:
+                case BOTTOM_RIGHT:
                 {
-                    basic_margins( resize_opt::bottom );
-                    basic_margins( resize_opt::right );
+                    basicMargins(GuiBuilderClasses.ResizeOptions.BOTTOM, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
+                    basicMargins(GuiBuilderClasses.ResizeOptions.RIGHT, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
                     break;
                 }
-                case resize_opt::top_left:
+                case TOP_LEFT:
                 {
-                    basic_margins( resize_opt::top );
-                    basic_margins( resize_opt::left );
+                    basicMargins(GuiBuilderClasses.ResizeOptions.TOP, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
+                    basicMargins(GuiBuilderClasses.ResizeOptions.LEFT, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
                     break;
                 }
-                case resize_opt::top_right:
+                case TOP_RIGHT:
                 {
-                    basic_margins( resize_opt::top );
-                    basic_margins( resize_opt::right );
+                    basicMargins(GuiBuilderClasses.ResizeOptions.TOP, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
+                    basicMargins(GuiBuilderClasses.ResizeOptions.RIGHT, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
                     break;
                 }
-                case resize_opt::bottom_left:
+                case BOTTOM_LEFT:
                 {
-                    basic_margins( resize_opt::bottom );
-                    basic_margins( resize_opt::left );
+                    basicMargins(GuiBuilderClasses.ResizeOptions.BOTTOM, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
+                    basicMargins(GuiBuilderClasses.ResizeOptions.LEFT, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
                     break;
                 }
                 default:
-                    basic_margins( m_resize_opt );
+                    basicMargins(resizeOption, objectPos, objSize, currentWinPos, currentPos, scrollPosY, normalizeDiff100);
                     break;
             }
         }
 
     }
 
-    void renderOBJ(GuiBuilderClasses.BasicOBJ obj, int currentFormID)
-    {
-        // set pos for next obj render
+    private void basicMargins(GuiBuilderClasses.ResizeOptions rsOpt, ImVec2 objectPos, ImVec2 objSize, ImVec2 currentWinPos, ImVec2 currentPos, float scrollPosY, Function<Float, Float> normalizeDiff) {
+        switch (rsOpt) {
+            case RIGHT -> {
+                float endPosX = currentWinPos.x + objectPos.x + objSize.x;
+                float dif = normalizeDiff.apply(currentPos.x - endPosX);
+                objSize.x += dif;
+            }
+            case LEFT -> {
+                float endPosX = currentWinPos.x + objectPos.x;
+                float dif = normalizeDiff.apply(endPosX - currentPos.x);
+                objectPos.x -= dif;
+                objSize.x += dif;
+            }
+            case TOP -> {
+                float endPosY = (currentWinPos.y + objectPos.y) - scrollPosY;
+                float dif = normalizeDiff.apply(endPosY - currentPos.y);
+                objectPos.y -= dif;
+                objSize.y += dif;
+            }
+            case BOTTOM -> {
+                float endPosY = currentWinPos.y + objectPos.y + objSize.y;
+                float dif = normalizeDiff.apply(currentPos.y - endPosY);
+                objSize.y += dif;
+            }
+            default -> {
+                // do nothing
+            }
+        }
+    }
+
+    private void renderOBJ(GuiBuilderClasses.BasicOBJ obj, int currentFormID) {
+        // Set position for next object render
         setCursorPos(obj.pos);
 
-        // if signal of delete object
-        if (obj.deleteMe)
-        {
-            // delete obj
-            if (obj.id < m_obj_id)
-            {
-                m_objs.erase(m_objs.begin() + obj.id);
-                // reform id objs
-                m_obj_id = m_objs.size() - 1;
+        // If object is marked for deletion
+        if (obj.deleteMe) {
+            if (obj.id < objID) {
+                objs.remove(obj.id);
+                objID = objs.size() - 1;
             }
 
-            // previous object, before rendering the others
-            for ( auto new_id = obj.id - 1; new_id < m_objs.size( ); ++new_id )
-            {
-                m_objs[ new_id ].id = new_id;
-                //std::cout << obj_render_me[new_id].id << std::endl;
+            // Reassign IDs to remaining objects
+            for (int newID = obj.id; newID < objs.size(); newID++) {
+                objs.get(newID).id = newID;
             }
-            return; //not to render the object
+            return; // Skip rendering this object
         }
 
-        // To type any obj for render set in case
-        // to render all obj for 1 time in loop
+        String buffer = "text here";
+        int value_i = 0;
+        float value_f = 0;
+        boolean true_bool = false;
+        boolean normalSelect = currentItem.equals(obj.name + ":" + obj.id);
 
-        // buffer for inputs
-        std::string		buffer			= "text here";
-        int				value_i			= 0;
-        float			value_f			= 0;
-        static bool		true_bool		= false;
-        auto			normal_select	= ( m_current_item == ( obj.name + ":" + std::to_string( obj.id ) ) );
-
-
-        auto relative_for_resize = []( basic_obj& obj ) -> float
-        {
-            auto&		g			= *GImGui;
-            auto*		window		= g.CurrentWindow;
-		const auto&	style		= g.Style;
-		const auto	id			= window->GetID( obj.name.c_str( ) );
-		const auto	label_size	= calcTextSize( obj.name.c_str( ), nullptr, true );
-		const auto	frame_size	= calcItemSize( ImVec2( 0, 0 ), calcItemWidth( ), ( label_size.y ) + style.FramePadding.y * 2.0f );
-		const auto	label_dif	= ( label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f );
-            if ( obj.size.x == 0.f && obj.size.y == 0.f )
-                obj.size = ImVec2( frame_size.x + label_dif, frame_size.y );
-            return obj.size.x - label_dif;
+        Function<GuiBuilderClasses.BasicOBJ, Float> relativeForResize = (o) -> {
+            ImGuiStyle style = ImGui.getStyle();
+            ImVec2 labelSize = calcTextSize(o.name.get(), true);
+            ImVec2 frameSize = calcItemSize(new ImVec2(0, 0), calcItemWidth(),
+                    labelSize.y + style.getFramePadding().y * 2.0f);
+            float labelDif = (labelSize.x > 0.0f ? style.getItemInnerSpacing().x + labelSize.x : 0.0f);
+            if (o.size.x == 0 && o.size.y == 0) {
+                o.size = new ImVec2(frameSize.x + labelDif, frameSize.y);
+            }
+            return o.size.x - labelDif;
         };
 
-        // render obj
-        switch ( obj.my_type )
-        {
-            case 1:
-                button( obj.name.c_str( ), obj.size );
-                break;
-            case 2:
-                ImGui::Text( obj.name.c_str( ) );
-                break;
-            case 3:
-            {
-                pushItemWidth(relative_for_resize(obj));
-                inputText( obj.name.c_str( ), const_cast<char*>( buffer.c_str( ) ), 254 );
-                popItemWidth( );
-                break;
+        // Render based on type
+        switch (obj.myType) {
+            case 1 -> button(obj.name.get(), obj.size);
+            case 2 -> text(obj.name.get());
+            case 3 -> {
+                pushItemWidth(relativeForResize.apply(obj));
+                inputText(obj.name.get(), new ImString(buffer), 254);
+                popItemWidth();
             }
-            case 4:
-            {
-                pushItemWidth( relative_for_resize( obj ) );
-                sliderInt( obj.name.c_str( ), &value_i, 0, 100 );
-                popItemWidth( );
-                break;
+            case 4 -> {
+                pushItemWidth(relativeForResize.apply(obj));
+                sliderInt(obj.name.get(), new int[]{value_i}, 0, 100); // Wrap in array for reference
+                popItemWidth();
             }
-            case 5:
-            {
-                pushItemWidth( relative_for_resize( obj ) );
-                sliderFloat( obj.name.c_str( ), &value_f, 0, 100 );
-                popItemWidth( );
-                break;
+            case 5 -> {
+                pushItemWidth(relativeForResize.apply(obj));
+                sliderFloat(obj.name.get(), new float[]{value_f}, 0f, 100f); // Wrap in array for reference
+                popItemWidth();
             }
-            case 6:
-                checkbox( obj.name.c_str( ), &true_bool );
-
-                break;
-            case 7:
-                radioButton( obj.name.c_str( ), true_bool );
-
-                break;
-            case 8:
-                ImGui::ToggleButton( obj.name.c_str( ), &true_bool );
-
-                break;
-            default:
-                break;
+            case 6 -> checkbox(obj.name.get(), true_bool);
+            case 7 -> radioButton(obj.name.get(), true_bool);
+            case 8 -> toggleButton(obj.name.get(), new boolean[]{true_bool});
+            default -> {}
         }
-        obj.size_obj		= ImGui::GetItemRectSize( );
 
-        bool scrollEnableY	= ImGui::GetScrollMaxY( ) > 0.f;
+        obj.size = getItemRectSize();
 
-        auto scrollPosY		= ImGui::GetScrollY( );
+        boolean scrollEnableY = getScrollMaxY() > 0f;
+        float scrollPosY = getScrollY();
+        ImVec2 oldPos = new ImVec2(obj.pos.x, obj.pos.y);
 
-        ImVec2 oldPos = obj.pos;
-
-        if ( scrollEnableY )
-        {
+        if (scrollEnableY) {
             obj.pos.y -= scrollPosY;
         }
 
-        if ( ( obj.selected || normal_select ) && current_form_id == m_active_window_id )
-        {
-            ImGui::DrawObjBorder( obj );
+        if ((obj.selected || normalSelect) && currentFormID == activeWindowID) {
+            drawObjBorder(obj);
         }
 
-        // get size and hover of object
-        //obj.hover		= isItemHovered( );
-        obj.hover		= my_IsItemHovered( obj.pos, obj.size_obj, 5.f );
+        obj.hover = isItemHovered(obj.pos, obj.size, 5f);
 
-        // Set family and type child etc for propri and execution modification on type
-        auto left_clicked	= isMouseClicked( 0, false );
-        auto right_clicked	= isMouseClicked( 1, false );
-        auto show_context	= normal_select;
-        if ( obj.hover && (left_clicked || right_clicked) && show_context == false )
-        {
-            show_context = !left_clicked;
-            if ( GetKeyState( VK_CONTROL ) & 0x8000 )
+        boolean leftClicked = isMouseClicked(0, false);
+        boolean rightClicked = isMouseClicked(1, false);
+        boolean showContext = normalSelect;
+
+        if (obj.hover && (leftClicked || rightClicked) && !showContext) {
+            showContext = !leftClicked;
+            if (isKeyDown(ImGuiKey.LeftCtrl)) {
                 obj.selected = !obj.selected;
-            else
-            {
-                for ( auto& o_obj : m_objs )
-                o_obj.selected = false;
+            } else {
+                for (GuiBuilderClasses.BasicOBJ o : objs) o.selected = false;
             }
 
-            m_current_item	= obj.name + ':' + std::to_string( obj.id );
-            m_family		= obj.form;
-            m_grandchild	= obj.child;
-            m_index			= obj.id;
-            m_type			= obj.my_type;
+            currentItem = obj.name.get() + ':' + obj.id;
+            family = obj.form;
+            grandchild = obj.child;
+            index = obj.id;
+            type = obj.myType;
         }
 
-        pushAllColorsDark(m_dark_style);
+        pushAllColorsDark(darkStyle);
 
-        if ( show_context && beginPopupContextItem( "##obj_context" ) )
-        {
-            //style.ButtonTextAlign
-            auto& g = *GImGui;
-            auto backup1_y = g.Style.ButtonTextAlign.y;
-            auto backup2_y = g.Style.FramePadding.y;
-            g.Style.FramePadding.y		= -1.3f;
-            g.Style.ButtonTextAlign.y	= 0.f;
-            ImVec2 btn_size				= { 60.f, 12.f };
-            if ( button( "delete", btn_size ) )
-            {
-                obj.delete_me	= true;
-                m_current_item	= "";
-                m_type			= -1;
+        if (showContext && beginPopupContextItem("##obj_context")) {
+
+            var backup1_y = ImGui.getStyle().getButtonTextAlign().y;
+            var backup2_y = ImGui.getStyle().getFramePadding().y;
+            getStyle().setFramePadding(getStyle().getFramePaddingX(), -1.3f);
+            getStyle().setButtonTextAlign(getStyle().getButtonTextAlignX(), 0);
+            ImVec2 btnSize = new ImVec2(60f, 12f);
+
+            if (button("delete", btnSize)) {
+                obj.deleteMe = true;
+                currentItem = "";
+                type = -1;
             }
-            if ( button( "copy", btn_size ) )
-            {
-                copy_obj( obj.my_type, obj.child, obj.size, obj.pos, false, false, true );
+            if (button("copy", btnSize)) {
+                copyOBJ(obj.myType, obj.child, obj.size, obj.pos, false, false, true);
             }
-            checkbox( "lock", &obj.locked );
-            g.Style.ButtonTextAlign.y	= backup1_y;
-            g.Style.FramePadding.y		= backup2_y;
-            endPopup( );
+            checkbox("lock", obj.locked);
+            getStyle().setFramePadding(getStyle().getFramePaddingX(), backup1_y);
+            getStyle().setButtonTextAlign(getStyle().getButtonTextAlignX(), backup1_y);
+            endPopup();
         }
 
-        popAllColorsCustom( );
+        popAllColorsCustom();
 
-        if ( obj.hover )
-            SetCursor( this->cursor.m_arrow_all );
+        if (obj.hover) {
+            //SetCursor(this.cursor.m_arrow_all);
+        }
 
         obj.pos = oldPos;
-
-        resize_obj( obj, normal_select  );
+        resizeOBJ(obj, normalSelect);
     }
 
     void objectProperty() {
-        static std::vector<move_obj> mto{ };
+        List<MoveOBJ> moveOBJS = new ArrayList<>();
         setNextWindowPos(0, 100);
         setNextWindowSize(300, 700 - 100);
         begin( "property", null, NoBringToFrontOnFocus);
-        m_my_forms_active = isWindowFocused();
-        if ( beginCombo( "##itens", m_current_item.c_str( ) ) )
-        {
+        myFormsActive = isWindowFocused();
+        if (beginCombo("##itens", currentItem)) {
             // list all obj render in array child and form
 
-            for ( auto& n : m_forms )
+            for (Form form : forms)
             {
-                if ( n.delete_me )
-                {
+                if (form.shouldDelete()) {
                     break;
                 }
 
-                // it is simply possible to simplify this please do this
-                auto item = n.name + ":" + std::to_string( n.id );
-			const auto is_selected = ( m_current_item == item );
+                String item = form.getName() + ":" + form.getID();
+			    boolean is_selected = (Objects.equals(currentItem, item));
 
-                if ( selectable( item.c_str( ), is_selected ) )
-                {
-                    m_name = const_cast<char*>( n.name.c_str( ) );
-                    m_current_item = item;
-                    m_type = 0;
-                    m_family = n.id;
+                if (selectable(item, is_selected )) {
+                    name = new ImString(form.getName());
+                    currentItem = item;
+                    type = 0;
+                    family = form.getID();
                 }
 
-                for ( auto& c : n.child )
-                {
-                    item = c.name + ":" + std::to_string( n.id );
-                    if ( selectable( item.c_str( ), is_selected ) )
+                for (GuiBuilderClasses.Child child : form.getChildren()) {
+                    item = child.name + ":" + form.getID();
+                    if ( selectable(item, is_selected ) )
                     {
-                        m_family		= n.id;
-                        m_index			= c.id;
-                        m_type			= 10;
-                        m_current_item	= item;
+                        family = form.getID();
+                        index = child.id;
+                        type = 10;
+                        currentItem	= item;
                     }
                 }
-
                 item = "";
 
                 if ( is_selected )
                     setItemDefaultFocus( );
             }
 
-            for ( auto& o : m_objs )
+            for (GuiBuilderClasses.BasicOBJ obj : objs)
             {
-                if ( o.delete_me )
-                {
+                if (obj.deleteMe) {
                     break;
                 }
 
-                auto item = o.name + ":" + std::to_string( o.id );
-			const auto is_selected = ( m_current_item == item );
+                String item = obj.name + ":" + obj.id;
+			    boolean is_selected = (Objects.equals(currentItem, item));
 
-                item = o.name + ":" + std::to_string( o.id );
-                if ( selectable( item.c_str( ), is_selected ) )
-                {
-                    m_family		= o.form;
-                    m_grandchild	= o.child;
-                    m_index			= o.id;
-                    m_type			= o.my_type;
-                    m_current_item	= item;
+                item = obj.name + ":" + obj.id;
+                if (selectable(item, is_selected)) {
+                    family = obj.form;
+                    grandchild = obj.child;
+                    index = obj.id;
+                    type = obj.myType;
+                    currentItem	= item;
                 }
 
                 if ( is_selected )
@@ -1292,241 +1257,270 @@ public class GuiBuilder {
             endCombo( );
         }
 
-        // vars for simplification functions less line length
-        child		chl{ };
-        basic_obj	obj{ };
-        form		fm{ };
+        GuiBuilderClasses.Child child = new GuiBuilderClasses.Child();
+        GuiBuilderClasses.BasicOBJ obj = new GuiBuilderClasses.BasicOBJ();
+        Form form = new Form();
 
-        switch ( m_type )
-        {
-            case -1: // none
-
+        switch (type) {
+            case -1 -> {
                 break;
-
-            case 0: // form
-                fm = m_forms[ m_family ];
-                inputInt( "ID", &fm.id, 0 );
-
-                inputTextEx( "Name form", &m_name, 0 );
-                //inputText("name form", name, 255);
-                if ( button( "Apply name" ) )
-            {
-                if ( !m_name.empty( ) ) fm.name = m_name;
             }
-            inputFloat( "SizeX", &fm.size.x, 1 );
-            inputFloat( "SizeY", &fm.size.y, 1 );
-            inputFloat( "PosX", &fm.pos.x, 1 );
-            inputFloat( "PosY", &fm.pos.y, 1 );
+            case 0 -> {
+                form = forms.get(family);
+                inputInt("ID", new ImInt(form.getID()), 0);
 
-            if ( button( "DELETE" ) || window::i( )->pressed_key( VK_DELETE ) )
-            {
-                fm.delete_me	= true;
-                m_current_item	= "";
-                m_type			= -1;
-            }
+                formTextBox.draw("Name form");
 
-            m_forms[ m_family ] = fm;
-            break;
+                //inputText("name form", new ImString(name));
 
-            case 10: // child
-                chl = m_forms[ m_family ].child[ m_index ];
-                m_form_pos = m_forms[ m_family ].pos;
-                inputInt( "ID", &chl.id, 0 );
+                if (button("Apply name")) {
+                    if (!name.isEmpty()) form.setName(name.get());
+                }
+                inputFloat("SizeX", new ImFloat(form.getSize().x), 1);
+                inputFloat("SizeY", new ImFloat(form.getSize().y), 1);
+                inputFloat("PosX", new ImFloat(form.getPos().x), 1);
+                inputFloat("PosY", new ImFloat(form.getPos().y), 1);
 
-                if ( inputInt( "Form Father", &chl.father, 1 ) )
-            {
-                m_forms[ chl.father ].child.push_back( chl );
-                chl.delete_me	= true;
-                m_current_item	= "";
-                m_type			= -1;
+                if (button("DELETE") || ImGui.isKeyDown(ImGuiKey.Delete)) {
+                    form.setShouldDelete(true);
+                    currentItem = "";
+                    type = -1;
+                }
+
+                forms.set(family, form);
+                break;
             }
 
-            inputFloat( "SizeX", &chl.size.x, 1 );
-            inputFloat( "SizeY", &chl.size.y, 1 );
-            inputFloat( "PosX", &chl.pos.x, 1 );
-            inputFloat( "PosY", &chl.pos.y, 1 );
-            checkbox( "Border", &chl.border );
-            sameLine( );
-            checkbox( "Lock", &chl.locked );
-            m_item_size = chl.size;
-            if ( chl.hover && !chl.locked )
-                chl.change_pos = true;
+            case 10 -> {
+                child = forms.get(family).getChildren().get(index);
+                formPos = vector2fToImVec2(forms.get(family).getPos());
+                inputInt("ID", new ImInt(child.id), 0);
 
-            if ( !m_no_move )
-                move_item( chl.pos, chl.change_pos );
+                if (inputInt( "Form Father", new ImInt(child.father), 1)) {
+                    forms.get(child.father).getChildren().addLast(child);
+                    child.deleteMe	= true;
+                    currentItem	= "";
+                    type			= -1;
+                }
 
-            copy_obj( 10, 0, chl.size, chl.pos, chl.border, obj.selected );
+                inputFloat( "SizeX", new ImFloat(child.size.x), 1);
+                inputFloat( "SizeY", new ImFloat(child.size.y), 1);
+                inputFloat( "PosX", new ImFloat(child.pos.x), 1);
+                inputFloat( "PosY", new ImFloat(child.pos.y), 1);
+                checkbox( "Border", child.border );
+                sameLine( );
+                checkbox( "Lock", child.locked );
+                itemSize = child.size;
+                if (child.hover && !child.locked )
+                    child.changePos = true;
 
-            if ( button( "DELETE" ) || window::i( )->pressed_key( VK_DELETE ) )
-            {
-                chl.delete_me	= true;
-                m_current_item	= "";
-                m_type			= -1;
-            }
+                if (!noMove ) {
+                    moveItem(child.pos, new AtomicBoolean(child.changePos));
+                }
 
-            m_forms[ m_family ].child[ m_index ] = chl;
-            break;
-            default: // another obj
+                copyOBJ(10, 0, child.size, child.pos, child.border, obj.selected, false);
 
-                if ( m_grandchild > -1 )
+                if (button( "DELETE") || ImGui.isKeyDown(ImGuiKey.Delete))
                 {
-                    obj = m_objs[ m_index ];
-                    m_form_pos	= m_forms[ m_family ].child[ m_grandchild ].pos;
-                    m_form_pos.x += m_forms[ m_family ].pos.x;
-                    m_form_pos.y += m_forms[ m_family ].pos.y;
+                    child.deleteMe	= true;
+                    currentItem	= "";
+                    type = -1;
+                }
+
+                forms.get(family).getChildren().set(index, child);
+                break;
+            }
+
+            default -> {
+                if (grandchild > -1 )
+                {
+                    obj = objs.get(index);
+                    formPos	= forms.get(family).getChildren().get(grandchild).pos;
+                    formPos.x += forms.get(family).getPos().x;
+                    formPos.y += forms.get(family).getPos().y;
                 }
                 else
                 {
-                    if ( m_objs.size( ) > static_cast<unsigned>( m_index ) )
-                    {
-                        obj = m_objs[ m_index ];
-                        m_form_pos = m_forms[ m_family ].pos;
+                    if (objs.size() > index) {
+                        obj = objs.get(index);
+                        formPos = vector2fToImVec2(forms.get(family).getPos());
                     }
                 }
 
-                m_item_size = obj.size_obj;
-                inputInt( "ID", &obj.id, 0 );
-                inputInt( "Form Father", &obj.form, 1 );
-                inputInt( "Child Father", &obj.child, 1 );
-                inputTextEx( "Name", &obj.name, 0 );
+                itemSize = obj.sizeObj;
+                inputInt("ID", new ImInt(obj.id), 0);
+                inputInt("Form Father", new ImInt(obj.form), 1);
+                inputInt( "Child Father", new ImInt(obj.child), 1);
+                inputText( "Name", new ImString(obj.name), 0);
                 //inputText("Name", name, 255);
-                inputFloat( "PosX", &obj.pos.x, 1, 1 );
-                inputFloat( "PosY", &obj.pos.y, 1, 1 );
-                inputFloat( "SizeX", &obj.size.x, 1, 1 );
-                inputFloat( "SizeY", &obj.size.y, 1, 1 );
-                checkbox( "Lock", &obj.locked );
+                inputFloat( "PosX", new ImFloat(obj.pos.x), 1, 1 );
+                inputFloat( "PosY", new ImFloat(obj.pos.y), 1, 1 );
+                inputFloat( "SizeX", new ImFloat(obj.size.x), 1, 1);
+                inputFloat( "SizeY", new ImFloat(obj.size.y), 1, 1);
+                checkbox( "Lock", obj.locked);
 
                 //obj.name = name;
                 // check if hover because need for change position
                 if ( obj.hover )
-                    obj.change_pos = true;
+                    obj.changePos = true;
 
-                if ( obj.selected && !m_no_move )
-                {
-                    mto.clear( );
-                    for ( auto& r_obj : m_objs )
-                    {
-                        if ( r_obj.selected == true && !r_obj.locked )
-                        {
-                            mto.push_back( { r_obj.id, r_obj.pos } );
+                if ( obj.selected && !noMove) {
+                    moveOBJS.clear();
+                    for (GuiBuilderClasses.BasicOBJ r_obj : objs) {
+                        if ( r_obj.selected && !r_obj.locked ) {
+                            MoveOBJ moveOBJ = new MoveOBJ();
+                            moveOBJ.index = r_obj.id;
+                            moveOBJ.pos = r_obj.pos;
+                            moveOBJS.add(moveOBJ);
                         }
                     }
 
-                    move_items( mto, obj.change_pos );
+                    moveItems(moveOBJS, new AtomicBoolean(obj.changePos));
 
-                    for ( auto& teste : mto )
+                    for (MoveOBJ teste : moveOBJS)
                     {
-                        if ( obj.id == teste.index )
+                        if (obj.id == teste.index)
                             obj.pos = teste.pos;
                         else
-                            m_objs[ teste.index ].pos = teste.pos;
+                            objs.get(teste.index).pos = teste.pos;
                     }
                 }
-                else if ( !m_no_move )
+                else if (!noMove)
                     if (!obj.locked )
-                        move_item( obj.pos, obj.change_pos );
+                        moveItem(obj.pos, new AtomicBoolean(obj.changePos));
 
-                copy_obj( obj.my_type, obj.child, obj.size, obj.pos, false, obj.selected );
+                copyOBJ(obj.myType, obj.child, obj.size, obj.pos, false, obj.selected, false);
 
                 // dont delete here!
-                if ( button( "DELETE" ) || window::i( )->pressed_key( VK_DELETE ) )
-            {
-                obj.delete_me	= true;
-                m_current_item	= "";
-                m_type			= -1;
-            }
+                if (button( "DELETE" ) || ImGui.isKeyDown(ImGuiKey.Delete)) {
+                    obj.deleteMe = true;
+                    currentItem	= "";
+                    type = -1;
+                }
 
-            m_objs[ m_index ] = obj;
+                objs.set(index, obj);
 
-            break;
-        }
-
-        end( );
-    }
-
-    void imgui_builder::routine_draw( )
-    {
-        static imgui_builder* instance = nullptr;
-        if ( !instance )
-            instance = new imgui_builder( );
-        instance->draw( );
-    }
-
-    void move_items( std::vector<move_obj>& mto, bool& continue_edt )
-    {
-        static POINT old_pos = { 0, 0 };
-        static std::vector<ImVec2> old_pos_obj{ };
-        if ( !window::i( )->holding_key( VK_LBUTTON ) || !continue_edt )
-        {
-            old_pos_obj.clear( );
-            g_moving_obj	= false;
-            continue_edt	= false;
-            old_pos			= { 0, 0 };
-            tickMove = 0;
-            return;
-        }
-        auto tick_now		= GetTickCount64( );
-        auto current_pos	= window::i( )->get_relative_cursor_pos( );
-        if ( tickMove == 0 )
-        {
-            tickMove = tick_now + 100;
-            old_pos			= current_pos;
-            for ( auto& i : mto )
-            old_pos_obj.push_back( i.pos );
-            return;
-        }
-        if ( mto.size( ) != old_pos_obj.size( ) )
-        {
-            old_pos_obj.clear( );
-            g_moving_obj	= false;
-            continue_edt	= false;
-            old_pos			= { 0, 0 };
-            tickMove = 0;
-            return;
-        }
-        if ( tick_now > tickMove)
-        {
-            g_moving_obj	= true;
-            auto i			= 0;
-            for ( auto& m : mto )
-            {
-			const auto x_pos = old_pos_obj[ i ].x + current_pos.x - old_pos.x;
-			const auto y_pos = old_pos_obj[ i ].y + current_pos.y - old_pos.y;
-                m.pos.x = x_pos;
-                m.pos.y = y_pos;
-                ++i;
+                break;
             }
         }
-        return;
+        end();
     }
 
-    void move_item( ImVec2& obj_pos, bool& continue_edt )
-    {
-        static ImVec2 old_pos{ };
-        if ( !window::i( )->holding_key( VK_LBUTTON ) || !continue_edt  )
-        {
-            old_pos				= { 0, 0 };
-            g_moving_obj		= false;
-            continue_edt		= false;
+    private void moveItems(List<MoveOBJ> mto, AtomicBoolean continueEdt) {
+        if (!relicApplication.getInput().getMouseButtonsDown().contains(GLFW_MOUSE_BUTTON_LEFT) || !continueEdt.get()) {
+            oldPosObjs.clear();
+            movingObj = false;
+            continueEdt.set(false);
+            oldPos.x = 0;
+            oldPos.y = 0;
             tickMove = 0;
             return;
         }
-        auto tick_now			= GetTickCount64( );
-        auto current_pos		= window::i( )->get_relative_cursor_pos( );
-        if ( tickMove == 0 )
-        {
-            old_pos				= { current_pos.x - obj_pos.x, current_pos.y - obj_pos.y };
-            tickMove = tick_now + 50;
+
+        long tickNow = getTickCount();
+        ImVec2 currentPos = getRelativeCursorPos();
+
+        if (tickMove == 0) {
+            tickMove = tickNow + 100;
+            oldPos.x = currentPos.x;
+            oldPos.y = currentPos.y;
+
+            oldPosObjs.clear();
+            for (MoveOBJ obj : mto) {
+                oldPosObjs.add(new ImVec2(obj.pos.x, obj.pos.y));
+            }
             return;
         }
-        auto current_win_pos = ImGui::GetWindowPos( );
-        if ( tick_now > tickMove)
-        {
-            g_moving_obj		= true;
-		const auto x_pos	=  current_pos.x - old_pos.x;
-		const auto y_pos	=  current_pos.y - old_pos.y;
-            obj_pos.x = x_pos;
-            obj_pos.y = y_pos;
+
+        if (mto.size() != oldPosObjs.size()) {
+            oldPosObjs.clear();
+            movingObj = false;
+            continueEdt.set(false);
+            oldPos.x = 0;
+            oldPos.y = 0;
+            tickMove = 0;
+            return;
         }
+
+        if (tickNow > tickMove) {
+            movingObj = true;
+            for (int i = 0; i < mto.size(); i++) {
+                MoveOBJ m = mto.get(i);
+                ImVec2 orig = oldPosObjs.get(i);
+                m.pos.x = orig.x + currentPos.x - oldPos.x;
+                m.pos.y = orig.y + currentPos.y - oldPos.y;
+            }
+        }
+    }
+
+
+
+    private void moveItem(ImVec2 objPos, AtomicBoolean continue_edt) {
+        if (!ImGui.getIO().getMouseDown(0) || !continue_edt.get()) {
+            oldPos.x = 0;
+            oldPos.y = 0;
+            movingObj = false;
+            continue_edt.set(false);
+            tickMove = 0;
+            return;
+        }
+
+        long tickNow = getTickCount();
+        ImVec2 current_pos = getRelativeCursorPos();
+
+        if (tickMove == 0) {
+            oldPos.x = current_pos.x - objPos.x;
+            oldPos.y = current_pos.y - objPos.y;
+            tickMove = tickNow + 50;
+            return;
+        }
+
+        if (tickNow > tickMove) {
+            movingObj = true;
+            objPos.x = current_pos.x - oldPos.x;
+            objPos.y = current_pos.y - oldPos.y;
+        }
+    }
+
+    private long getTickCount() {
+        return System.nanoTime() / 1_000_000;
+    }
+
+    private void setStyle(ImGuiStyle newStyle) {
+        ImGuiStyle style = ImGui.getStyle();
+
+        style.setColors(newStyle.getColors());
+
+        style.setWindowPadding(newStyle.getWindowPadding());
+        style.setFramePadding(newStyle.getFramePadding());
+        style.setCellPadding(newStyle.getCellPadding());
+        style.setItemSpacing(newStyle.getItemSpacing());
+        style.setItemInnerSpacing(newStyle.getItemInnerSpacing());
+        style.setTouchExtraPadding(newStyle.getTouchExtraPadding());
+        style.setIndentSpacing(newStyle.getIndentSpacing());
+        style.setScrollbarSize(newStyle.getScrollbarSize());
+        style.setGrabMinSize(newStyle.getGrabMinSize());
+        style.setWindowBorderSize(newStyle.getWindowBorderSize());
+        style.setChildBorderSize(newStyle.getChildBorderSize());
+        style.setPopupBorderSize(newStyle.getPopupBorderSize());
+        style.setFrameBorderSize(newStyle.getFrameBorderSize());
+        style.setTabBorderSize(newStyle.getTabBorderSize());
+
+        style.setWindowRounding(newStyle.getWindowRounding());
+        style.setChildRounding(newStyle.getChildRounding());
+        style.setFrameRounding(newStyle.getFrameRounding());
+        style.setPopupRounding(newStyle.getPopupRounding());
+        style.setScrollbarRounding(newStyle.getScrollbarRounding());
+        style.setGrabRounding(newStyle.getGrabRounding());
+        style.setLogSliderDeadzone(newStyle.getLogSliderDeadzone());
+        style.setTabRounding(newStyle.getTabRounding());
+
+        style.setWindowTitleAlign(newStyle.getWindowTitleAlign());
+        style.setWindowMenuButtonPosition(newStyle.getWindowMenuButtonPosition());
+        style.setColorButtonPosition(newStyle.getColorButtonPosition());
+        style.setButtonTextAlign(newStyle.getButtonTextAlign());
+        style.setSelectableTextAlign(newStyle.getSelectableTextAlign());
+
+        style.setDisplaySafeAreaPadding(newStyle.getDisplaySafeAreaPadding());
     }
 }
