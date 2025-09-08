@@ -25,6 +25,12 @@ public class Window {
 
     private boolean isInitialized;
 
+    private long standardCursorHandle;
+    private long horizontalCursorHandle;
+    private long verticalCursorHandle;
+    private long NWCursorHandle;
+    private long NECursorHandle;
+
     private GLFWFramebufferSizeCallback framebufferSizeCallback;
 
     private final RelicApplication application;
@@ -58,6 +64,11 @@ public class Window {
         //glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         this.windowHandle = glfwCreateWindow(width, height, title, config.isFullscreen() ? monitor : NULL, NULL);
+        this.standardCursorHandle = glfwCreateStandardCursor(GLFW_CURSOR);
+        this.horizontalCursorHandle = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+        this.verticalCursorHandle = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+        this.NWCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+        this.NECursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
 
         if(this.windowHandle == NULL) {
             glfwTerminate();
@@ -120,6 +131,22 @@ public class Window {
     public void setSize(int width, int height) {
         setWidth(width);
         setHeight(height);
+    }
+
+    public void setCursorShapeStandard() {
+        glfwSetCursor(windowHandle, standardCursorHandle);
+    }
+    public void setCursorShapeHorizontal() {
+        glfwSetCursor(windowHandle, horizontalCursorHandle);
+    }
+    public void setCursorShapeVertical() {
+        glfwSetCursor(windowHandle, verticalCursorHandle);
+    }
+    public void setCursorShapeNWSE() {
+        glfwSetCursor(windowHandle, NWCursorHandle);
+    }
+    public void setCursorShapeNESW() {
+        glfwSetCursor(windowHandle, NECursorHandle);
     }
 
     public Vector2i getWindowSize() {

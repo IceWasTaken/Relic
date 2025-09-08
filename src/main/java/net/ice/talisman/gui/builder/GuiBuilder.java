@@ -94,21 +94,13 @@ public class GuiBuilder {
         this.relicApplication = relicApplication;
 
         styleColorsDark(darkStyle);
-        for (int i = 0; i < COUNT; i++ )
+        for (int i = 0; i < COUNT; i++ ) {
             customGUIStyle.getColors()[i] = darkStyle.getColors()[i];
+        }
 
         forms.clear();
         objs.clear();
     }
-
-//    imgui_builder::imgui_builder( )
-//    {
-//        this->cursor.m_arrow_top_or_bottom				= LoadCursor( NULL, IDC_SIZENS );
-//        this->cursor.m_arrow_left_or_right				= LoadCursor( NULL, IDC_SIZEWE );
-//        this->cursor.m_arrow_northwest_and_southeast	= LoadCursor( NULL, IDC_SIZENWSE );
-//        this->cursor.m_arrow_northeast_and_southwest	= LoadCursor( NULL, IDC_SIZENESW );
-//        this->cursor.m_arrow_all						= LoadCursor( NULL, IDC_SIZEALL );
-//    }
 
     class MoveOBJ {
         int index = 0;
@@ -472,7 +464,7 @@ public class GuiBuilder {
 
         setNextWindowSize(( width - 16 ), 100);
         setNextWindowPos(0, 0);
-        begin( "BUILDER", null, NoBringToFrontOnFocus | MenuBar);
+        begin("BUILDER", null, NoBringToFrontOnFocus | MenuBar);
         myFormsActive = isWindowFocused();
         if (beginMenuBar()) {
             if (beginMenu( "Project")){
@@ -516,7 +508,7 @@ public class GuiBuilder {
         }
         sameLine();
         if (button("New Button")) {
-            createObject( 1 );
+            createObject(1);
         }
         sameLine();
         if (button("New Label")) {
@@ -706,9 +698,9 @@ public class GuiBuilder {
             form.setPos(getWindowPos());
             form.setSize(getWindowSize());
 
-            if ( isWindowHovered( ) && isMouseDoubleClicked( 0 ) )
+            if (isWindowHovered() && isMouseDoubleClicked(0))
             {
-                name =  new ImString(form.getName());
+                name = new ImString(form.getName());
                 currentItem = form.getName() + ":" + form.getID();
                 family = form.getID();
                 type = 0;
@@ -925,27 +917,27 @@ public class GuiBuilder {
 
             objectPos = oldPos;
 
-//            switch (resizeOption)
-//            {
-//                case BOTTOM_RIGHT:
-//                case TOP_LEFT:
-//                    this->cursor.m_current_icon	= this->cursor.m_arrow_northwest_and_southeast;
-//                    break;
-//                case TOP_RIGHT:
-//                case BOTTOM_LEFT:
-//                    this->cursor.m_current_icon	= this->cursor.m_arrow_northeast_and_southwest;
-//                    break;
-//                case TOP:
-//                case BOTTOM:
-//                    this->cursor.m_current_icon	= this->cursor.m_arrow_top_or_bottom;
-//                    break;
-//                case LEFT:
-//                case RIGHT:
-//                    this->cursor.m_current_icon	= this->cursor.m_arrow_left_or_right;
-//                    break;
-//                default:f
-//                    break;
-//            }
+            switch (resizeOption)
+            {
+                case BOTTOM_RIGHT:
+                case TOP_LEFT:
+                    relicApplication.getWindow().setCursorShapeNWSE();
+                    break;
+                case TOP_RIGHT:
+                case BOTTOM_LEFT:
+                    relicApplication.getWindow().setCursorShapeNESW();
+                    break;
+                case TOP:
+                case BOTTOM:
+                    relicApplication.getWindow().setCursorShapeHorizontal();
+                    break;
+                case LEFT:
+                case RIGHT:
+                    relicApplication.getWindow().setCursorShapeVertical();
+                    break;
+                default:
+                    break;
+            }
 
 //            if (resizeOption != GuiBuilderClasses.ResizeOptions.OFF)
 //            {
@@ -1197,7 +1189,7 @@ public class GuiBuilder {
         setNextWindowSize(300, 700 - 100);
         begin( "property", null, NoBringToFrontOnFocus);
         myFormsActive = isWindowFocused();
-        if (beginCombo("##itens", currentItem)) {
+        if (beginCombo("##items", currentItem)) {
             // list all obj render in array child and form
 
             for (Form form : forms)
@@ -1274,7 +1266,9 @@ public class GuiBuilder {
                 //inputText("name form", new ImString(name));
 
                 if (button("Apply name")) {
-                    if (!name.isEmpty()) form.setName(name.get());
+                    if (!formTextBox.getString().isEmpty()) {
+                        form.setName(formTextBox.getString());
+                    }
                 }
                 inputFloat("SizeX", new ImFloat(form.getSize().x), 1);
                 inputFloat("SizeY", new ImFloat(form.getSize().y), 1);

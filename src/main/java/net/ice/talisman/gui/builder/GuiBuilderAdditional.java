@@ -2,6 +2,7 @@ package net.ice.talisman.gui.builder;
 
 import imgui.*;
 import imgui.callback.ImGuiInputTextCallback;
+import imgui.flag.ImDrawFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
 import imgui.type.ImString;
@@ -159,6 +160,6 @@ public class GuiBuilderAdditional {
                 vMin.y + objSize.y + (distanceThickness * 2f)
         );
 
-        getWindowDrawList().addRect(vMin.x, vMin.y, vMax.x, vMax.y, col, 0f, 15, 0.01f);
+        getWindowDrawList().addRect(vMin.x, vMin.y, vMax.x, vMax.y, col, 0f, ImDrawFlags.RoundCornersAll, 0.01f);
     }
 }

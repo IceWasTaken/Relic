@@ -10,7 +10,6 @@ import java.util.List;
 public class Form {
 
     private int id = 0;
-    private int type = 0;
     private boolean changePos = false;
     private boolean hover = false;
     private boolean shouldDelete = false;
@@ -31,14 +30,9 @@ public class Form {
         this.id = id;
     }
 
-    public int getType() {
-        return type;
-    }
-
     public boolean shouldChangePos() {
         return changePos;
     }
-
     public boolean isHovered() {
         return hover;
     }

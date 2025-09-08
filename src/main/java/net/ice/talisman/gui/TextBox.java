@@ -12,7 +12,7 @@ public class TextBox {
     private ImString buffer;
 
     public TextBox() {
-        this.buffer = new ImString("");
+        this.buffer = new ImString();
     }
 
     public TextBox(ImString buffer) {
@@ -20,13 +20,10 @@ public class TextBox {
     }
 
     public boolean draw(String label) {
-        return ImGui.inputText(label, buffer, CallbackResize, consoleCallback);
+        return ImGui.inputText(label, buffer);
     }
 
-    private final ImGuiInputTextCallback consoleCallback = new ImGuiInputTextCallback() {
-        @Override
-        public void accept(ImGuiInputTextCallbackData data) {
-            data.setBuf(buffer.get());
-        }
-    };
+    public String getString() {
+        return buffer.get();
+    }
 }
