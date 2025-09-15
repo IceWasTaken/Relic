@@ -24,11 +24,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.GL_SHADING_LANGUAGE_VERSION;
 import static org.lwjgl.opengl.GL43.GL_MAX_SHADER_STORAGE_BLOCK_SIZE;
-import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public abstract class RelicApplication implements ApplicationContext {
 
-    private static final Version ENGINE_VERSION = new Version(0, 3, 0);
+    private static final Version ENGINE_VERSION = new Version(0, 4, 0);
 
     protected Scene currentScene;
     protected EngineState currentState;
