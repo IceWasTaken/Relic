@@ -37,6 +37,11 @@ dependencies {
     implementation "org.lwjgl:lwjgl-vma"
     implementation "org.lwjgl:lwjgl-vulkan"
 
+    implementation "org.joml:joml:${jomlVersion}"
+
+    implementation 'org.tinylog:tinylog-api:2.7.0'
+    implementation 'org.tinylog:tinylog-impl:2.7.0'
+
     implementation "org.json:json:20250107"
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     implementation "com.code-disaster.steamworks4j:steamworks4j:1.9.0"
@@ -55,10 +60,14 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-spvc::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 
-    implementation "org.joml:joml:${jomlVersion}"
+    runtimeOnly "io.github.spair:imgui-java-app:${imguiVersion}"
+    runtimeOnly "org.joml:joml:${jomlVersion}"
+    runtimeOnly 'org.tinylog:tinylog-api:2.7.0'
+    runtimeOnly 'org.tinylog:tinylog-impl:2.7.0'
 
-    implementation 'org.tinylog:tinylog-api:2.7.0'
-    implementation 'org.tinylog:tinylog-impl:2.7.0'
+
+
+
 
 }
 
