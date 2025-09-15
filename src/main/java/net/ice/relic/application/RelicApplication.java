@@ -15,7 +15,6 @@ import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.config.Config;
 import net.ice.relic.core.rendering.Renderer;
 import net.ice.relic.core.modding.ModManager;
-import net.ice.rune.scenes.SceneTest;
 import org.joml.Vector2f;
 import org.tinylog.Logger;
 

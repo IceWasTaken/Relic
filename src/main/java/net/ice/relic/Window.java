@@ -30,6 +30,7 @@ public class Window {
     private long verticalCursorHandle;
     private long NWCursorHandle;
     private long NECursorHandle;
+    private long AllCursorHandle;
 
     private GLFWFramebufferSizeCallback framebufferSizeCallback;
 
@@ -69,6 +70,7 @@ public class Window {
         this.verticalCursorHandle = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
         this.NWCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
         this.NECursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+        this.AllCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
 
         if(this.windowHandle == NULL) {
             glfwTerminate();
@@ -147,6 +149,9 @@ public class Window {
     }
     public void setCursorShapeNESW() {
         glfwSetCursor(windowHandle, NECursorHandle);
+    }
+    public void setCursorShapeAll() {
+        glfwSetCursor(windowHandle, AllCursorHandle);
     }
 
     public Vector2i getWindowSize() {

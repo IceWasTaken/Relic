@@ -1,6 +1,5 @@
 package net.ice.relic.core.modding;
 
-import net.ice.glyph.Glyph;
 import net.ice.relic.application.RelicApplication;
 import org.tinylog.Logger;
 
@@ -18,7 +17,7 @@ public class ModManager {
         this.modLoader = new ModLoader(application);
 
         mods = new ArrayList<>();
-        mods.add(new Glyph());
+
     }
 
     public void loadMods() {

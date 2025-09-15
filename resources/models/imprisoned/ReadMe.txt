@@ -1,1 +1,0 @@
-Ripped from Skyward Sword by Roxas358. No credit required.
