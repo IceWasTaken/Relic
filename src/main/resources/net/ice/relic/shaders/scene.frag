@@ -1,4 +1,4 @@
-#version 400
+#version 430
 
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : require
@@ -23,11 +23,19 @@ struct Material
     vec4 diffuse;
     vec4 specular;
     float reflectance;
+    float _padding;
+    float _padding1;
+    float _padding2;
     uint64_t textureHandle;
     uint64_t normalHandle;
+    //uint64_t emissiveHandle;
+    //uint64_t specularHandle;
+    //uint64_t AOHandle;
 };
 
-uniform Material materials[MAX_MATERIALS];
+layout(std430, binding = 5) buffer MaterialBuffer {
+    Material materials[MAX_MATERIALS];
+};
 
 vec3 calcNormal(Material mat, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoords) {
     mat3 TBN = mat3(tangent, bitangent, normal);
@@ -48,13 +56,13 @@ void main() {
         discard;
     }
     vec4 specular = text_color + material.specular;
-
     vec3 normal = outNormal;
     if (material.normalHandle != 0u) {
         normal = calcNormal(material, outNormal, outTangent, outBitangent, outTextCoord);
     }
 
-    buffAlbedo   = vec4(diffuse.xyz, material.reflectance);
-    buffNormal   = vec4(0.5 * normal + 0.5, 1.0);
+    buffAlbedo = vec4(diffuse.xyz, material.reflectance);
+    buffNormal = vec4(0.5 * normal + 0.5, 1.0);
     buffSpecular = specular;
+
 }

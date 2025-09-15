@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 java {
@@ -8,8 +9,8 @@ java {
     }
 }
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
+group = 'net.ice.relic'
+version = '0.3.0'
 
 repositories {
     mavenCentral()
@@ -20,8 +21,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
-    implementation "org.json:json:20250107"
     implementation "org.lwjgl:lwjgl"
     implementation "org.lwjgl:lwjgl-assimp"
     implementation "org.lwjgl:lwjgl-par"
@@ -37,9 +36,17 @@ dependencies {
     implementation "org.lwjgl:lwjgl-stb"
     implementation "org.lwjgl:lwjgl-vma"
     implementation "org.lwjgl:lwjgl-vulkan"
+
+    implementation "org.joml:joml:${jomlVersion}"
+
+    implementation 'org.tinylog:tinylog-api:2.7.0'
+    implementation 'org.tinylog:tinylog-impl:2.7.0'
+
+    implementation "org.json:json:20250107"
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     implementation "com.code-disaster.steamworks4j:steamworks4j:1.9.0"
     implementation "com.code-disaster.steamworks4j:steamworks4j-server:1.9.0"
+
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
@@ -53,36 +60,52 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-spvc::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 
-    implementation "org.joml:joml:${jomlVersion}"
+    runtimeOnly "io.github.spair:imgui-java-app:${imguiVersion}"
+    runtimeOnly "org.joml:joml:${jomlVersion}"
+    runtimeOnly 'org.tinylog:tinylog-api:2.7.0'
+    runtimeOnly 'org.tinylog:tinylog-impl:2.7.0'
 
-    implementation 'org.tinylog:tinylog-api:2.7.0'
-    implementation 'org.tinylog:tinylog-impl:2.7.0'
+
+
+
 
 }
 
-tasks.register('fatJar', Jar) {
-    archiveBaseName.set('Relic')
-    archiveClassifier.set('all')
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+publishing {
+    publications {
+       create("mavenJava", MavenPublication) {
+            from components.java
 
-    manifest {
-        attributes(
-                'Main-Class': 'net.ice.rune.Rune'
-        )
+            groupId = "net.ice"
+            artifactId = "relic"
+            version = "0.3.0"
+
+            pom {
+                name.set("Relic Engine")
+                description.set("Placeholder")
+                url.set("https://github.com/IceWasTaken/Relic")
+
+                developers {
+                    developer {
+                        id.set("Ice")
+                        name.set("")
+                    }
+                }
+            }
+        }
     }
-
-    // Include compiled classes
-    with tasks.named('jar').get()
-
-    // Include runtime dependencies
-    from({
-        configurations.runtimeClasspath
-                .filter { it.name.endsWith('jar') }
-                .collect { zipTree(it) }
-    })
-
-
-    from {
-        sourceSets.main.resources.srcDirs
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/IceWasTaken/Relic")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
 }
