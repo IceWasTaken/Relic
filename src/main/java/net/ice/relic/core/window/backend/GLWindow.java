@@ -1,46 +1,24 @@
-package net.ice.relic;
+package net.ice.relic.core.window.backend;
 
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.config.configs.WindowConfig;
-import org.joml.Vector2i;
+import net.ice.relic.core.window.Window;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.system.MemoryUtil;
 import org.tinylog.Logger;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-@Deprecated
-public class Window {
+public class GLWindow extends Window {
 
-    private long windowHandle = NULL;
-
-    private int width;
-    private int height;
-    private String title;
-    private long monitor;
-
-    private boolean isInitialized;
-
-    private long standardCursorHandle;
-    private long horizontalCursorHandle;
-    private long verticalCursorHandle;
-    private long NWCursorHandle;
-    private long NECursorHandle;
-    private long AllCursorHandle;
-
-
-    private final RelicApplication application;
-
-    public Window(RelicApplication application) {
-        this.application = application;
-
-        isInitialized = false;
+    public GLWindow(RelicApplication application) {
+        super(application);
     }
 
-    public void init() throws RuntimeException {
+    @Override
+    public void init() {
         WindowConfig config = application.getConfig().getWindowConfig();
 
         if(!glfwInit()) {
@@ -84,7 +62,7 @@ public class Window {
         glfwSetFramebufferSizeCallback(windowHandle, new GLFWFramebufferSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
-                setSize(width, height);
+                resize(width, height);
                 application.getCurrentScene().getMatrix().updateProjMatrix(width, height);
                 application.getRenderer().resize();
             }
@@ -94,11 +72,12 @@ public class Window {
                 Logger.error("Error code [{}], msg [{}]", errorCode, MemoryUtil.memUTF8(msgPtr))
         );
 
-        this.isInitialized = true;
+        this.initialized = true;
     }
 
-    public void update() {
-        if(!isInitialized) {
+    @Override
+    public void resize(int width, int height) {
+        if(!initialized) {
             throw new IllegalStateException("Window has not been initialized yet.");
         }
 
@@ -106,83 +85,9 @@ public class Window {
         glfwPollEvents();
     }
 
-    public void destroy() {
-        if(!isInitialized) {
-            return;
-        }
 
-        glfwDestroyWindow(windowHandle);
-    }
+    @Override
+    public void update(float deltaTime) {
 
-    public boolean shouldClose() {
-        if(!isInitialized) {
-            return false;
-        }
-
-        return glfwWindowShouldClose(windowHandle);
     }
-
-
-    public void refreshSize() {
-        glViewport(0, 0, width, height);
-    }
-
-    public void setSize(int width, int height) {
-        setWidth(width);
-        setHeight(height);
-    }
-
-    public void setCursorShapeStandard() {
-        glfwSetCursor(windowHandle, standardCursorHandle);
-    }
-    public void setCursorShapeHorizontal() {
-        glfwSetCursor(windowHandle, horizontalCursorHandle);
-    }
-    public void setCursorShapeVertical() {
-        glfwSetCursor(windowHandle, verticalCursorHandle);
-    }
-    public void setCursorShapeNWSE() {
-        glfwSetCursor(windowHandle, NWCursorHandle);
-    }
-    public void setCursorShapeNESW() {
-        glfwSetCursor(windowHandle, NECursorHandle);
-    }
-    public void setCursorShapeAll() {
-        glfwSetCursor(windowHandle, AllCursorHandle);
-    }
-
-    public Vector2i getWindowSize() {
-        return new Vector2i(width, height);
-    }
-
-    //default setters / getters
-
-    public long getWindowHandle() {
-        return windowHandle;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public long getMainMonitor() {
-        return monitor;
-    }
-
-    public String getCurrentTitle() {
-        return title;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
 }

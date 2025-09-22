@@ -7,7 +7,6 @@ public class OSUtil {
     public static OSType getOSType() {
         OSType result;
         String os = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-        System.out.println(os);
         result = switch (os) {
             case "mac" -> OSType.MAC;
             case "nux" -> OSType.LINUX;

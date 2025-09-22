@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static net.ice.relic.core.rendering.backend.vulkan.VulkanUtil.checkVulkanResult;
+import static net.ice.relic.core.rendering.backend.vulkan.VulkanUtil.checkVulkan;
 import static org.lwjgl.vulkan.KHRPortabilitySubset.VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -66,7 +66,7 @@ public class Device {
                     .pQueueCreateInfos(queueCreateInfoBuffer);
 
             PointerBuffer pDevice = stack.mallocPointer(1);
-            checkVulkanResult(vkCreateDevice(physicalDevice.getPhysicalDevice(), deviceCreateInfo, null, pDevice), "Failed to create device");
+            checkVulkan(vkCreateDevice(physicalDevice.getPhysicalDevice(), deviceCreateInfo, null, pDevice), "Failed to create device");
             device = new VkDevice(pDevice.get(0), physicalDevice.getPhysicalDevice(), deviceCreateInfo);
         }
 
@@ -92,6 +92,13 @@ public class Device {
         return deviceExtensions;
     }
 
+    public VkDevice getVkDevice() {
+        return device;
+    }
+
+    public PhysicalDevice getPhysicalDevice() {
+        return physicalDevice;
+    }
 
     public static class PhysicalDevice {
 
@@ -114,9 +121,9 @@ public class Device {
                 vkGetPhysicalDeviceProperties(physicalDevice, physicalDeviceProperties);
 
                 //Device Extensions
-                checkVulkanResult(vkEnumerateDeviceExtensionProperties(physicalDevice, (String) null, intBuffer, null), "Failed to get number of device extensions");
+                checkVulkan(vkEnumerateDeviceExtensionProperties(physicalDevice, (String) null, intBuffer, null), "Failed to get number of device extensions");
                 deviceExtensions = VkExtensionProperties.calloc(intBuffer.get(0));
-                checkVulkanResult(vkEnumerateDeviceExtensionProperties(physicalDevice, (String) null, intBuffer, deviceExtensions), "Failed to get device extensions");
+                checkVulkan(vkEnumerateDeviceExtensionProperties(physicalDevice, (String) null, intBuffer, deviceExtensions), "Failed to get device extensions");
 
                 //Queue Families
                 vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, intBuffer, null);
@@ -182,12 +189,12 @@ public class Device {
             PointerBuffer devices;
 
             IntBuffer intBuffer = stack.mallocInt(1);
-            checkVulkanResult(vkEnumeratePhysicalDevices(instance.getInstance(), intBuffer, null), "Failed to get number of physical devices");
+            checkVulkan(vkEnumeratePhysicalDevices(instance.getInstance(), intBuffer, null), "Failed to get number of physical devices");
             int deviceCount = intBuffer.get(0);
             Logger.info("Vulkan: Found {} physical devices.", deviceCount);
 
             devices = stack.mallocPointer(deviceCount);
-            checkVulkanResult(vkEnumeratePhysicalDevices(instance.getInstance(), intBuffer, devices), "Failed to get physical devices");
+            checkVulkan(vkEnumeratePhysicalDevices(instance.getInstance(), intBuffer, devices), "Failed to get physical devices");
             return devices;
         }
 

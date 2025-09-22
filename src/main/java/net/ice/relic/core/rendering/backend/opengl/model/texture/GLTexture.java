@@ -1,6 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl.model.texture;
 
 import net.ice.relic.common.asset.image.Image;
+import net.ice.relic.core.resource.Resource;
 import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
@@ -16,15 +17,15 @@ public class GLTexture {
     private final int textureID;
     private final long bindlessHandle;
 
-    public GLTexture(String path) {
+    public GLTexture(Resource path) {
         this(new Image(path));
     }
 
     public GLTexture(Image image) {
-        this(image.getPath(), image.getWidth(), image.getHeight(), image.getData());
+        this(image.getResource(), image.getWidth(), image.getHeight(), image.getData());
     }
 
-    public GLTexture(String path, int width, int height, ByteBuffer data) {
+    public GLTexture(Resource resource, int width, int height, ByteBuffer data) {
         this.textureID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -34,17 +35,19 @@ public class GLTexture {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        stbi_image_free(data);
+        if(data != null) {
+            stbi_image_free(data);
+        }
 
         this.bindlessHandle = glGetTextureHandleARB(textureID);
         if(bindlessHandle == 0L) {
-            throw new RuntimeException("Failed to obtain bindless handle.");
+            Logger.error("Failed to obtain texture bindless handle.");
         }
 
         glMakeTextureHandleResidentARB(bindlessHandle);
 
         if(!glIsTextureHandleResidentARB(bindlessHandle)) {
-            Logger.error("Texture handle not resident: {}", path);
+            Logger.error("Texture handle not resident: {}", resource.getAsPath());
         }
     }
 
@@ -86,6 +89,7 @@ public class GLTexture {
 
         glMakeTextureHandleResidentARB(bindlessHandle);
     }
+
 
     public long getBindlessHandle() {
         return bindlessHandle;

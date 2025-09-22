@@ -1,12 +1,14 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
+import net.ice.relic.core.rendering.buffer.VertexBuffer;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL15.*;
 
-public class VertexBufferObject {
+public class VertexBufferObject implements VertexBuffer {
 
     private final int id;
 
@@ -14,6 +16,7 @@ public class VertexBufferObject {
         this.id = glGenBuffers();
     }
 
+    @Override
     public void bind(int type) {
         glBindBuffer(type, id);
     }
@@ -40,6 +43,18 @@ public class VertexBufferObject {
 
     public int getId() {
         return id;
+    }
+
+
+
+    @Override
+    public void unbind() {
+
+    }
+
+    @Override
+    public void bufferData() {
+
     }
 
     public void delete() {

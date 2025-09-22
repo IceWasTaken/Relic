@@ -53,39 +53,25 @@ public class ShaderStorageBufferObject {
             this.data = ByteBuffer.allocateDirect(INITIAL_CAPACITY).order(ByteOrder.nativeOrder());
         }
 
-         private void ensureCapacity(int additionalBytes) {
-             if (data.remaining() < additionalBytes) {
-                 int newCapacity = Math.max(data.capacity() << 1, size + additionalBytes);
-                 ByteBuffer newBuffer = ByteBuffer.allocateDirect(newCapacity).order(ByteOrder.nativeOrder());
-                 data.flip(); // Prepare old buffer for reading
-                 newBuffer.put(data); // Copy old data
-                 data = newBuffer;
-             }
-         }
-
         public Builder addFloat(float value) {
-            //ensureCapacity(Float.BYTES);
             size += Float.BYTES;
             data.putFloat(value);
             return this;
         }
 
         public Builder addInt(int value) {
-            //ensureCapacity(Integer.BYTES);
             size += Integer.BYTES;
             data.putInt(value);
             return this;
         }
 
         public Builder addLong(long value) {
-            //ensureCapacity(Long.BYTES);
             size += Long.BYTES;
             data.putLong(value);
             return this;
         }
 
         public Builder addVec3f(Vector3f value) {
-            //ensureCapacity(3 * Float.BYTES);
             size += 3 * Float.BYTES;
             data.putFloat(value.x);
             data.putFloat(value.y);
@@ -94,7 +80,6 @@ public class ShaderStorageBufferObject {
         }
 
         public Builder addVec4f(Vector4f value) {
-            //ensureCapacity(4 * Float.BYTES);
             size += 4 * Float.BYTES;
             data.putFloat(value.x);
             data.putFloat(value.y);
@@ -104,7 +89,6 @@ public class ShaderStorageBufferObject {
         }
 
         public Builder addPadding(int bytes) {
-            //ensureCapacity(bytes);
             for (int i = 0; i < bytes; i++) {
                 data.put((byte) 0);
             }

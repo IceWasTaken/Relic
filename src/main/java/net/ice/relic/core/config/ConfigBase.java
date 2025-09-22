@@ -1,11 +1,13 @@
 package net.ice.relic.core.config;
 
+import net.ice.relic.core.resource.Resource;
+
 public abstract class ConfigBase {
 
     protected ConfigFile configFile;
     protected ConfigFile defaultConfigFile;
 
-    protected ConfigBase(String configFilePath, String defaultConfigFilePath) {
+    protected ConfigBase(String configFilePath, Resource defaultConfigFilePath) {
         this.configFile = ConfigFile.loadFromFile(configFilePath);
         this.defaultConfigFile = ConfigFile.loadFromJar(defaultConfigFilePath);
     }

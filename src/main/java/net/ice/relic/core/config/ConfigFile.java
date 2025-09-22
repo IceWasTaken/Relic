@@ -1,9 +1,9 @@
 package net.ice.relic.core.config;
 
+import net.ice.relic.core.resource.Resource;
 import org.tinylog.Logger;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 public class ConfigFile extends Properties {
@@ -26,10 +26,9 @@ public class ConfigFile extends Properties {
         return file;
     }
 
-    public static ConfigFile loadFromJar(String path) {
-        ConfigFile file = new ConfigFile(path);
-        try(InputStream stream = ConfigFile.class.getClassLoader().getResourceAsStream(path)) {
-            URL url = ConfigFile.class.getClassLoader().getResource(path);
+    public static ConfigFile loadFromJar(Resource path) {
+        ConfigFile file = new ConfigFile(path.getAsPath());
+        try(InputStream stream = ConfigFile.class.getClassLoader().getResourceAsStream( path.getAsPath())) {
 
             if(stream == null) {
                 throw new RuntimeException("Config file not in JAR.");

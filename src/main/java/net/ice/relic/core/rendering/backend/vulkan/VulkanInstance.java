@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static net.ice.relic.core.rendering.backend.vulkan.VulkanUtil.checkVulkanResult;
+import static net.ice.relic.core.rendering.backend.vulkan.VulkanUtil.checkVulkan;
 import static org.lwjgl.vulkan.EXTDebugUtils.*;
 import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 import static org.lwjgl.vulkan.VK10.*;
@@ -53,7 +53,6 @@ public class VulkanInstance {
                 Logger.warn("Vulkan: No validation layers found. Validation will be disabled.");
             }
             Logger.info("Vulkan: Found {} validation layers.", layerCount);
-            Logger.info("Vulkan: Validation - {}", supportsValidation);
 
             PointerBuffer requiredExtensions = null;
             if(supportsValidation) {
@@ -65,7 +64,6 @@ public class VulkanInstance {
             }
 
             Set<String> extensions = getInstanceExtensions();
-
             PointerBuffer glfwExtensions = GLFWVulkan.glfwGetRequiredInstanceExtensions();
             if(glfwExtensions == null) {
                 throw new RuntimeException("Failed to find GLFW extensions.");
@@ -109,13 +107,13 @@ public class VulkanInstance {
             }
 
             PointerBuffer pInstance = stack.mallocPointer(1);
-            checkVulkanResult(vkCreateInstance(instanceInfo, null, pInstance), "Vulkan: Error creating instance");
+            checkVulkan(vkCreateInstance(instanceInfo, null, pInstance), "Vulkan: Error creating instance");
             instance = new VkInstance(pInstance.get(0), instanceInfo);
 
             debugHandle = VK_NULL_HANDLE;
             if (supportsValidation) {
                 LongBuffer longBuff = stack.mallocLong(1);
-                checkVulkanResult(vkCreateDebugUtilsMessengerEXT(instance, debugUtils, null, longBuff), "Error creating debug utils");
+                checkVulkan(vkCreateDebugUtilsMessengerEXT(instance, debugUtils, null, longBuff), "Error creating debug utils");
                 debugHandle = longBuff.get(0);
             }
         }

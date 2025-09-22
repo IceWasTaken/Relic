@@ -1,6 +1,7 @@
 package net.ice.relic.core.config.configs;
 
 import net.ice.relic.core.config.ConfigBase;
+import net.ice.relic.core.resource.Resource;
 
 public class PlayerConfig extends ConfigBase {
 
@@ -8,7 +9,7 @@ public class PlayerConfig extends ConfigBase {
     private static final String fileName = "playerConfig.properties";
 
     private static final String configPath = "config/" + fileName;
-    private static final String defaultConfigPath = "net/ice/relic/config/" + defaultFileName;
+    private static final Resource defaultConfigPath = Resource.getResourceWithDefaultNamespace("data/config/" + defaultFileName);
 
     private float mouseSensitivity;
 

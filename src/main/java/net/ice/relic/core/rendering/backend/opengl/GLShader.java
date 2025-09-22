@@ -38,13 +38,14 @@ public class GLShader {
     public static GLShader loadShader(String fileName, ShaderType type, boolean postShader) {
         StringBuilder shaderSource = new StringBuilder();
 
-        try(InputStream stream = GLShader.class.getResourceAsStream("/net/ice/relic/shaders/" + fileName)) {
+        try(InputStream stream = GLShader.class.getResourceAsStream("/relic/data/rendering/gl/shaders/" + fileName)) {
             if(stream != null) {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         shaderSource.append(line).append("\n");
                     }
+
                 }
             }
         } catch (IOException exception) {

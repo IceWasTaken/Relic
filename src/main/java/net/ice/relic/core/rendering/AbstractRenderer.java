@@ -45,6 +45,7 @@ public abstract class AbstractRenderer {
         this.geometryBuffer = buffer;
         this.refractionBuffer = refractionBuffer;
         this.reflectionBuffer = reflectionBuffer;
+        assertNoError();
         initUniforms();
     }
 

@@ -1,6 +1,7 @@
 package net.ice.relic.common.asset.image;
 
 import net.ice.relic.common.asset.Asset;
+import net.ice.relic.core.resource.Resource;
 import org.lwjgl.system.MemoryStack;
 import org.tinylog.Logger;
 
@@ -14,26 +15,33 @@ public class Image implements Asset {
     protected final int height;
     protected final int width;
 
-    protected final String path;
+    protected final Resource resource;
     protected final ByteBuffer data;
 
     public Image(String path) {
-        this.path = path;
+        this(Resource.getResourceWithDefaultNamespace(path));
+    }
+
+    public Image(Resource resource) {
+        this.resource = resource;
 
         try(MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer buffer = resource.load();
+
             IntBuffer widthBuffer = stack.mallocInt(1);
             IntBuffer heightBuffer = stack.mallocInt(1);
             IntBuffer channelBuffer = stack.mallocInt(1);
 
-            this.data = stbi_load(path, widthBuffer, heightBuffer, channelBuffer, 4);
+            this.data = stbi_load_from_memory(buffer, widthBuffer, heightBuffer, channelBuffer, 4);
             this.width = widthBuffer.get(0);
             this.height = heightBuffer.get(0);
 
             if(data == null) {
-                Logger.debug("Failed to load texture: {} - {}", path, stbi_failure_reason());
+                Logger.error("Failed to load texture: {} - {}", resource.getAsPath(), stbi_failure_reason());
             }
         }
     }
+
 
     public int getHeight() {
         return height;
@@ -43,8 +51,8 @@ public class Image implements Asset {
         return width;
     }
 
-    public String getPath() {
-        return path;
+    public Resource getResource() {
+        return resource;
     }
 
     @Override
@@ -55,4 +63,6 @@ public class Image implements Asset {
     public ByteBuffer getData() {
         return data;
     }
+
+
 }

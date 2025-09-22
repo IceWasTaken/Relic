@@ -344,8 +344,6 @@ public class RenderingBuffers {
             meshesBuffer.put(textCoords[startTextCoord]);
             meshesBuffer.put(textCoords[startTextCoord + 1]);
         }
-
-        System.out.println(Arrays.toString(positions));
     }
 
     public VertexArrayObject getAnimationArrayObject() {

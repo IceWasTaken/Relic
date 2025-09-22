@@ -62,7 +62,7 @@ public class SkyboxRenderer extends AbstractRenderer {
         GLTexture texture = textureCache.getTexture(material.getTexturePath());
         uniforms.setUniform("textureHandle", texture.getBindlessHandle());
         uniforms.setUniform("diffuse", material.getDiffuseColor().convertToGLVector4f());
-        uniforms.setUniform("hasTexture", texture.getBindlessHandle() != 0 && !texture.equals(textureCache.getTexture(TextureCache.DEFAULT_TEXTURE))  ? 1 : 0);
+        uniforms.setUniform("hasTexture", texture.getBindlessHandle() != 0 && !texture.equals(textureCache.getTexture(TextureCache.DEFAULT_TEXTURE.getPath()))  ? 1 : 0);
 
         uniforms.setUniform("modelMatrix", skyBoxEntity.getTransform().getTransformMatrix());
         glDrawElements(GL_TRIANGLES, mesh.getVertexCount(), GL_UNSIGNED_INT, 0);

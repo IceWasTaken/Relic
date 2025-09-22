@@ -1,6 +1,5 @@
 package net.ice.relic.core.rendering.backend.opengl.model;
 
-import net.ice.relic.core.AABB;
 import net.ice.relic.core.model.MeshData;
 import net.ice.relic.core.rendering.backend.opengl.VertexArrayObject;
 import net.ice.relic.core.rendering.backend.opengl.VertexBufferObject;
@@ -20,12 +19,10 @@ public class Mesh {
 
     private int vertexCount;
 
-    private AABB aabb;
     private VertexArrayObject vertexArrayObject;
     private List<VertexBufferObject> VBOs;
 
     public Mesh(MeshData data) {
-        this.aabb = data.getAabb();
         this.vertexCount = data.getIndices().length;
         this.VBOs = new ArrayList<>();
 

@@ -1,8 +1,10 @@
 package net.ice.relic.core.model;
 
+import net.ice.relic.common.util.AssimpUtil;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
 import net.ice.relic.common.util.ColorUtil;
+import net.ice.relic.core.resource.Resource;
 import org.lwjgl.assimp.AIColor4D;
 import org.lwjgl.assimp.AIMaterial;
 import org.lwjgl.assimp.AIString;
@@ -12,6 +14,7 @@ import org.lwjgl.system.MemoryStack;
 import java.io.File;
 import java.nio.IntBuffer;
 
+import static net.ice.relic.common.util.AssimpUtil.getMaterialColor;
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_DIFFUSE;
 import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_SPECULAR;
@@ -78,24 +81,11 @@ public class Material {
         float reflectance = 0.0f;
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            AIColor4D color = AIColor4D.create();
+            material.setAmbientColor(getMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT).convertFromOpenGLColor());
+            material.setDiffuseColor(getMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE).convertFromOpenGLColor());
+            material.setSpecularColor(getMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR).convertFromOpenGLColor());
+            material.setEmissiveColor(getMaterialColor(aiMaterial, AI_MATKEY_COLOR_EMISSIVE).convertFromOpenGLColor());
 
-            int ambientResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, color);
-            if (ambientResult == aiReturn_SUCCESS) {
-                material.setAmbientColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
-            }
-            int diffuseResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color);
-            if (diffuseResult == aiReturn_SUCCESS) {
-                material.setDiffuseColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
-            }
-            int specularResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, color);
-            if (specularResult == aiReturn_SUCCESS) {
-                material.setSpecularColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
-            }
-            int emissiveResult = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_EMISSIVE, aiTextureType_NONE, 0, color);
-            if (emissiveResult == aiReturn_SUCCESS) {
-                material.setEmissiveColor(new ColorUtil.Color(color.r(), color.g(), color.b(), color.a()).convertFromOpenGLColor());
-            }
             //dumb
             int shininessResult = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH, aiTextureType_NONE, 0, shininess, max);
             if (shininessResult != aiReturn_SUCCESS) {
@@ -108,40 +98,31 @@ public class Material {
             String texturePath = aiTexturePath.dataString();
             if (!texturePath.isEmpty()) {
                 material.setTexturePath(directory + File.separator + "textures/" + new File(texturePath).getName());
-                GLTexture texture = textureCache.createTexture(material.getTexturePath());
+                GLTexture texture = textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getTexturePath()));
                 material.setDiffuseColor(Material.DEFAULT_COLOR);
                 material.setTexture(texture);
             }
 
-            AIString aiNormalMapPath = AIString.calloc(stack);
-            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_NORMALS, 0, aiNormalMapPath, (IntBuffer) null, null, null, null, null, null);
-            String normalMapPath = aiNormalMapPath.dataString();
-            if (!normalMapPath.isEmpty()) {
-                material.setNormalMapPath(directory + File.separator + "textures/" + new File(normalMapPath).getName());
-                material.setNormalMap(textureCache.createTexture(material.getNormalMapPath()));
+            String texPath;
+            if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_NORMALS)).isEmpty()) {
+                material.setNormalMapPath(directory + File.separator + "textures/" + new File(texPath).getName());
+                material.setNormalMap(textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getNormalMapPath())));
             }
-            AIString aiEmissiveMapPath = AIString.calloc(stack);
-            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_EMISSIVE, 0, aiEmissiveMapPath, (IntBuffer) null, null, null, null, null, null);
-            String emissiveMapPath = aiEmissiveMapPath.dataString();
-            if (!emissiveMapPath.isEmpty()) {
-                material.setEmissiveMapPath(directory + File.separator + "textures/" + new File(emissiveMapPath).getName());
-                material.setEmissiveMap(textureCache.createTexture(material.getNormalMapPath()));
+
+            if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_EMISSIVE)).isEmpty()) {
+                material.setEmissiveMapPath(directory + File.separator + "textures/" + new File(texPath).getName());
+                material.setEmissiveMap(textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getEmissiveMapPath())));
             }
-            AIString aiSpecularMapPath = AIString.calloc(stack);
-            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_SPECULAR, 1, aiSpecularMapPath, (IntBuffer) null, null, null, null, null, null);
-            String specularMapPath = aiSpecularMapPath.dataString();
-            if (!specularMapPath.isEmpty()) {
-                System.out.println(specularMapPath);
-                material.setSpecularMapPath(directory + File.separator + "textures/" + new File(specularMapPath).getName());
-                material.setSpecularMap(textureCache.createTexture(material.getNormalMapPath()));
-            }
-            AIString aiAOMapPath = AIString.calloc(stack);
-            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_AMBIENT, 1, aiAOMapPath, (IntBuffer) null, null, null, null, null, null);
-            String aoMapPath = aiAOMapPath.dataString();
-            if (!aoMapPath.isEmpty()) {
-                material.setAOMapPath(directory + File.separator + "textures/" + new File(aoMapPath).getName());
-                material.setAOMap(textureCache.createTexture(material.getNormalMapPath()));
-            }
+
+//            if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_SPECULAR, 1)).isEmpty()) {
+//                material.setSpecularMapPath(directory + File.separator + "textures/" + new File(texPath).getName());
+//                material.setSpecularMap(textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getNormalMapPath())));
+//            }
+//
+//            if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_AMBIENT, 1)).isEmpty()) {
+//                material.setAOMapPath(directory + File.separator + "textures/" + new File(texPath).getName());
+//                material.setAOMap(textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getNormalMapPath())));
+//            }
 
             return material;
         }
