@@ -2,7 +2,7 @@ package net.ice.relic.core.modding;
 
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.Input;
-import net.ice.relic.core.rendering.Renderer;
+import net.ice.relic.core.rendering.backend.opengl.rendering.GLRenderer;
 
 public interface IMod {
 
@@ -16,9 +16,9 @@ public interface IMod {
 
     default void postUpdate(float deltaTime) {}
 
-    default void preRender(Renderer renderer) {}
+    default void preRender(GLRenderer renderer) {}
 
-    default void postRender(Renderer renderer) {}
+    default void postRender(GLRenderer renderer) {}
 
     default void cleanup() {}
 

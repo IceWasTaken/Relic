@@ -1,7 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl.rendering;
 
 import net.ice.relic.core.rendering.backend.opengl.VertexArrayObject;
-import net.ice.relic.core.rendering.backend.opengl.VertexBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;

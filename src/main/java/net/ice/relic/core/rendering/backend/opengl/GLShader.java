@@ -1,5 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
+import net.ice.relic.core.rendering.shader.ShaderType;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,21 +73,5 @@ public class GLShader {
         return type;
     }
 
-    public enum ShaderType {
 
-        VERTEX(GL_VERTEX_SHADER),
-        FRAGMENT(GL_FRAGMENT_SHADER),
-        GEOMETRY(GL_GEOMETRY_SHADER),
-        COMPUTE(GL_COMPUTE_SHADER),;
-
-        private final int glType;
-
-        ShaderType(int glType) {
-            this.glType = glType;
-        }
-
-        public int getGlType() {
-            return glType;
-        }
-    }
 }

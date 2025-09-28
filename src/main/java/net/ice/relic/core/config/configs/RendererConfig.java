@@ -1,6 +1,7 @@
 package net.ice.relic.core.config.configs;
 
 import net.ice.relic.core.config.ConfigBase;
+import net.ice.relic.core.config.enums.BackendType;
 import net.ice.relic.core.config.enums.GraphicsQuality;
 import net.ice.relic.core.resource.Resource;
 
@@ -21,6 +22,7 @@ public class RendererConfig extends ConfigBase {
     private Integer maxSpotLights;
     private GraphicsQuality shadowQuality;
     private GraphicsQuality lightingQuality;
+    private BackendType backendType;
 
     public RendererConfig() {
         super(configPath, defaultConfigPath);
@@ -37,6 +39,7 @@ public class RendererConfig extends ConfigBase {
         maxSpotLights = getInt("max_spot_lights");
         shadowQuality = getEnum("shadowQuality", GraphicsQuality.class);
         lightingQuality = getEnum("lightingQuality", GraphicsQuality.class);
+        backendType = getEnum("backendType", BackendType.class);
 
         return this;
     }
@@ -102,5 +105,12 @@ public class RendererConfig extends ConfigBase {
     }
     public void setShadowQuality(GraphicsQuality shadowQuality) {
         this.shadowQuality = shadowQuality;
+    }
+
+    public BackendType getBackendType() {
+        return backendType;
+    }
+    public void setBackendType(BackendType backendType) {
+        this.backendType = backendType;
     }
 }

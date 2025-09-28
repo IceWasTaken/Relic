@@ -9,7 +9,12 @@ public abstract class BackendManager implements Initializable, Cleanable, Render
 
     protected final RelicApplication application;
 
+
     public BackendManager(RelicApplication relicApplication) {
         this.application = relicApplication;
+    }
+
+    public RelicApplication getApplication() {
+        return application;
     }
 }

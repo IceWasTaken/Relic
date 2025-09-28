@@ -1,7 +1,5 @@
 package net.ice.relic.common.asset.image;
 
-import net.ice.relic.common.asset.Asset;
-import net.ice.relic.core.resource.Resource;
 import org.lwjgl.system.MemoryStack;
 import org.tinylog.Logger;
 
@@ -10,23 +8,15 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.stb.STBImage.*;
 
-public class Image implements Asset {
+public class Image {
 
     protected final int height;
     protected final int width;
 
-    protected final Resource resource;
     protected final ByteBuffer data;
 
-    public Image(String path) {
-        this(Resource.getResourceWithDefaultNamespace(path));
-    }
-
-    public Image(Resource resource) {
-        this.resource = resource;
-
+    public Image(ByteBuffer buffer) {
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer buffer = resource.load();
 
             IntBuffer widthBuffer = stack.mallocInt(1);
             IntBuffer heightBuffer = stack.mallocInt(1);
@@ -37,11 +27,10 @@ public class Image implements Asset {
             this.height = heightBuffer.get(0);
 
             if(data == null) {
-                Logger.error("Failed to load texture: {} - {}", resource.getAsPath(), stbi_failure_reason());
+                Logger.error("Failed to load texture: {}",  stbi_failure_reason());
             }
         }
     }
-
 
     public int getHeight() {
         return height;
@@ -51,11 +40,6 @@ public class Image implements Asset {
         return width;
     }
 
-    public Resource getResource() {
-        return resource;
-    }
-
-    @Override
     public void cleanup() {
         stbi_image_free(data);
     }

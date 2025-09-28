@@ -1,7 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl.model;
 
 import net.ice.relic.core.model.MeshData;
-import net.ice.relic.core.rendering.backend.opengl.rendering.buffer.RenderingBuffers;
+import net.ice.relic.core.rendering.backend.opengl.GLManager;
 import net.ice.relic.core.scene.SceneObject;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class Model {
     private List<Animation> animations;
     private List<SceneObject> sceneObjects;
     private List<MeshData> meshData;
-    private List<RenderingBuffers.MeshDrawData> meshDrawData;
+    private List<GLManager.MeshDrawData> meshDrawData;
 
     public Model(String id, List<MeshData> meshData, List<Animation> animations) {
         this.id = id;
@@ -45,7 +45,7 @@ public class Model {
         return meshData;
     }
 
-    public List<RenderingBuffers.MeshDrawData> getMeshDrawData() {
+    public List<GLManager.MeshDrawData> getMeshDrawData() {
         return meshDrawData;
     }
 }

@@ -31,7 +31,6 @@ public class SceneObject implements Updatable {
 
     @Override
     public void update(float deltaTime) {
-        transform.update();
     }
 
     public AnimationData getAnimationData() {

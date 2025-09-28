@@ -6,6 +6,7 @@ import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 
+import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
 import static org.lwjgl.opengl.ARBBindlessTexture.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.GL_RGBA16F;
@@ -17,15 +18,20 @@ public class GLTexture {
     private final int textureID;
     private final long bindlessHandle;
 
-    public GLTexture(Resource path) {
-        this(new Image(path));
+    public GLTexture(Resource resource) {
+        this(new Image(resource.load()));
+    }
+
+    public GLTexture(ByteBuffer data) {
+        this(new Image(data));
+
     }
 
     public GLTexture(Image image) {
-        this(image.getResource(), image.getWidth(), image.getHeight(), image.getData());
+        this(image.getWidth(), image.getHeight(), image.getData());
     }
 
-    public GLTexture(Resource resource, int width, int height, ByteBuffer data) {
+    public GLTexture(int width, int height, ByteBuffer data) {
         this.textureID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -47,32 +53,10 @@ public class GLTexture {
         glMakeTextureHandleResidentARB(bindlessHandle);
 
         if(!glIsTextureHandleResidentARB(bindlessHandle)) {
-            Logger.error("Texture handle not resident: {}", resource.getAsPath());
+            Logger.error("Texture handle not resident: {}");
         }
+        assertNoError();
     }
-
-    public GLTexture(int width, int height, ByteBuffer imageData) {
-        this.textureID = glGenTextures();
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        this.bindlessHandle = glGetTextureHandleARB(textureID);
-        if (bindlessHandle == 0L) {
-            throw new RuntimeException("Failed to obtain bindless texture handle.");
-        }
-
-        glMakeTextureHandleResidentARB(bindlessHandle);
-
-        if (!glIsTextureHandleResidentARB(bindlessHandle)) {
-            Logger.error("Texture handle not resident: {}", "internal resource");
-        }
-    }
-
 
     public GLTexture(int width, int height) {
         this.textureID = glGenTextures();

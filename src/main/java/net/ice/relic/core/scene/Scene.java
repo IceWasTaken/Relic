@@ -1,17 +1,17 @@
 package net.ice.relic.core.scene;
 
 import net.ice.relic.Lifecycle;
-import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.annotations.Rewrite;
+import net.ice.relic.common.util.ColorUtil;
+import net.ice.relic.core.ProjectionMatrix;
 import net.ice.relic.core.gui.Gui;
+import net.ice.relic.core.rendering.backend.opengl.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.model.ModelLoader;
+import net.ice.relic.core.scene.light.AmbientLight;
 import net.ice.relic.core.scene.light.DirectionalLight;
 import net.ice.relic.core.scene.light.PointLight;
 import net.ice.relic.core.scene.light.SpotLight;
-import net.ice.relic.core.ProjectionMatrix;
-import net.ice.relic.core.rendering.backend.opengl.model.Model;
-import net.ice.relic.core.scene.light.AmbientLight;
-import net.ice.relic.core.rendering.backend.opengl.model.ModelLoader;
-import net.ice.relic.common.util.ColorUtil;
 import org.joml.Vector3f;
 import org.tinylog.Logger;
 
@@ -58,7 +58,7 @@ public abstract class Scene implements Lifecycle {
         this.objects = new HashMap<>();
         this.fog = new Fog(false, ColorUtil.ColorDefaults.WHITE.getColor(), 0.2f);
 
-        this.ambientLight = new AmbientLight().setIntensity(100).setColor(0.3f, 0.3f, 0.3f);
+        this.ambientLight = new AmbientLight().setIntensity(10).setColor(0.3f, 0.3f, 0.3f);
         this.directionalLight = new DirectionalLight(ColorUtil.ColorDefaults.WHITE.getColor(), new Vector3f(0, 1, 0), 1);
         this.spotLights = new ArrayList<>();
         this.pointLights = new ArrayList<>();

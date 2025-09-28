@@ -1,5 +1,7 @@
 package net.ice.relic.common.generation;
 
+import net.ice.relic.common.noise.FastNoiseLite;
+import net.ice.relic.common.util.NoiseUtil;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
@@ -7,8 +9,7 @@ import net.ice.relic.core.model.Material;
 import net.ice.relic.core.model.MeshData;
 import net.ice.relic.core.rendering.backend.opengl.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
-import net.ice.relic.common.noise.FastNoiseLite;
-import net.ice.relic.common.util.NoiseUtil;
+import net.ice.relic.core.resource.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +37,8 @@ public class Terrain {
         material.setMaterialIndex(3);
 
 
-        GLTexture texture1 = textureCache.createTexture("resources/textures/terrain/grass/" + "grass.png");
-        GLTexture texture2 = textureCache.createTexture("resources/textures/terrain/grass/" + "grass_normal.png");
+        GLTexture texture1 = textureCache.createTexture(Resource.getResourceWithDefaultNamespace("resources/textures/terrain/grass/" + "grass.png"));
+        GLTexture texture2 = textureCache.createTexture(Resource.getResourceWithDefaultNamespace("resources/textures/terrain/grass/" + "grass_normal.png"));
 
         //material.setTexturePath(texture1.getTexturePath());
         //material.setNormalMapPath(texture2.getTexturePath());

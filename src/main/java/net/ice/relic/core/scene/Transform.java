@@ -22,7 +22,7 @@ public class Transform {
         this.rotation = rotation;
     }
 
-    public void update() {
+    private void update() {
         transformMatrix.identity()
                 .translate(position)
                 .rotate(rotation)
@@ -52,12 +52,15 @@ public class Transform {
     }
     public void setScale(Vector3f scale) {
         this.scale = scale;
+        update();
     }
     public void setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
+        update();
     }
     public void setScale(float scale) {
         this.scale.set(scale, scale, scale);
+        update();
     }
 
     public Matrix4f getTransformMatrix() {

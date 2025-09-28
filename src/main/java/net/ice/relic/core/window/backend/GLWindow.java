@@ -1,7 +1,6 @@
 package net.ice.relic.core.window.backend;
 
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.config.configs.WindowConfig;
 import net.ice.relic.core.window.Window;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -18,35 +17,16 @@ public class GLWindow extends Window {
     }
 
     @Override
-    public void init() {
-        WindowConfig config = application.getConfig().getWindowConfig();
-
-        if(!glfwInit()) {
-            throw new RuntimeException("Failed to initialize GLFW.");
-        }
-
-        this.width = config.getWidth();
-        this.height = config.getHeight();
-        this.title = config.getTitle();
-        this.monitor = glfwGetPrimaryMonitor();
+    protected void backendInit() {
         GLFWVidMode vidMode = glfwGetVideoMode(monitor);
 
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_SAMPLES, 4);
         glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
         //glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         this.windowHandle = glfwCreateWindow(width, height, title, config.isFullscreen() ? monitor : NULL, NULL);
-        this.standardCursorHandle = glfwCreateStandardCursor(GLFW_CURSOR);
-        this.horizontalCursorHandle = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-        this.verticalCursorHandle = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
-        this.NWCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
-        this.NECursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
-        this.AllCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
 
         if(this.windowHandle == NULL) {
             glfwTerminate();
@@ -63,8 +43,6 @@ public class GLWindow extends Window {
             @Override
             public void invoke(long window, int width, int height) {
                 resize(width, height);
-                application.getCurrentScene().getMatrix().updateProjMatrix(width, height);
-                application.getRenderer().resize();
             }
         });
 
@@ -81,6 +59,9 @@ public class GLWindow extends Window {
             throw new IllegalStateException("Window has not been initialized yet.");
         }
 
+        application.getCurrentScene().getMatrix().updateProjMatrix(width, height);
+        application.getRenderer().resize();
+
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
     }
@@ -88,6 +69,11 @@ public class GLWindow extends Window {
 
     @Override
     public void update(float deltaTime) {
+        if(!initialized) {
+            throw new IllegalStateException("Window has not been initialized yet.");
+        }
 
+        glfwSwapBuffers(windowHandle);
+        glfwPollEvents();
     }
 }

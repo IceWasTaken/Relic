@@ -1,7 +1,6 @@
 package net.ice.relic.core.rendering.backend.vulkan;
 
-import static org.lwjgl.vulkan.VK10.VK_NOT_READY;
-import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
+import static org.lwjgl.vulkan.VK10.*;
 
 public class VulkanUtil {
 
@@ -9,7 +8,8 @@ public class VulkanUtil {
         if(result != VK_SUCCESS) {
             String errorCode = switch(result) {
                 case VK_NOT_READY -> "VK_NOT_READY";
-                default -> "Error Code Not Mapped.";
+                case VK_ERROR_INITIALIZATION_FAILED -> "VK_ERROR_INITIALIZATION_FAILED";
+                default -> "Error Code Not Mapped";
             };
             throw new RuntimeException(message + ": " + result + " [" + errorCode + "]");
         }

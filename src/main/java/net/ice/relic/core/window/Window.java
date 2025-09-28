@@ -1,6 +1,7 @@
 package net.ice.relic.core.window;
 
 import net.ice.relic.application.RelicApplication;
+import net.ice.relic.core.config.configs.WindowConfig;
 import net.ice.relic.core.interfaces.Initializable;
 import net.ice.relic.core.interfaces.Updatable;
 import org.joml.Vector2i;
@@ -21,14 +22,41 @@ public abstract class Window implements Initializable, Updatable {
     protected long horizontalCursorHandle;
     protected long verticalCursorHandle;
     protected boolean initialized = false;
-    protected String title;
 
+    protected String title;
+    protected final WindowConfig config;
     protected final RelicApplication application;
 
+    protected abstract void backendInit();
     public abstract void resize(int width, int height);
 
     protected Window(RelicApplication application) {
         this.application = application;
+        this.config = application.getConfig().getWindowConfig();
+
+        if(!glfwInit()) {
+            throw new RuntimeException("GLFW: Failed to initialize.");
+        }
+    }
+
+    @Override
+    public void init() {
+
+        this.width = config.getWidth();
+        this.height = config.getHeight();
+        this.title = config.getTitle();
+        this.monitor = glfwGetPrimaryMonitor();
+
+        glfwDefaultWindowHints();
+
+        this.standardCursorHandle = glfwCreateStandardCursor(GLFW_CURSOR);
+        this.horizontalCursorHandle = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+        this.verticalCursorHandle = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+        this.NWCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+        this.NECursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+        this.AllCursorHandle = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
+
+        backendInit();
     }
 
     public boolean shouldClose() {
@@ -90,6 +118,10 @@ public abstract class Window implements Initializable, Updatable {
     }
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public Vector2i getSize() {
+        return new Vector2i(width, height);
     }
 
     public long getMonitor() {

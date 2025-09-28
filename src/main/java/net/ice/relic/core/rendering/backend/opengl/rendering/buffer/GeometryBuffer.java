@@ -2,7 +2,7 @@ package net.ice.relic.core.rendering.backend.opengl.rendering.buffer;
 
 import net.ice.relic.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.rendering.backend.opengl.FrameBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.buffer.FrameBufferObject;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
@@ -16,9 +16,9 @@ public class GeometryBuffer implements Lifecycle {
     private static final int TEXTURE_COUNT = 4;
 
     private FrameBufferObject geometryBuffer;
-    private int height;
     private int[] textureIDS;
     private int width;
+    private int height;
 
     private RelicApplication application;
 
@@ -70,7 +70,7 @@ public class GeometryBuffer implements Lifecycle {
     public int[] getTextureIDS() {
         return textureIDS;
     }
-    public FrameBufferObject getGeometryBuffer() {
+    public FrameBufferObject getFrameBuffer() {
         return geometryBuffer;
     }
 

@@ -12,7 +12,7 @@ import org.lwjgl.glfw.GLFWScrollCallback;
 import java.util.HashSet;
 import java.util.Set;
 
-import static net.ice.relic.core.rendering.GuiRenderer.getImKey;
+import static net.ice.relic.core.rendering.backend.opengl.rendering.renderer.GuiRenderer.getImKey;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Input implements Lifecycle {

@@ -2,8 +2,8 @@ package net.ice.relic.core.rendering.backend.opengl.rendering.buffer;
 
 import net.ice.relic.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.rendering.backend.opengl.FrameBufferObject;
-import net.ice.relic.core.rendering.backend.opengl.RenderBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.buffer.FrameBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.buffer.RenderBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
 
 import static org.lwjgl.opengl.GL11.*;

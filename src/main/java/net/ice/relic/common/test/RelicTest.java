@@ -12,7 +12,6 @@ public class RelicTest extends RelicApplication {
 
     @Override
     protected void init(RelicApplication application) {
-
     }
 
     @Override

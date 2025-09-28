@@ -1,7 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl.rendering.buffer;
 
-import net.ice.relic.core.rendering.backend.opengl.FrameBufferObject;
 import net.ice.relic.core.Shadow;
+import net.ice.relic.core.rendering.backend.opengl.buffer.FrameBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.ArrayTexture;
 import org.joml.Vector2i;
 
@@ -32,6 +32,9 @@ public class ShadowBuffer {
         shadowMapFBO.unbindFrameBuffer();
     }
 
+    public void init() {
+
+    }
 
     public void bindTextures(int start) {
         for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {

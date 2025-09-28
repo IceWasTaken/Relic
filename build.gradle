@@ -14,17 +14,14 @@ version = '0.3.0'
 
 repositories {
     mavenCentral()
+    maven { url "https://central.sonatype.com/repository/maven-snapshots" }
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
     implementation "org.lwjgl:lwjgl"
     implementation "org.lwjgl:lwjgl-assimp"
     implementation "org.lwjgl:lwjgl-par"
-    implementation "org.lwjgl:lwjgl-cuda"
     implementation "org.lwjgl:lwjgl-fmod"
     implementation "org.lwjgl:lwjgl-glfw"
     implementation "org.lwjgl:lwjgl-nanovg"

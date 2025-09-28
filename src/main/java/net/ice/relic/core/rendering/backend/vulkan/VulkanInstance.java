@@ -1,7 +1,6 @@
 package net.ice.relic.core.rendering.backend.vulkan;
 
 import net.ice.relic.core.Version;
-import net.ice.relic.core.util.OSUtil;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFWVulkan;
 import org.lwjgl.system.MemoryStack;
@@ -21,19 +20,27 @@ import static net.ice.relic.core.rendering.backend.vulkan.VulkanUtil.checkVulkan
 import static org.lwjgl.vulkan.EXTDebugUtils.*;
 import static org.lwjgl.vulkan.KHRPortabilityEnumeration.VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 import static org.lwjgl.vulkan.VK10.*;
-import static org.lwjgl.vulkan.VK12.VK_API_VERSION_1_2;
+import static org.lwjgl.vulkan.VK13.VK_API_VERSION_1_3;
 
 public class VulkanInstance {
 
     public static final int MESSAGE_SEVERITY_BITMASK = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT;
     public static final int MESSAGE_TYPE_BITMASK = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 
-    private final VkInstance instance;
+    private VkInstance instance;
 
     private VkDebugUtilsMessengerCreateInfoEXT debugUtils;
     private long debugHandle;
 
+    private boolean validate;
+    private Version version;
+    private String appName;
+
     public VulkanInstance(boolean validate, Version version, String appName) {
+        this.appName = appName;
+        this.version = version;
+        this.validate = validate;
+
         Logger.info("Vulkan: Initializing Vulkan instance.");
         try(MemoryStack stack = MemoryStack.stackPush()) {
             ByteBuffer applicationName = stack.UTF8(appName);
@@ -43,7 +50,7 @@ public class VulkanInstance {
                     .applicationVersion(version.makeVulkanVersion())
                     .pEngineName(stack.UTF8("Vulkan Relic Engine"))
                     .engineVersion(VK_MAKE_VERSION(0, 3, 0))
-                    .apiVersion(VK_API_VERSION_1_2);
+                    .apiVersion(VK_API_VERSION_1_3);
 
             List<String> validationLayers = getSupportedValidationLayers();
             int layerCount = validationLayers.size();
@@ -58,7 +65,7 @@ public class VulkanInstance {
             if(supportsValidation) {
                 requiredExtensions = stack.mallocPointer(layerCount);
                 for(int i = 0; i < layerCount; i++) {
-                    Logger.debug("Vulkan: Using validation layer [{}]", validationLayers.get(i));
+                    Logger.info("Vulkan: Using validation layer [{}]", validationLayers.get(i));
                     requiredExtensions.put(i, stack.ASCII(validationLayers.get(i)));
                 }
             }
@@ -71,7 +78,9 @@ public class VulkanInstance {
 
             PointerBuffer requiredInstanceExtensions;
 
-            boolean usePortability = extensions.contains("VK_KHR_portability_enumeration") && OSUtil.getOSType() == OSUtil.OSType.MAC;
+            //boolean usePortability = extensions.contains("VK_KHR_portability_enumeration") && OSUtil.getOSType() == OSUtil.OSType.MAC;
+            boolean usePortability = extensions.contains("VK_KHR_portability_enumeration");
+
             if(supportsValidation) {
                 ByteBuffer vkDebugUtilsExtension = stack.UTF8(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
                 int extensionCount = usePortability ? glfwExtensions.remaining() + 2 : glfwExtensions.remaining() + 1;
@@ -134,7 +143,7 @@ public class VulkanInstance {
                     } else if ((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) != 0) {
                         Logger.error("Vulkan: VkDebugUtilsCallback, {}", callbackData.pMessageString());
                     } else {
-                        Logger.debug("Vulkan: VkDebugUtilsCallback, {}", callbackData.pMessageString());
+                        Logger.info("Vulkan: VkDebugUtilsCallback, {}", callbackData.pMessageString());
                     }
                     return VK_FALSE;
                 });
@@ -165,7 +174,7 @@ public class VulkanInstance {
             IntBuffer layerCountBuffer = stack.callocInt(1);
             vkEnumerateInstanceLayerProperties(layerCountBuffer, null);
             int layerCount = layerCountBuffer.get(0);
-            Logger.debug("Vulkan: Found {} validation layers.", layerCount);
+            Logger.info("Vulkan: Found {} validation layers.", layerCount);
 
             VkLayerProperties.Buffer layerProperties = VkLayerProperties.calloc(layerCount, stack);
             vkEnumerateInstanceLayerProperties(layerCountBuffer, layerProperties);
@@ -176,7 +185,7 @@ public class VulkanInstance {
                 VkLayerProperties properties = layerProperties.get(i);
                 String name  = properties.layerNameString();
                 supportedValidationLayers.add(name);
-                Logger.debug("Vulkan: Found validation layer: {}", name);
+                Logger.info("Vulkan: Found validation layer: {}", name);
             }
 
             List<String> layersToUse = new ArrayList<>();

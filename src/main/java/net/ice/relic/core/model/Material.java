@@ -1,31 +1,22 @@
 package net.ice.relic.core.model;
 
 import net.ice.relic.common.util.AssimpUtil;
+import net.ice.relic.common.util.ColorUtil;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
-import net.ice.relic.common.util.ColorUtil;
 import net.ice.relic.core.resource.Resource;
-import org.lwjgl.assimp.AIColor4D;
 import org.lwjgl.assimp.AIMaterial;
+import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.AIString;
-import org.lwjgl.assimp.Assimp;
+import org.lwjgl.assimp.AITexture;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.File;
 import java.nio.IntBuffer;
 
+import static java.lang.Integer.parseInt;
 import static net.ice.relic.common.util.AssimpUtil.getMaterialColor;
 import static org.lwjgl.assimp.Assimp.*;
-import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_DIFFUSE;
-import static org.lwjgl.assimp.Assimp.AI_MATKEY_COLOR_SPECULAR;
-import static org.lwjgl.assimp.Assimp.AI_MATKEY_SHININESS_STRENGTH;
-import static org.lwjgl.assimp.Assimp.aiGetMaterialColor;
-import static org.lwjgl.assimp.Assimp.aiGetMaterialFloatArray;
-import static org.lwjgl.assimp.Assimp.aiGetMaterialTexture;
-import static org.lwjgl.assimp.Assimp.aiReturn_SUCCESS;
-import static org.lwjgl.assimp.Assimp.aiTextureType_DIFFUSE;
-import static org.lwjgl.assimp.Assimp.aiTextureType_NONE;
-import static org.lwjgl.assimp.Assimp.aiTextureType_NORMALS;
 
 public class Material {
 
@@ -74,7 +65,7 @@ public class Material {
         this.materialIndex = 0;
     }
 
-    public static Material processMaterial(AIMaterial aiMaterial, String directory, TextureCache textureCache) {
+    public static Material processMaterial(AIScene aiScene, AIMaterial aiMaterial, String directory, TextureCache textureCache) {
         Material material = new Material();
         float[] shininess = new float[]{0.0f};
         int[] max = new int[]{1};
@@ -96,22 +87,32 @@ public class Material {
             AIString aiTexturePath = AIString.calloc(stack);
             aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, aiTexturePath, (IntBuffer) null, null, null, null, null, null);
             String texturePath = aiTexturePath.dataString();
-            if (!texturePath.isEmpty()) {
-                material.setTexturePath(directory + File.separator + "textures/" + new File(texturePath).getName());
-                GLTexture texture = textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getTexturePath()));
-                material.setDiffuseColor(Material.DEFAULT_COLOR);
-                material.setTexture(texture);
-            }
+            System.out.println(texturePath + " " + directory);
 
+            if (!texturePath.isEmpty()) {
+                if(isInternalTexture(texturePath)) {
+                    AITexture aiTexture = getInternalTexture(aiScene, parseInt(texturePath.substring(1)));
+                    material.setTexturePath("INTERNAL_" + aiTexture.mFilename().dataString());
+                    GLTexture texture = textureCache.createTexture(aiTexture.pcDataCompressed());
+                    material.setDiffuseColor(Material.DEFAULT_COLOR);
+                    material.setTexture(texture);
+                } else {
+                    material.setTexturePath("relic/assets/textures/" + new File(texturePath).getName());
+                    GLTexture texture = textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getTexturePath()));
+                    material.setDiffuseColor(Material.DEFAULT_COLOR);
+                    material.setTexture(texture);
+                }
+            }
             String texPath;
             if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_NORMALS)).isEmpty()) {
                 material.setNormalMapPath(directory + File.separator + "textures/" + new File(texPath).getName());
-                material.setNormalMap(textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getNormalMapPath())));
+                material.setNormalMap(textureCache.createTexture(aiTexturePath.data()));
+
             }
 
             if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_EMISSIVE)).isEmpty()) {
                 material.setEmissiveMapPath(directory + File.separator + "textures/" + new File(texPath).getName());
-                material.setEmissiveMap(textureCache.createTexture(Resource.getResourceWithDefaultNamespace(material.getEmissiveMapPath())));
+                material.setEmissiveMap(textureCache.createTexture(aiTexturePath.data()));
             }
 
 //            if (!(texPath = AssimpUtil.getTexturePath(aiMaterial, aiTextureType_SPECULAR, 1)).isEmpty()) {
@@ -126,6 +127,14 @@ public class Material {
 
             return material;
         }
+    }
+
+    private static AITexture getInternalTexture(AIScene aiScene, int index) {
+        return AITexture.create(aiScene.mTextures().get(index));
+    }
+
+    private static boolean isInternalTexture(String path) {
+        return path.startsWith("*");
     }
 
     public ColorUtil.Color getAmbientColor() { return ambientColor; }
@@ -190,7 +199,13 @@ public class Material {
     public void setReflectance(float reflectance) { this.reflectance = reflectance; }
     public void setEmissiveStrength(float emissiveStrength) { this.emissiveStrength = emissiveStrength; }
 
-    public void setTexturePath(String texturePath) { this.texturePath = texturePath; }
+    public void setTexturePath(String texturePath) {
+        if(new File(texturePath).exists() || texturePath.startsWith("INTERNAL")) {
+            this.texturePath = texturePath;
+            return;
+        }
+        throw new RuntimeException("Texture does not exist: " + texturePath);
+    }
     public void setNormalMapPath(String normalMapPath) { this.normalMapPath = normalMapPath; }
     public void setEmissiveMapPath(String emissiveMapPath) {
         this.emissiveMapPath = emissiveMapPath;
