@@ -1,9 +1,10 @@
 package net.ice.relic.core.cache;
 
-import net.ice.relic.common.asset.image.Image;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
 import net.ice.relic.core.resource.Resource;
+import org.tinylog.Logger;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +19,9 @@ public class TextureCache {
     }
 
     public void init() {
-        textureMap.put(Resource.getResourceWithDefaultNamespace(DEFAULT_TEXTURE.getPath()), new GLTexture(new Image(DEFAULT_TEXTURE)));
-        textureMap.put(Resource.getResourceWithDefaultNamespace("grass"), new GLTexture(new Image(Resource.getResourceWithDefaultNamespace("assets/textures/terrain/grass/grass.png"))));
-        textureMap.put(Resource.getResourceWithDefaultNamespace("grass_normal"), new GLTexture(new Image(Resource.getResourceWithDefaultNamespace("assets/textures/terrain/grass/grass_normal.png"))));
+//        textureMap.put(Resource.getResourceWithDefaultNamespace(DEFAULT_TEXTURE.getPath()), new GLTexture(new Image(DEFAULT_TEXTURE)));
+//        textureMap.put(Resource.getResourceWithDefaultNamespace("grass"), new GLTexture(new Image(Resource.getResourceWithDefaultNamespace("assets/textures/terrain/grass/grass.png"))));
+//        textureMap.put(Resource.getResourceWithDefaultNamespace("grass_normal"), new GLTexture(new Image(Resource.getResourceWithDefaultNamespace("assets/textures/terrain/grass/grass_normal.png"))));
     }
 
     public void cleanup() {
@@ -31,12 +32,19 @@ public class TextureCache {
         return textureMap.computeIfAbsent(texturePath, GLTexture::new);
     }
 
+    public GLTexture createTexture(ByteBuffer data) {
+        return new GLTexture(data);
+    }
+
+
+
     public GLTexture getTexture(String texturePath) {
         GLTexture texture = null;
         if(texturePath != null) {
-            texture = textureMap.get(texturePath);
+            texture = textureMap.get(Resource.getResourceWithDefaultNamespace(texturePath));
         }
         if(texture == null) {
+            Logger.error("Texture not found in cache: [{}] - [{}]", texturePath);
             texture = textureMap.get(DEFAULT_TEXTURE);
         }
         return texture;

@@ -1,32 +1,34 @@
-package net.ice.relic.core.rendering;
+package net.ice.relic.core.rendering.backend.opengl.rendering.renderer;
 
-import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.rendering.backend.opengl.GLShader;
+import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.model.Material;
+import net.ice.relic.core.rendering.backend.opengl.AbstractGLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.model.Mesh;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
-import net.ice.relic.core.cache.TextureCache;
+import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.SceneObject;
 import net.ice.relic.core.scene.Skybox;
 import org.joml.Matrix4f;
 
+import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
 
-public class SkyboxRenderer extends AbstractRenderer {
+public class SkyboxRenderer extends AbstractGLRenderer {
 
     private Matrix4f viewMatrix = new Matrix4f();
 
-    public SkyboxRenderer(RelicApplication application) {
-        super(application);
+    public SkyboxRenderer(GLManager manager) {
+        super(manager);
     }
 
     @Override
     protected void initShaders() {
-        loadShader("skybox.vert", GLShader.ShaderType.VERTEX);
-        loadShader("skybox.frag", GLShader.ShaderType.FRAGMENT);
+        loadShader("skybox.vert", ShaderType.VERTEX);
+        loadShader("skybox.frag", ShaderType.FRAGMENT);
     }
 
     @Override
@@ -40,8 +42,8 @@ public class SkyboxRenderer extends AbstractRenderer {
     }
 
     @Override
-    protected void render() {
-        Scene scene = application.getCurrentScene();
+    public void render() {
+        Scene scene = manager.getApplication().getCurrentScene();
         Skybox skyBox = scene.getSkybox();
         if (skyBox == null) {
             return;
@@ -60,9 +62,9 @@ public class SkyboxRenderer extends AbstractRenderer {
         Material material = skyBox.getMaterial();
         Mesh mesh = skyBox.getMesh();
         GLTexture texture = textureCache.getTexture(material.getTexturePath());
-        uniforms.setUniform("textureHandle", texture.getBindlessHandle());
+        uniforms.setUniform("textureHandle", texture == null ? 0 : texture.getBindlessHandle());
         uniforms.setUniform("diffuse", material.getDiffuseColor().convertToGLVector4f());
-        uniforms.setUniform("hasTexture", texture.getBindlessHandle() != 0 && !texture.equals(textureCache.getTexture(TextureCache.DEFAULT_TEXTURE.getPath()))  ? 1 : 0);
+        uniforms.setUniform("hasTexture", texture == null ? 0 : texture.getBindlessHandle() != 0 && !texture.equals(textureCache.getTexture(TextureCache.DEFAULT_TEXTURE.getPath()))  ? 1 : 0);
 
         uniforms.setUniform("modelMatrix", skyBoxEntity.getTransform().getTransformMatrix());
         glDrawElements(GL_TRIANGLES, mesh.getVertexCount(), GL_UNSIGNED_INT, 0);

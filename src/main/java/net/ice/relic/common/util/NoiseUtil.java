@@ -1,7 +1,7 @@
 package net.ice.relic.common.util;
 
-import net.ice.relic.core.model.MeshData;
 import net.ice.relic.common.noise.FastNoiseLite;
+import net.ice.relic.core.model.MeshData;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 

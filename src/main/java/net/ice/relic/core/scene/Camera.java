@@ -1,7 +1,7 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.core.Input;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;

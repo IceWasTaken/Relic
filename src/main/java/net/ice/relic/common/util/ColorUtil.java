@@ -3,7 +3,8 @@ package net.ice.relic.common.util;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glColor4f;
 
 public class ColorUtil {
 
