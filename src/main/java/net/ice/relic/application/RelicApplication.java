@@ -32,7 +32,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public abstract class RelicApplication implements ApplicationContext {
 
-    private static final Version ENGINE_VERSION = new Version(0, 4, 0);
+    private static final Version ENGINE_VERSION = new Version(0, 4, 1);
 
     protected Scene currentScene;
     protected EngineState currentState;

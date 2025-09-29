@@ -10,7 +10,7 @@ java {
 }
 
 group = 'net.ice.relic'
-version = '0.3.0'
+version = '0.4.1'
 
 repositories {
     mavenCentral()
@@ -75,7 +75,7 @@ publishing {
 
             groupId = "net.ice"
             artifactId = "relic"
-            version = "0.4.0"
+            version = "0.4.1"
 
             pom {
                 name.set("Relic Engine")
