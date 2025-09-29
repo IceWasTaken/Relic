@@ -39,6 +39,7 @@ public class GLWindow extends Window {
             glfwSwapInterval(1);
         }
 
+
         glfwSetFramebufferSizeCallback(windowHandle, new GLFWFramebufferSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
@@ -50,6 +51,8 @@ public class GLWindow extends Window {
                 Logger.error("Error code [{}], msg [{}]", errorCode, MemoryUtil.memUTF8(msgPtr))
         );
 
+
+
         this.initialized = true;
     }
 
@@ -58,6 +61,8 @@ public class GLWindow extends Window {
         if(!initialized) {
             throw new IllegalStateException("Window has not been initialized yet.");
         }
+        this.width = width;
+        this.height = height;
 
         application.getCurrentScene().getMatrix().updateProjMatrix(width, height);
         application.getRenderer().resize();

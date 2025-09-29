@@ -4,7 +4,7 @@ import net.ice.relic.core.resource.Resource;
 import org.tinylog.Logger;
 
 import java.io.*;
-import java.util.*;
+import java.util.Properties;
 
 public class ConfigFile extends Properties {
 
