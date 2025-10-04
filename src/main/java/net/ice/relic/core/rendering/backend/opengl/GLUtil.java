@@ -15,7 +15,8 @@ public class GLUtil {
                 case GL_INVALID_OPERATION -> "GL_INVALID_OPERATION";
                 default -> "Error Code Not Mapped";
             };
-            Logger.error("OpenGL Error: " + errorCode + " [" + error + "]");
+            //Logger.error("OpenGL Error: " + errorCode + " [" + error + "]");
+            throw new RuntimeException("OpenGL Error: " + errorCode + " [" + error + "]");
         }
     }
 

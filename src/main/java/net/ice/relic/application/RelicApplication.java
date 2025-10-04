@@ -111,7 +111,7 @@ public abstract class RelicApplication implements ApplicationContext {
                 this.currentScene.getCamera().update(clock.getDeltaTime());
                 this.currentScene.update(clock.getDeltaTime());
                 this.update(this);
-                //handleGUI();
+                handleGUI();
                 renderer.render();
             }
 

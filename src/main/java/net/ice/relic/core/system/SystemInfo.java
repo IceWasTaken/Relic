@@ -59,7 +59,6 @@ public class SystemInfo {
 
 
     public static void logSystemInfo() {
-
         Logger.info("OS Name: " + System.getProperty("os.name"));
         Logger.info("CPU Architecture: " + System.getProperty("os.arch"));
     }

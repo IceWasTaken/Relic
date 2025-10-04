@@ -1,6 +1,7 @@
 package net.ice.relic.common.test.scene;
 
 import net.ice.relic.application.RelicApplication;
+import net.ice.relic.common.test.gui.DebugGui;
 import net.ice.relic.core.resource.Resource;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.SceneObject;
@@ -23,6 +24,8 @@ public class TestingScene extends Scene {
         addSceneObject("blahaj", sceneObject);
 
         getPointLights().add(new PointLight(new Vector3f(0,1,0), new Vector3f(0,2,0), 2));
+
+        setGUI(new DebugGui(application));
 
     }
 

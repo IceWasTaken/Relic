@@ -6,6 +6,7 @@ import net.ice.relic.core.rendering.backend.Renderer;
 import net.ice.relic.core.rendering.backend.opengl.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.ShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.rendering.buffer.GeometryBuffer;
+import net.ice.relic.core.rendering.backend.opengl.rendering.enums.RenderType;
 import net.ice.relic.core.rendering.backend.opengl.rendering.renderer.*;
 
 import static org.lwjgl.opengl.GL43.*;
@@ -24,8 +25,11 @@ public class GLRenderer extends Renderer implements Lifecycle {
     private final GLManager manager;
     private final RelicApplication application;
 
+    private RenderType renderType = RenderType.NORMAL;
+
 
     private boolean postShader = false;
+    private boolean reloadShader = false;
     private ShaderProgram postShaderProgram;
 
     public GLRenderer(RelicApplication application) {
@@ -44,15 +48,15 @@ public class GLRenderer extends Renderer implements Lifecycle {
         } else {
             throw new RuntimeException("Engine: Attempted to create GL renderer in a non-openGL backend.");
         }
+
+
     }
 
 
     @Override
     public void init() {
-
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_DEPTH_TEST);
-
         glEnable(GL_FRAMEBUFFER_SRGB);
 
         glEnable(GL_BLEND);
@@ -75,10 +79,22 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void render() {
+        switch (renderType) {
+            case NORMAL -> renderNormal();
+            case NO_LIGHTING, NORMAL_MAPS -> renderNoLighting();
+        }
+    }
+
+    private void renderNormal() {
         animationRenderer.render();
         shadowRenderer.render();
+        manager.getGeometryBuffer().bind(GL_FRAMEBUFFER);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, manager.getGeometryBuffer().getWidth(), manager.getGeometryBuffer().getHeight());
+        glDisable(GL_BLEND);
         sceneRenderer.render();
         lightRenderStart(manager.getGeometryBuffer());
+
         lightRenderer.setShadowRenderer(shadowRenderer);
         lightRenderer.render();
         skyboxRenderer.render();
@@ -88,7 +104,18 @@ public class GLRenderer extends Renderer implements Lifecycle {
         }
 
         lightRenderFinish();
-        //guiRenderer.render();
+        guiRenderer.render();
+    }
+
+    private void renderNoLighting() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
+
+        animationRenderer.render();
+        sceneRenderer.render();
+        guiRenderer.render();
     }
 
     private void lightRenderFinish() {
@@ -113,6 +140,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, geometryBuffer.getFrameBuffer().getFboID());
 
     }
+
 
     @Override
     public void cleanup() {
@@ -141,5 +169,13 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public void resize() {
         postRenderer.resize();
         guiRenderer.resize();
+    }
+
+    public void setRenderType(RenderType renderType) {
+        this.renderType = renderType;
+        sceneRenderer.changeRenderType(renderType);
+
+
+
     }
 }

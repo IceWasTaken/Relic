@@ -1,11 +1,13 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
 import net.ice.relic.core.rendering.shader.ShaderType;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL43.*;
 
@@ -58,11 +60,15 @@ public class GLShader {
     }
 
     private void validateShader(int shaderId) {
-        int status = glGetShaderi(shaderId, GL_COMPILE_STATUS);
-        if (status == GL_FALSE) {
-            String log = glGetShaderInfoLog(shaderId);
-            throw new RuntimeException("Shader compilation failed:\n" + log);
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer test = stack.callocInt(1);
+            glGetShaderiv(shaderId, GL_COMPILE_STATUS, test);
+            if (test.get() == GL_FALSE) {
+                String log = glGetShaderInfoLog(shaderId);
+                throw new RuntimeException("Shader compilation failed:\n" + log);
+            }
         }
+
     }
 
     public int getShaderID() {

@@ -23,7 +23,7 @@ public class UniformBufferObject {
     public void createUniform(String uniformName) {
         int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), uniformName);
         if(uniformLocation < 0) {
-            //throw new RuntimeException("Could not find uniform: " + uniformName + " in shader.");
+            throw new RuntimeException("Could not find uniform: " + uniformName + " in shader.");
         }
 
         uniformMap.put(uniformName, uniformLocation);

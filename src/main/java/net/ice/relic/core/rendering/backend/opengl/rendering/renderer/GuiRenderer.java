@@ -18,6 +18,7 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 
 import java.nio.ByteBuffer;
 
+import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
@@ -42,6 +43,7 @@ public class GuiRenderer extends AbstractGLRenderer {
 
     @Override
     public void init() {
+        super.init();
         createUIResources();
         setupKeyCallBack();
     }
@@ -50,6 +52,7 @@ public class GuiRenderer extends AbstractGLRenderer {
     protected void initShaders() {
         loadShader("gui.vert", ShaderType.VERTEX);
         loadShader("gui.frag", ShaderType.FRAGMENT);
+        assertNoError();
     }
 
     @Override
@@ -66,7 +69,6 @@ public class GuiRenderer extends AbstractGLRenderer {
             return;
         }
         guiInstance.draw();
-
         shaderProgram.bind();
 
         glEnable(GL_BLEND);

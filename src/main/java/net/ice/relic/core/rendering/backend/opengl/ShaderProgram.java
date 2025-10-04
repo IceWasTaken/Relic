@@ -2,6 +2,7 @@ package net.ice.relic.core.rendering.backend.opengl;
 
 import java.util.List;
 
+import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL20.*;
 
@@ -16,7 +17,16 @@ public class ShaderProgram {
             throw new RuntimeException("Error while creating new shader shaderProgram. \nMost recent OpenGL error: " + glGetError());
         }
 
-        shaders.forEach(shader -> glAttachShader(programID, shader.getShaderID()));
+        for (GLShader shader : shaders) {
+            if(shader.getShaderID() == 0) {
+                throw new RuntimeException("Shader Invalid.");
+            }
+
+            glAttachShader(programID, shader.getShaderID());
+            assertNoError();
+        }
+
+        assertNoError();
 
         glLinkProgram(programID);
         glValidateProgram(programID);
@@ -24,6 +34,8 @@ public class ShaderProgram {
 
         shaders.forEach(shader -> glDetachShader(programID, shader.getShaderID()));
         shaders.forEach(shader -> glDeleteShader(shader.getShaderID()));
+
+
     }
 
     private void validateLink(int program) {

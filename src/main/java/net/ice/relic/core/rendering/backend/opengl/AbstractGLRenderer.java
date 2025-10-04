@@ -20,7 +20,7 @@ public abstract class AbstractGLRenderer extends AbstractRenderer {
 
     protected RendererConfig config;
 
-    private final List<GLShader> shaders;
+    protected final List<GLShader> shaders;
 
     public AbstractGLRenderer(GLManager manager) {
         this.manager = manager;

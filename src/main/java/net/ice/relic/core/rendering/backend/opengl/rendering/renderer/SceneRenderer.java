@@ -5,9 +5,12 @@ import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.model.Material;
 import net.ice.relic.core.rendering.backend.opengl.AbstractGLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.GLManager;
+import net.ice.relic.core.rendering.backend.opengl.ShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.buffer.ShaderStorageBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.buffer.UniformBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.rendering.enums.RenderType;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.SceneObject;
 import org.lwjgl.system.MemoryUtil;
@@ -65,11 +68,6 @@ public class SceneRenderer extends AbstractGLRenderer {
 
     @Override
     public void render() {
-        manager.getGeometryBuffer().bind(GL_FRAMEBUFFER);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, manager.getGeometryBuffer().getWidth(), manager.getGeometryBuffer().getHeight());
-        glDisable(GL_BLEND);
-
         shaderProgram.bind();
 
         uniforms.setUniform("projectionMatrix", manager.getApplication().getCurrentScene().getMatrix().getProjMatrix());
@@ -124,6 +122,33 @@ public class SceneRenderer extends AbstractGLRenderer {
         shaderProgram.unbind();
 
         assertNoError();
+    }
+
+    public void changeRenderType(RenderType renderType) {
+        this.shaders.clear();
+
+        switch (renderType) {
+            case NORMAL -> this.init();
+            case NO_LIGHTING -> {
+                shaderProgram.cleanup();
+                loadShader("nolighting/scene.vert", ShaderType.VERTEX);
+                loadShader("nolighting/scene.frag", ShaderType.FRAGMENT);
+                this.shaderProgram = new ShaderProgram(shaders);
+                this.uniforms = new UniformBufferObject(shaderProgram);
+                assertNoError();
+                initUniforms();
+            }
+            case NORMAL_MAPS -> {
+                shaderProgram.cleanup();
+                loadShader("normal/scene.vert", ShaderType.VERTEX);
+                loadShader("normal/scene.frag", ShaderType.FRAGMENT);
+                this.shaderProgram = new ShaderProgram(shaders);
+                this.uniforms = new UniformBufferObject(shaderProgram);
+                assertNoError();
+                initUniforms();
+            }
+        }
+
     }
 
     @Override
