@@ -5,6 +5,7 @@ import net.ice.relic.core.config.configs.RendererConfig;
 import net.ice.relic.core.model.MeshData;
 import net.ice.relic.core.rendering.backend.BackendManager;
 import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.enums.DrawType;
 import net.ice.relic.core.rendering.backend.opengl.model.Animation;
 import net.ice.relic.core.rendering.backend.opengl.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.rendering.buffer.GeometryBuffer;
@@ -177,7 +178,7 @@ public class GLManager extends BackendManager {
         }
         meshBuffer.flip();
         destinationAnimationBuffer.bind(GL_ARRAY_BUFFER);
-        destinationAnimationBuffer.bufferDataFloat(GL_ARRAY_BUFFER, meshBuffer, GL_STATIC_DRAW);
+        destinationAnimationBuffer.bufferDataFloat(GL_ARRAY_BUFFER, meshBuffer, DrawType.STATIC);
         MemoryUtil.memFree(meshBuffer);
 
         defineVertexAttributes();
@@ -194,7 +195,7 @@ public class GLManager extends BackendManager {
         }
         indicesBuffer.flip();
         vertexBufferObject.bind(GL_ELEMENT_ARRAY_BUFFER);
-        vertexBufferObject.bufferDataInt(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
+        vertexBufferObject.bufferDataInt(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, DrawType.STATIC);
         MemoryUtil.memFree(indicesBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -274,7 +275,7 @@ public class GLManager extends BackendManager {
         bindingPoseBuffer = new VertexBufferObject();
         vertexBufferObjects.add(bindingPoseBuffer);
         bindingPoseBuffer.bind(GL_SHADER_STORAGE_BUFFER);
-        bindingPoseBuffer.bufferDataFloat(GL_SHADER_STORAGE_BUFFER, meshesBuffer, GL_STATIC_DRAW);
+        bindingPoseBuffer.bufferDataFloat(GL_SHADER_STORAGE_BUFFER, meshesBuffer, DrawType.STATIC);
 
         MemoryUtil.memFree(meshesBuffer);
 
@@ -319,7 +320,7 @@ public class GLManager extends BackendManager {
         bonesMatricesBuffer = new VertexBufferObject();
         vertexBufferObjects.add(bonesMatricesBuffer);
         bonesMatricesBuffer.bind(GL_SHADER_STORAGE_BUFFER);
-        bonesMatricesBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, GL_STATIC_DRAW);
+        bonesMatricesBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, DrawType.STATIC);
 
         MemoryUtil.memFree(dataBuffer);
     }
@@ -356,7 +357,7 @@ public class GLManager extends BackendManager {
         bonesIndicesWeightsBuffer = new VertexBufferObject();
         vertexBufferObjects.add(bonesIndicesWeightsBuffer);
         bonesIndicesWeightsBuffer.bind(GL_SHADER_STORAGE_BUFFER);
-        bonesIndicesWeightsBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, GL_STATIC_DRAW);
+        bonesIndicesWeightsBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, DrawType.STATIC);
         MemoryUtil.memFree(dataBuffer);
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);

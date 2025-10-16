@@ -1,6 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.buffer;
 
-import net.ice.relic.core.rendering.backend.opengl.ShaderProgram;
+import net.ice.relic.core.rendering.backend.opengl.GLShaderProgram;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -12,15 +12,15 @@ import static org.lwjgl.opengl.GL20.*;
 
 public class UniformBufferObject {
 
-    private final ShaderProgram shaderProgram;
+    private final GLShaderProgram shaderProgram;
     private final Map<String, Integer> uniformMap;
 
-    public UniformBufferObject(ShaderProgram shaderProgram) {
+    public UniformBufferObject(GLShaderProgram shaderProgram) {
         this.shaderProgram = shaderProgram;
         this.uniformMap = new HashMap<>();
     }
 
-    public void createUniform(String uniformName) {
+    public void createUniformAssert(String uniformName) {
         int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), uniformName);
         if(uniformLocation < 0) {
             throw new RuntimeException("Could not find uniform: " + uniformName + " in shader.");
@@ -29,10 +29,11 @@ public class UniformBufferObject {
         uniformMap.put(uniformName, uniformLocation);
     }
 
-    public void createUniformUnsafe(String uniformName) {
-        int uniformLocation = glGetUniformLocation(shaderProgram.getProgramID(), uniformName);
-        uniformMap.put(uniformName, uniformLocation);
+    public void createUniform(String uniformName) {
+        uniformMap.put(uniformName, glGetUniformLocation(shaderProgram.getProgramID(), uniformName));
     }
+
+
 
 
     public void createUniform(String uniformName, int index) {

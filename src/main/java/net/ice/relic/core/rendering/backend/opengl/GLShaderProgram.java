@@ -1,41 +1,44 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
+import net.ice.relic.core.rendering.shader.IShader;
+import net.ice.relic.core.rendering.shader.IShaderProgram;
+
 import java.util.List;
 
 import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL20.*;
 
-public class ShaderProgram {
+public class GLShaderProgram implements IShaderProgram {
 
     private final int programID;
 
-    public ShaderProgram(List<GLShader> shaders) {
+    public GLShaderProgram() {
         this.programID = glCreateProgram();
 
         if(programID == 0) {
             throw new RuntimeException("Error while creating new shader shaderProgram. \nMost recent OpenGL error: " + glGetError());
         }
+    }
 
-        for (GLShader shader : shaders) {
-            if(shader.getShaderID() == 0) {
+    @Override
+    public GLShaderProgram attach(List<IShader> shaders) {
+        for (IShader shader : shaders) {
+            if(shader.getHandle() == 0) {
                 throw new RuntimeException("Shader Invalid.");
             }
 
-            glAttachShader(programID, shader.getShaderID());
-            assertNoError();
+            glAttachShader(programID, (int) shader.getHandle());
         }
-
-        assertNoError();
 
         glLinkProgram(programID);
         glValidateProgram(programID);
         validateLink(programID);
 
-        shaders.forEach(shader -> glDetachShader(programID, shader.getShaderID()));
-        shaders.forEach(shader -> glDeleteShader(shader.getShaderID()));
+        shaders.forEach(shader -> glDetachShader(programID, (int) shader.getHandle()));
+        shaders.forEach(shader -> glDeleteShader((int) shader.getHandle()));
 
-
+        return this;
     }
 
     private void validateLink(int program) {
@@ -48,7 +51,11 @@ public class ShaderProgram {
 
 
     public void bind() {
-        glUseProgram(programID);
+        if(programID != 0) {
+            glUseProgram(programID);
+        } else {
+            throw new RuntimeException();
+        }
     }
 
     public void unbind() {
@@ -63,4 +70,6 @@ public class ShaderProgram {
     public int getProgramID() {
         return programID;
     }
+
+
 }

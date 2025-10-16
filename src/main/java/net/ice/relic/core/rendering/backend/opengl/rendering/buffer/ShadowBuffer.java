@@ -1,6 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.rendering.buffer;
 
-import net.ice.relic.core.Shadow;
+import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.buffer.FrameBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.ArrayTexture;
 import org.joml.Vector2i;
@@ -17,7 +17,7 @@ public class ShadowBuffer {
 
     public ShadowBuffer() {
         this.shadowMapFBO = new FrameBufferObject();
-        this.shadowMapArrayTexture = new ArrayTexture(Shadow.SHADOW_MAP_COUNT, SHADOW_MAP_SIZE, GL_DEPTH_COMPONENT);
+        this.shadowMapArrayTexture = new ArrayTexture(Shadows.SHADOW_MAP_COUNT, SHADOW_MAP_SIZE, GL_DEPTH_COMPONENT);
 
         shadowMapFBO.bindFrameBuffer();
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMapArrayTexture.getIds()[0], 0);
@@ -37,7 +37,7 @@ public class ShadowBuffer {
     }
 
     public void bindTextures(int start) {
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
+        for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             glActiveTexture(start + i);
             glBindTexture(GL_TEXTURE_2D, shadowMapArrayTexture.getIds()[i]);
         }

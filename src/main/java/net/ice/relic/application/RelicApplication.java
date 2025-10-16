@@ -97,6 +97,7 @@ public abstract class RelicApplication implements ApplicationContext {
         clock.init();
         changeState(LOADING);
         input.init();
+
         init(this);
     }
 

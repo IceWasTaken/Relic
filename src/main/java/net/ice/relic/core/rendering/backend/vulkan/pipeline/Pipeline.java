@@ -29,7 +29,7 @@ public class Pipeline {
 
             VulkanShader[] shaderModules = buildInfo.getShaderModules();
             int numModules = shaderModules.length;
-            var shaderStages = VkPipelineShaderStageCreateInfo.calloc(numModules, stack);
+            VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(numModules, stack);
             for (int i = 0; i < numModules; i++) {
                 VulkanShader shaderModule = shaderModules[i];
                 shaderStages.get(i)

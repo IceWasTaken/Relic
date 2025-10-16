@@ -33,7 +33,7 @@ public class GuiMesh {
 
         indicesVBO = new VertexBufferObject();
 
-        VertexBufferObject.unbind(GL_ARRAY_BUFFER);
+        verticesVBO.unbind(GL_ARRAY_BUFFER);
         glBindVertexArray(0);
     }
 

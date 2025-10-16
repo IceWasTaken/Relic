@@ -4,7 +4,6 @@
 #extension GL_ARB_gpu_shader_int64 : require
 
 const int MAX_MATERIALS  = 200;
-const int MAX_TEXTURES = 160;
 
 in vec3 outNormal;
 in vec3 outTangent;

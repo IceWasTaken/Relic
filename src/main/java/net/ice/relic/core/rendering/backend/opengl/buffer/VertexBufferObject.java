@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.buffer;
 
+import net.ice.relic.core.rendering.backend.opengl.enums.DrawType;
 import net.ice.relic.core.rendering.buffer.VertexBuffer;
 
 import java.nio.ByteBuffer;
@@ -21,20 +22,20 @@ public class VertexBufferObject implements VertexBuffer {
         glBindBuffer(type, id);
     }
 
-    public static void unbind(int type) {
+    public void unbind(int type) {
         glBindBuffer(type, 0);
     }
 
-    public void bufferDataFloat(int target, FloatBuffer data, int usage) {
-        glBufferData(target, data, usage);
+    public void bufferDataFloat(int target, FloatBuffer data, DrawType drawType) {
+        glBufferData(target, data, drawType.raw());
     }
 
-    public void bufferDataInt(int target, IntBuffer data, int usage) {
-        glBufferData(target, data, usage);
+    public void bufferDataInt(int target, IntBuffer data, DrawType drawType) {
+        glBufferData(target, data, drawType.raw());
     }
 
-    public void bufferData(int target, ByteBuffer data, int usage) {
-        glBufferData(target, data, usage);
+    public void bufferData(int target, ByteBuffer data, DrawType drawType) {
+        glBufferData(target, data, drawType.raw());
     }
 
     public void bufferSubData(int type, long offset, FloatBuffer data) {

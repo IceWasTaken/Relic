@@ -1,6 +1,5 @@
 package net.ice.relic.core.cache;
 
-
 import net.ice.relic.core.model.Material;
 import org.tinylog.Logger;
 

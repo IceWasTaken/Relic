@@ -3,6 +3,7 @@ package net.ice.relic.core.rendering.backend.opengl.model;
 import net.ice.relic.core.model.MeshData;
 import net.ice.relic.core.rendering.backend.opengl.VertexArrayObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.enums.DrawType;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -75,7 +76,7 @@ public class Mesh {
         FloatBuffer textCoordsBuffer = MemoryUtil.memCallocFloat(data.getTextureCoords().length);
         textCoordsBuffer.put(0, data.getTextureCoords());
         VBO.bind(GL_ARRAY_BUFFER);
-        glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
+        VBO.bufferDataFloat(GL_ARRAY_BUFFER, textCoordsBuffer, DrawType.STATIC);
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 2, GL_FLOAT, false, 0, 0);
 

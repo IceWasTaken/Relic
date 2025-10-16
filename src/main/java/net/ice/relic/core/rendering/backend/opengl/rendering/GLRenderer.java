@@ -4,7 +4,7 @@ import net.ice.relic.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.rendering.backend.Renderer;
 import net.ice.relic.core.rendering.backend.opengl.GLManager;
-import net.ice.relic.core.rendering.backend.opengl.ShaderProgram;
+import net.ice.relic.core.rendering.backend.opengl.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.rendering.buffer.GeometryBuffer;
 import net.ice.relic.core.rendering.backend.opengl.rendering.enums.RenderType;
 import net.ice.relic.core.rendering.backend.opengl.rendering.renderer.*;
@@ -30,7 +30,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     private boolean postShader = false;
     private boolean reloadShader = false;
-    private ShaderProgram postShaderProgram;
+    private GLShaderProgram postShaderProgram;
 
     public GLRenderer(RelicApplication application) {
         this.application = application;
@@ -63,8 +63,9 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glDebugMessageCallback((source, type, id, severity, length, message, userParam) -> {
-            System.err.println("GL DEBUG: \n" + getMessage(length, message));
+            throw new RuntimeException("GL DEBUG: \n" + getMessage(length, message));
         }, 0);
+
 
         manager.getGeometryBuffer().init();
 
@@ -87,12 +88,13 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     private void renderNormal() {
         animationRenderer.render();
-        shadowRenderer.render();
+
         manager.getGeometryBuffer().bind(GL_FRAMEBUFFER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, manager.getGeometryBuffer().getWidth(), manager.getGeometryBuffer().getHeight());
         glDisable(GL_BLEND);
         sceneRenderer.render();
+        shadowRenderer.render();
         lightRenderStart(manager.getGeometryBuffer());
 
         lightRenderer.setShadowRenderer(shadowRenderer);
@@ -125,7 +127,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
     private void lightRenderStart(GeometryBuffer geometryBuffer) {
 
         if (postShader && postShaderProgram != null) {
-            postRenderer.getPostBuffer().bind(GL_FRAMEBUFFER);
+            postRenderer.getPostBuffer().bindFrameBuffer();
         } else {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
@@ -144,7 +146,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void cleanup() {
-        sceneRenderer.cleanup();
+        //sceneRenderer.cleanup();
     }
 
     public void setupData() {
@@ -154,7 +156,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         shadowRenderer.setupData();
     }
 
-    public void enablePostShader(ShaderProgram shaderProgram) {
+    public void enablePostShader(GLShaderProgram shaderProgram) {
         this.postShader = true;
         this.postShaderProgram = shaderProgram;
         this.postRenderer.loadShader(shaderProgram);

@@ -1,7 +1,8 @@
 package net.ice.relic.core.rendering.backend.opengl.rendering.renderer;
 
 import net.ice.relic.common.annotations.Rewrite;
-import net.ice.relic.core.Shadow;
+import net.ice.relic.core.ShadowData;
+import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.AbstractGLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.rendering.QuadMesh;
@@ -88,7 +89,7 @@ public class LightRenderer extends AbstractGLRenderer {
         uniforms.createUniform("fog.color");
         uniforms.createUniform("fog.density");
 
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
+        for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             String prefix = uniforms.formatUniform("shadowMap", i);
             uniforms.createUniform("shadowMap_" + i);
             uniforms.createUniform(prefix + ".shadowProjectionMatrix");
@@ -123,13 +124,13 @@ public class LightRenderer extends AbstractGLRenderer {
         uniforms.setUniform("fog.density", fog.getDensity());
 
         int start = 4;
-        List<Shadow> cascadeShadows = shadowRenderer.getShadows();
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
+        Shadows cascadeShadows = shadowRenderer.getShadows();
+        for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             glActiveTexture(GL_TEXTURE0 + start + i);
             uniforms.setUniform("shadowMap_" + i, start + i);
-            Shadow cascadeShadow = cascadeShadows.get(i);
-            uniforms.setUniform("shadowMap[" + i + "]" + ".shadowProjectionMatrix", cascadeShadow.getProjectionMatrix());
-            uniforms.setUniform("shadowMap[" + i + "]" + ".splitDistance", cascadeShadow.getShadowDistance());
+            ShadowData cascadeShadow = cascadeShadows.getShadowData().get(i);
+            uniforms.setUniform("shadowMap[" + i + "]" + ".shadowProjectionMatrix", cascadeShadow.getProjViewMatrix());
+            uniforms.setUniform("shadowMap[" + i + "]" + ".splitDistance", cascadeShadow.getSplitDistance());
         }
         shadowRenderer.getShadowBuffer().bindTextures(GL_TEXTURE0 + start);
 

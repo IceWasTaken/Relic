@@ -2,6 +2,7 @@ package net.ice.relic.core.rendering.backend.opengl.rendering;
 
 import net.ice.relic.core.rendering.backend.opengl.VertexArrayObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.enums.DrawType;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -44,7 +45,7 @@ public class QuadMesh {
         FloatBuffer positionsBuffer = MemoryUtil.memCallocFloat(positions.length);
         positionsBuffer.put(0, positions);
         vertexVBO.bind(GL_ARRAY_BUFFER);
-        vertexVBO.bufferDataFloat(GL_ARRAY_BUFFER, positionsBuffer, GL_STATIC_DRAW);
+        vertexVBO.bufferDataFloat(GL_ARRAY_BUFFER, positionsBuffer, DrawType.STATIC);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
@@ -53,7 +54,7 @@ public class QuadMesh {
         FloatBuffer textCoordsBuffer = MemoryUtil.memCallocFloat(textCoords.length);
         textCoordsBuffer.put(0, textCoords);
         textureCoordinateVBO.bind(GL_ARRAY_BUFFER);
-        textureCoordinateVBO.bufferDataFloat(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
+        textureCoordinateVBO.bufferDataFloat(GL_ARRAY_BUFFER, textCoordsBuffer, DrawType.STATIC);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 
@@ -62,7 +63,7 @@ public class QuadMesh {
         IntBuffer indicesBuffer = MemoryUtil.memCallocInt(indices.length);
         indicesBuffer.put(0, indices);
         indicesVBO.bind(GL_ELEMENT_ARRAY_BUFFER);
-        indicesVBO.bufferDataInt(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
+        indicesVBO.bufferDataInt(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, DrawType.STATIC);
 
         indicesVBO.unbind(GL_ARRAY_BUFFER);
         meshVAO.unbind();

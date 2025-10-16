@@ -1,9 +1,14 @@
 package net.ice.relic.core.rendering.backend.opengl.rendering.renderer;
 
-import net.ice.relic.core.Shadow;
+import net.ice.relic.core.ShadowData;
+import net.ice.relic.core.Shadows;
+import net.ice.relic.core.cache.MaterialCache;
+import net.ice.relic.core.model.Material;
 import net.ice.relic.core.rendering.backend.opengl.AbstractGLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.GLManager;
+import net.ice.relic.core.rendering.backend.opengl.buffer.ShaderStorageBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.enums.DrawType;
 import net.ice.relic.core.rendering.backend.opengl.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.rendering.buffer.ShadowBuffer;
 import net.ice.relic.core.rendering.shader.ShaderType;
@@ -28,16 +33,17 @@ public class ShadowRenderer extends AbstractGLRenderer {
 
     private VertexBufferObject staticVBO;
     private VertexBufferObject animatedVBO;
+    private ShaderStorageBufferObject shaderStorage;
 
     private ShadowBuffer shadowBuffer;
-    private ArrayList<Shadow> shadows;
+    private Shadows shadows;
     private Map<String, Integer> objectIndexMap;
 
     public ShadowRenderer(GLManager glManager) {
         super(glManager);
 
         this.objectIndexMap = new HashMap<>();
-        this.shadows = new ArrayList<>();
+        this.shadows = new Shadows();
     }
 
     @Override
@@ -46,34 +52,28 @@ public class ShadowRenderer extends AbstractGLRenderer {
 
         this.shadowBuffer = new ShadowBuffer();
 
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
-            shadows.add(new Shadow());
-        }
     }
 
     @Override
     protected void initShaders() {
         loadShader("shadow.vert", ShaderType.VERTEX);
+        loadShader("shadow.geom", ShaderType.GEOMETRY);
+        loadShader("shadow.frag", ShaderType.FRAGMENT);
     }
 
     @Override
     protected void initUniforms() {
-        uniforms.createUniform("projectionMatrix");
-
         for (int i = 0; i < config.getMaxDrawElements(); i++) {
-            uniforms.createUniform(uniforms.formatUniform("drawElements", i) + ".modelMatrixIndex");
-        }
-
-        for (int i = 0; i < config.getMaxSceneObjects(); i++) {
-            uniforms.createUniform(uniforms.formatUniform("modelMatrices", i));
+            uniforms.createUniform(uniforms.formatUniform("drawElements", i) + ".modelMatrix");
+            uniforms.createUniform(uniforms.formatUniform("drawElements", i) + ".materialIndex");
         }
     }
 
     @Override
     public void render() {
-        Shadow.update(shadows, manager.getApplication().getCurrentScene());
+        Shadows.update(shadows, manager.getApplication().getCurrentScene());
 
-        shadowBuffer.getShadowMapFBO().bind(GL_FRAMEBUFFER);
+        shadowBuffer.getShadowMapFBO().bindFrameBuffer();
         shadowBuffer.shadowViewport();
         shaderProgram.bind();
 
@@ -81,12 +81,12 @@ public class ShadowRenderer extends AbstractGLRenderer {
         for(Model model : manager.getApplication().getCurrentScene().getModels().values()) {
             List<SceneObject> objects = model.getSceneObjects();
             for(SceneObject object : objects) {
-                uniforms.setUniform(uniforms.formatUniform("modelMatrices", entityIndex), object.getTransform().getTransformMatrix());
+                uniforms.setUniform(uniforms.formatUniform("drawElements", entityIndex) + ".modelMatrix", object.getTransform().getTransformMatrix());
                 entityIndex++;
             }
         }
 
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
+        for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowBuffer.getShadowMapArrayTexture().getIds()[i], 0);
             glClear(GL_DEPTH_BUFFER_BIT);
         }
@@ -99,17 +99,16 @@ public class ShadowRenderer extends AbstractGLRenderer {
             List<SceneObject> entities = model.getSceneObjects();
             for (GLManager.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 for (SceneObject entity : entities) {
-                    uniforms.setUniform(uniforms.formatUniform("drawElements", drawElement) + ".modelMatrixIndex", objectIndexMap.get(entity.getName()));
+                    uniforms.setUniform(uniforms.formatUniform("drawElements", drawElement) + ".materialIndex", objectIndexMap.get(entity.getName()));
                     drawElement++;
                 }
             }
         }
         staticVBO.bind(GL_DRAW_INDIRECT_BUFFER);
         manager.getStaticArrayObject().bind();
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
+        for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowBuffer.getShadowMapArrayTexture().getIds()[i], 0);
-            Shadow shadow = shadows.get(i);
-            uniforms.setUniform("projectionMatrix", shadow.getProjectionMatrix());
+            ShadowData shadow = shadows.getShadowData().get(i);
             glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0);
         }
 
@@ -121,16 +120,15 @@ public class ShadowRenderer extends AbstractGLRenderer {
             for (GLManager.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 GLManager.AnimMeshDrawData animMeshDrawData = meshDrawData.animMeshDrawData();
                 SceneObject entity = animMeshDrawData.entity();
-                uniforms.setUniform("drawElements" + drawElement + ".modelMatrixIndex", objectIndexMap.get(entity.getName()));
+                uniforms.setUniform("drawElements" + drawElement + ".modelMatrix", objectIndexMap.get(entity.getName()));
                 drawElement++;
             }
         }
         animatedVBO.bind(GL_DRAW_INDIRECT_BUFFER);
         manager.getAnimationArrayObject().bind();
-        for (int i = 0; i < Shadow.SHADOW_MAP_COUNT; i++) {
+        for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowBuffer.getShadowMapArrayTexture().getIds()[i], 0);
-            Shadow shadow = shadows.get(i);
-            uniforms.setUniform("projectionMatrix", shadow.getProjectionMatrix());
+            ShadowData shadow = shadows.getShadowData().get(i);
             glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, animationDrawCount, 0);
         }
 
@@ -143,6 +141,7 @@ public class ShadowRenderer extends AbstractGLRenderer {
         setupEntitiesData();
         setupStaticCommandBuffer();
         setupAnimatedCommandBuffer();
+        setupMaterialUniforms(manager.getApplication().getCurrentScene().getModelLoader().getMaterialCache());
     }
 
     private void setupEntitiesData() {
@@ -190,7 +189,7 @@ public class ShadowRenderer extends AbstractGLRenderer {
 
         staticVBO = new VertexBufferObject();
         staticVBO.bind(GL_DRAW_INDIRECT_BUFFER);
-        staticVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, GL_DYNAMIC_DRAW);
+        staticVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, DrawType.DYNAMIC);
 
         MemoryUtil.memFree(commandBuffer);
     }
@@ -226,7 +225,7 @@ public class ShadowRenderer extends AbstractGLRenderer {
 
         animatedVBO = new VertexBufferObject();
         animatedVBO.bind(GL_DRAW_INDIRECT_BUFFER);
-        animatedVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, GL_DYNAMIC_DRAW);
+        animatedVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, DrawType.DYNAMIC);
 
         MemoryUtil.memFree(commandBuffer);
     }
@@ -240,7 +239,29 @@ public class ShadowRenderer extends AbstractGLRenderer {
         animatedVBO.delete();
     }
 
-    public ArrayList<Shadow> getShadows() {
+    public void setupMaterialUniforms(MaterialCache materialCache) {
+        List<Material> materialList = materialCache.getMaterialsList();
+
+        ShaderStorageBufferObject.Builder shaderStorageBuilder = new ShaderStorageBufferObject.Builder();
+        shaderProgram.bind();
+
+        for (Material material : materialList) {
+            shaderStorageBuilder.addVec4f(material.getDiffuseColor().convertToGLVector4f())
+                    .addVec4f(material.getSpecularColor().convertToGLVector4f())
+                    .addFloat(material.getReflectance())
+                    .addFloat(0)
+                    .addFloat(0)
+                    .addFloat(0)
+                    .addLong(material.hasTexture() ? material.getTextureHandle() : 0L)
+                    .addLong(material.hasNormalMap() ? material.getNormalHandle() : 0L);
+        }
+        shaderStorage = shaderStorageBuilder.build();
+        shaderStorage.bind();
+        shaderStorage.bindBase(5);
+        shaderStorage.bufferData(GL_STATIC_DRAW);
+    }
+
+    public Shadows getShadows() {
         return shadows;
     }
 

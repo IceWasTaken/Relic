@@ -2,29 +2,36 @@ package net.ice.relic.core.rendering.backend.opengl.rendering.renderer;
 
 import net.ice.relic.common.annotations.Rewrite;
 import net.ice.relic.core.cache.MaterialCache;
+import net.ice.relic.core.config.configs.RendererConfig;
 import net.ice.relic.core.model.Material;
-import net.ice.relic.core.rendering.backend.opengl.AbstractGLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.GLManager;
-import net.ice.relic.core.rendering.backend.opengl.ShaderProgram;
+import net.ice.relic.core.rendering.backend.opengl.GLShader;
+import net.ice.relic.core.rendering.backend.opengl.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.buffer.ShaderStorageBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.UniformBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.enums.DrawType;
 import net.ice.relic.core.rendering.backend.opengl.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.rendering.enums.RenderType;
+import net.ice.relic.core.rendering.pipeline.Pipeline;
+import net.ice.relic.core.rendering.shader.IShader;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.SceneObject;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
+import static net.ice.relic.core.rendering.backend.opengl.enums.BufferTarget.DRAW_INDIRECT;
 import static org.lwjgl.opengl.GL43.*;
+import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 @Rewrite
-public class SceneRenderer extends AbstractGLRenderer {
+public class SceneRenderer {
 
     private final Map<String, Integer> objectIndexMap;
 
@@ -32,96 +39,86 @@ public class SceneRenderer extends AbstractGLRenderer {
     private VertexBufferObject animatedVBO;
     private ShaderStorageBufferObject shaderStorage;
 
+    private GLShaderProgram shaderProgram;
+
+    protected RendererConfig config;
+
+    private GLManager manager;
+
+    protected final List<IShader> shaders;
+    private Pipeline pipeline;
+
     private int animationDrawCount;
     private int staticDrawCount;
 
     public SceneRenderer(GLManager manager) {
-        super(manager);
+        this.manager = manager;
+        this.shaders = new ArrayList<>();
+        this.config = manager.getRendererConfig();
         this.objectIndexMap = new HashMap<>();
     }
 
-    @Override
+    public void init() {
+        initShaders();
+        this.shaderProgram = new GLShaderProgram().attach(shaders);
+        assertNoError();
+    }
+
     protected void initShaders() {
-        loadShader("scene.vert", ShaderType.VERTEX);
-        loadShader("scene.frag", ShaderType.FRAGMENT);
-
-        assertNoError();
+        shaders.add(new GLShader(ShaderType.VERTEX).load("scene.vert", ShaderType.VERTEX, false));
+        shaders.add(new GLShader(ShaderType.FRAGMENT).load("scene.frag", ShaderType.FRAGMENT, false));
     }
 
-    @Override
-    protected void initUniforms() {
-        uniforms.createUniform("projectionMatrix");
-        uniforms.createUniform("viewMatrix");
 
-        for (int i = 0; i < config.getMaxDrawElements(); i++) {
-            String name = "drawElements[" + i + "]";
-            uniforms.createUniform(name + ".modelMatrixIndex");
-            uniforms.createUniform(name + ".materialIndex");
-        }
-
-        for (int i = 0; i < config.getMaxSceneObjects(); i++) {
-            uniforms.createUniform(uniforms.formatUniform("modelMatrices", i));
-        }
-
-        assertNoError();
-    }
-
-    @Override
     public void render() {
-        shaderProgram.bind();
+        pipeline.reset();
 
-        uniforms.setUniform("projectionMatrix", manager.getApplication().getCurrentScene().getMatrix().getProjMatrix());
-        uniforms.setUniform("viewMatrix", manager.getApplication().getCurrentScene().getCamera().getViewMatrix());
+        pipeline.execute();
+
+        pipeline.setUniform("projectionMatrix", manager.getApplication().getCurrentScene().getMatrix().getProjMatrix());
+        pipeline.setUniform("viewMatrix", manager.getApplication().getCurrentScene().getCamera().getViewMatrix());
 
         int entityIndex = 0;
         for (Model model : manager.getApplication().getCurrentScene().getModels().values()) {
             for (SceneObject object : model.getSceneObjects()) {
-                uniforms.setUniform(uniforms.formatUniform("modelMatrices", entityIndex), object.getTransform().getTransformMatrix());
+                pipeline.setUniform(pipeline.formatUniform("modelMatrices", entityIndex), object.getTransform().getTransformMatrix());
                 entityIndex++;
             }
         }
 
-        // static
         int drawElement = 0;
         for (Model model : manager.getApplication().getCurrentScene().getModels().values()) {
             if (model.isAnimated()) continue;
             for (GLManager.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 for (SceneObject object : model.getSceneObjects()) {
-                    String name = uniforms.formatUniform("drawElements", drawElement);
-                    uniforms.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getName()));
-                    uniforms.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
+                    String name = pipeline.formatUniform("drawElements", drawElement);
+                    pipeline.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getName()));
+                    pipeline.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
                     drawElement++;
-
                 }
             }
         }
 
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, staticVBO.getId());
-        glBindVertexArray(manager.getStaticArrayObject().getId());
-        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0);
+        pipeline.resume();
 
-        // animated
         drawElement = 0;
         for (Model model : manager.getApplication().getCurrentScene().getModels().values()) {
             if (!model.isAnimated()) continue;
             for (GLManager.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 SceneObject object = meshDrawData.animMeshDrawData().entity();
-                String name = uniforms.formatUniform("drawElements", drawElement);
-                uniforms.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getName()));
-                uniforms.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
+                String name = pipeline.formatUniform("drawElements", drawElement);
+                pipeline.setUniform(name + ".modelMatrixIndex", objectIndexMap.get(object.getName()));
+                pipeline.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
                 drawElement++;
             }
         }
 
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, animatedVBO.getId());
-        glBindVertexArray(manager.getAnimationArrayObject().getId());
-        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, animationDrawCount, 0);
-
-        glBindVertexArray(0);
-        glEnable(GL_BLEND);
-        shaderProgram.unbind();
-
+        pipeline.resume();
         assertNoError();
+    }
+
+    private void updateUniforms() {
+
     }
 
     public void changeRenderType(RenderType renderType) {
@@ -131,32 +128,30 @@ public class SceneRenderer extends AbstractGLRenderer {
             case NORMAL -> this.init();
             case NO_LIGHTING -> {
                 shaderProgram.cleanup();
-                loadShader("nolighting/scene.vert", ShaderType.VERTEX);
-                loadShader("nolighting/scene.frag", ShaderType.FRAGMENT);
-                this.shaderProgram = new ShaderProgram(shaders);
-                this.uniforms = new UniformBufferObject(shaderProgram);
+                shaders.add(new GLShader(ShaderType.VERTEX).load("nolighting/scene.vert", ShaderType.VERTEX, false));
+                shaders.add(new GLShader(ShaderType.FRAGMENT).load("nolighting/scene.frag", ShaderType.FRAGMENT, false));
+                this.shaderProgram = new GLShaderProgram().attach(shaders);
                 assertNoError();
-                initUniforms();
+                setupPipeline();
             }
             case NORMAL_MAPS -> {
                 shaderProgram.cleanup();
-                loadShader("normal/scene.vert", ShaderType.VERTEX);
-                loadShader("normal/scene.frag", ShaderType.FRAGMENT);
-                this.shaderProgram = new ShaderProgram(shaders);
-                this.uniforms = new UniformBufferObject(shaderProgram);
+                shaders.add(new GLShader(ShaderType.VERTEX).load("normal/scene.vert", ShaderType.VERTEX, false));
+                shaders.add(new GLShader(ShaderType.FRAGMENT).load("normal/scene.frag", ShaderType.FRAGMENT, false));
+                this.shaderProgram = new GLShaderProgram().attach(shaders);
                 assertNoError();
-                initUniforms();
+                setupPipeline();
             }
         }
 
     }
 
-    @Override
     public void setupData() {
         setupObjectData();
         setupStaticCommandBuffer();
         setupAnimationCommandBuffer();
         setupMaterialUniforms(manager.getApplication().getCurrentScene().getModelLoader().getMaterialCache());
+        setupPipeline();
     }
 
     private void setupObjectData() {
@@ -206,7 +201,7 @@ public class SceneRenderer extends AbstractGLRenderer {
 
         staticVBO = new VertexBufferObject();
         staticVBO.bind(GL_DRAW_INDIRECT_BUFFER);
-        staticVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, GL_DYNAMIC_DRAW);
+        staticVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, DrawType.DYNAMIC);
 
         MemoryUtil.memFree(commandBuffer);
     }
@@ -237,7 +232,7 @@ public class SceneRenderer extends AbstractGLRenderer {
 
         animatedVBO = new VertexBufferObject();
         animatedVBO.bind(GL_DRAW_INDIRECT_BUFFER);
-        animatedVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, GL_DYNAMIC_DRAW);
+        animatedVBO.bufferData(GL_DRAW_INDIRECT_BUFFER, commandBuffer, DrawType.DYNAMIC);
         MemoryUtil.memFree(commandBuffer);
     }
 
@@ -245,7 +240,6 @@ public class SceneRenderer extends AbstractGLRenderer {
         List<Material> materialList = materialCache.getMaterialsList();
 
         ShaderStorageBufferObject.Builder shaderStorageBuilder = new ShaderStorageBufferObject.Builder();
-        shaderProgram.bind();
 
         for (Material material : materialList) {
             shaderStorageBuilder.addVec4f(material.getDiffuseColor().convertToGLVector4f())
@@ -267,7 +261,42 @@ public class SceneRenderer extends AbstractGLRenderer {
         shaderStorage = shaderStorageBuilder.build();
         shaderStorage.bind();
         shaderStorage.bindBase(5);
-        shaderStorage.bufferData(GL_STATIC_DRAW);
+        shaderStorage.bufferData(GL_DYNAMIC_DRAW);
+    }
 
+    private void setupPipeline() {
+        Pipeline.PipelineBuilder pipelineBuilder = new Pipeline.PipelineBuilder()
+                .bindShaderProgram(shaderProgram)
+                .uniform("projectionMatrix", shaderProgram)
+                .uniform("viewMatrix", shaderProgram);
+
+        for (int i = 0; i < config.getMaxDrawElements(); i++) {
+            String name = "drawElements[" + i + "]";
+            pipelineBuilder
+                    .uniform(name + ".modelMatrixIndex", shaderProgram)
+                    .uniform(name + ".materialIndex", shaderProgram);
+        }
+
+        for (int i = 0; i < config.getMaxSceneObjects(); i++) {
+            pipelineBuilder.uniform("modelMatrices[" + i + "]", shaderProgram);
+        }
+
+        pipelineBuilder
+                .pauseHere()
+
+                .bindVertexBufferObject(staticVBO, DRAW_INDIRECT)
+                .bindVertexArrayObject(manager.getStaticArrayObject())
+                .multiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0)
+
+                .pauseHere()
+
+                .bindVertexBufferObject(animatedVBO, DRAW_INDIRECT)
+                .bindVertexArrayObject(manager.getAnimationArrayObject())
+                .multiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, animationDrawCount, 0)
+                .unbindVertexArrayObject()
+                .enable(GL_BLEND)
+                .unbindShaderProgram(shaderProgram);
+
+        this.pipeline = pipelineBuilder.build();
     }
 }

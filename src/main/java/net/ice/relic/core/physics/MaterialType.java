@@ -22,7 +22,7 @@ public enum MaterialType {
     WOOD_OAK(750),              // strong
     WOOD_BIRCH(670),            // strong
 
-    PAPER(800),                 // office paper
+    PAPER(800),                 // paper (no shit)
     CARDBOARD(690),             // corrugated boxboard
 
     CLOTH_COTTON(1_500),        // clothing

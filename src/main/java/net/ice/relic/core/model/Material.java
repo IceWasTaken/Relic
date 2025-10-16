@@ -77,9 +77,7 @@ public class Material {
             material.setSpecularColor(getMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR).convertFromOpenGLColor());
             material.setEmissiveColor(getMaterialColor(aiMaterial, AI_MATKEY_COLOR_EMISSIVE).convertFromOpenGLColor());
 
-            //dumb
-            int shininessResult = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH, aiTextureType_NONE, 0, shininess, max);
-            if (shininessResult != aiReturn_SUCCESS) {
+            if (aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH, aiTextureType_NONE, 0, shininess, max) != aiReturn_SUCCESS) {
                 reflectance = shininess[0];
             }
             material.setReflectance(reflectance);

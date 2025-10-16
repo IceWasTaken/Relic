@@ -19,11 +19,11 @@ public class TestingScene extends Scene {
     protected void sceneInit() {
         setSkybox(new Skybox("assets/models/skybox4/skybox.glb", getModelLoader()));
 
-        SceneObject sceneObject = new SceneObject("blahaj", getModelLoader().loadModel("blahaj", Resource.getResourceWithDefaultNamespace("/assets/models/sponza/sponza.glb"), false));
+        SceneObject sceneObject = new SceneObject("blahaj", getModelLoader().loadModel("blahaj", Resource.getResourceWithDefaultNamespace("/assets/models/sponza/sponza.gltf"), false));
         sceneObject.getTransform().setScale(0.01f);
         addSceneObject("blahaj", sceneObject);
 
-        getPointLights().add(new PointLight(new Vector3f(0,1,0), new Vector3f(0,2,0), 2));
+        //getPointLights().add(new PointLight(new Vector3f(0,1,0), new Vector3f(0,2,0), 10));
 
         setGUI(new DebugGui(application));
 

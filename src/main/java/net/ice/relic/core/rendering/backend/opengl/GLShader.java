@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
+import net.ice.relic.core.rendering.shader.IShader;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import org.lwjgl.system.MemoryStack;
 
@@ -11,12 +12,12 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL43.*;
 
-public class GLShader {
+public class GLShader implements IShader {
 
     private final int shaderID;
     private final ShaderType type;
 
-    private GLShader(ShaderType type) {
+    public GLShader(ShaderType type) {
         this.type = type;
 
         this.shaderID = glCreateShader(type.getGlType());
@@ -39,7 +40,8 @@ public class GLShader {
         validateShader(shaderID);
     }
 
-    public static GLShader loadShader(String fileName, ShaderType type, boolean postShader) {
+    @Override
+    public GLShader load(String fileName, ShaderType type, boolean postShader) {
         StringBuilder shaderSource = new StringBuilder();
 
         try(InputStream stream = GLShader.class.getResourceAsStream("/relic/data/rendering/gl/shaders/" + fileName)) {
@@ -71,13 +73,12 @@ public class GLShader {
 
     }
 
-    public int getShaderID() {
+    @Override
+    public long getHandle() {
         return shaderID;
     }
 
     public ShaderType getType() {
         return type;
     }
-
-
 }

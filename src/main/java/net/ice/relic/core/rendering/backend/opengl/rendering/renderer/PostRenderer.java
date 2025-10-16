@@ -2,7 +2,7 @@ package net.ice.relic.core.rendering.backend.opengl.rendering.renderer;
 
 import net.ice.relic.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.rendering.backend.opengl.ShaderProgram;
+import net.ice.relic.core.rendering.backend.opengl.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.buffer.FrameBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.buffer.UniformBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
@@ -16,7 +16,7 @@ public class PostRenderer implements Lifecycle {
     private final RelicApplication application;
 
     private FrameBufferObject postBuffer;
-    private ShaderProgram shaderProgram;
+    private GLShaderProgram shaderProgram;
     private GLTexture postTexture;
     private QuadMesh quadMesh;
     private UniformBufferObject uniforms;
@@ -31,9 +31,9 @@ public class PostRenderer implements Lifecycle {
     }
 
     private void initUniforms() {
-        uniforms.createUniformUnsafe("screenHandle");
-        uniforms.createUniformUnsafe("resolution");
-        uniforms.createUniformUnsafe("projectionMatrix");
+        uniforms.createUniform("screenHandle");
+        uniforms.createUniform("resolution");
+        uniforms.createUniform("projectionMatrix");
     }
 
     @Override
@@ -82,7 +82,7 @@ public class PostRenderer implements Lifecycle {
         postBuffer.framebufferTexture2D(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, postTexture.getTextureID(), 0);
     }
 
-    public void loadShader(ShaderProgram shaderProgram) {
+    public void loadShader(GLShaderProgram shaderProgram) {
         enabled = true;
         this.shaderProgram = shaderProgram;
         this.uniforms = new UniformBufferObject(shaderProgram);
