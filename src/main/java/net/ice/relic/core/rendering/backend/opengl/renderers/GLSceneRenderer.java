@@ -1,5 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.object.Viewport;
+import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.wrapper.enums.DataType;
 import net.ice.curio.library.opengl.wrapper.enums.FramebufferTarget;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
@@ -40,6 +42,7 @@ public class GLSceneRenderer implements Lifecycle {
 
     private final Map<String, Integer> objectIndexMap;
     private UniformBufferObject uniforms;
+    private Viewport viewport;
 
     private ShaderStorageBufferObject materialBuffer;
     private ShaderStorageBufferObject albedoMapBuffer;
@@ -48,7 +51,10 @@ public class GLSceneRenderer implements Lifecycle {
 
     public GLSceneRenderer(GLRenderer glRenderer) {
         this.glRenderer = glRenderer;
-
+        this.viewport = new GLViewport(
+                glRenderer.getApplication().getWindow().getWidth(),
+                glRenderer.getApplication().getWindow().getHeight()
+        );
         this.objectIndexMap = new HashMap<>();
     }
 
@@ -73,6 +79,8 @@ public class GLSceneRenderer implements Lifecycle {
     @Override
     public void render() {
         shaderProgram.bind();
+        viewport.bind();
+
         glRenderer.getGeometryBuffer().bind(FramebufferTarget.FRAMEBUFFER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_BLEND);
@@ -99,6 +107,10 @@ public class GLSceneRenderer implements Lifecycle {
         glRenderer.getStaticArrayObject().unbind();
         glRenderer.getGeometryBuffer().unbind(FramebufferTarget.FRAMEBUFFER);
         shaderProgram.unbind();
+    }
+
+    public void resize(int width, int height) {
+        this.viewport.resize(width, height);
     }
 
     private void setupObjectData() {

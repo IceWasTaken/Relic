@@ -73,7 +73,6 @@ public class FramebufferObject {
 
     public void assertComplete() {
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        Logger.info("------------------------------- {}", status);
         switch (status) {
 
             case GL_FRAMEBUFFER_UNDEFINED -> throw new RuntimeException("Specified framebuffer is the default read or draw framebuffer, but the default framebuffer does not exist.");

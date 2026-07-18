@@ -13,6 +13,7 @@ import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.UniformBuff
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
+import net.ice.relic.core.scene.primitives.threed.LineCube;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
@@ -39,30 +40,7 @@ public class GLDebugRenderer implements Lifecycle {
 
 	private final GLRenderer glRenderer;
 
-	private final float[] vertices = new float[] {
-			// Front
-			-1,-1, 1,
-			1,-1, 1,
-			1, 1, 1,
-			-1, 1, 1,
-
-			// Back
-			-1,-1,-1,
-			1,-1,-1,
-			1, 1,-1,
-			-1, 1,-1
-	};
-
-	private final int[] indices = new int[] {
-			// Front square
-			0,1, 1,2, 2,3, 3,0,
-
-			// Back square
-			4,5, 5,6, 6,7, 7,4,
-
-			// Connecting edges
-			0,4, 1,5, 2,6, 3,7
-	};
+	private final LineCube lineCube = new LineCube();
 
 	public GLDebugRenderer(GLRenderer glRenderer) {
 		this.glRenderer = glRenderer;
@@ -76,8 +54,10 @@ public class GLDebugRenderer implements Lifecycle {
 
 		vao.bind();
 
-		FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(vertices.length);
-		floatBuffer.put(vertices);
+
+
+		FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(lineCube.getVertices().length);
+		floatBuffer.put(lineCube.getVertices());
 		floatBuffer.flip();
 
 		vbo.bind();
@@ -86,8 +66,8 @@ public class GLDebugRenderer implements Lifecycle {
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
-		IntBuffer indicesBuffer = MemoryUtil.memCallocInt(indices.length);
-		indicesBuffer.put(indices);
+		IntBuffer indicesBuffer = MemoryUtil.memCallocInt(lineCube.getIndices().length);
+		indicesBuffer.put(lineCube.getIndices());
 		indicesBuffer.flip();
 		indexBufferObject.bind();
 		indexBufferObject.bufferData(indicesBuffer, Usage.STATIC_DRAW);
@@ -139,6 +119,6 @@ public class GLDebugRenderer implements Lifecycle {
 
 	private void drawCube(Vector3f position) {
 		uniforms.setUniform("centerPos", new Matrix4f().identity().translate(position));
-		glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_LINES, lineCube.getIndices().length, GL_UNSIGNED_INT, 0);
 	}
 }

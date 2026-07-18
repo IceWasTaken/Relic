@@ -56,6 +56,8 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public void resize(int width, int height) {
         this.geometryBuffer = new FramebufferObject(new Vector2i(width, height), 5);
         this.guiRenderer.onResize(width, height);
+        this.sceneRenderer.resize(width, height);
+        this.lightRenderer.resize(width, height);
     }
 
     @Override

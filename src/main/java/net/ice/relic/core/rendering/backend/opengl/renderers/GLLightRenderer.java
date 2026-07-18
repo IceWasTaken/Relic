@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.wrapper.enums.FramebufferTarget;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.ShadowData;
@@ -26,11 +27,16 @@ public class GLLightRenderer implements Lifecycle {
     private GLShaderProgram shaderProgram;
     private UniformBufferObject uniformBufferObject;
     private QuadMesh quadMesh;
+    private Viewport viewport;
 
     private final GLRenderer glRenderer;
 
     public GLLightRenderer(GLRenderer glRenderer) {
         this.glRenderer = glRenderer;
+        this.viewport = glRenderer.getApplication().getCurio().getGraphicsContext().createViewport(
+                glRenderer.getApplication().getWindow().getWidth(),
+                glRenderer.getApplication().getWindow().getHeight()
+        );
     }
 
     @Override
@@ -79,7 +85,7 @@ public class GLLightRenderer implements Lifecycle {
             Scene scene = glRenderer.getApplication().getCurrentScene();
             updateLights(scene);
             updateShadows();
-            //glDisable(GL_FRAMEBUFFER_SRGB);
+            viewport.bind();
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glEnable(GL_BLEND);
@@ -119,6 +125,10 @@ public class GLLightRenderer implements Lifecycle {
             //glEnable(GL_FRAMEBUFFER_SRGB);
 
         }
+    }
+
+    public void resize(int width, int height) {
+        viewport.resize(width, height);
     }
 
     private void updateLights(Scene scene) {

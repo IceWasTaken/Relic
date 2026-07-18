@@ -76,8 +76,12 @@ public class GLShadowRenderer implements Lifecycle {
         shaderProgram.bind();
         shadows.update(glRenderer.getApplication().getCurrentScene());
         glRenderer.getShadowBuffer().bindFramebuffer();
-        //viewport.bind();
-        //glDepthRange(0f, 1.0f);
+        glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
+        glDepthRange(-1, 1);
+        glDepthFunc(GL_LESS);
+        glClearDepthf(1.0f);
+        glViewport(0, 0, 4096, 4096);
+
         glClearColor(1.f, 1.f, 0f, 0f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -108,9 +112,6 @@ public class GLShadowRenderer implements Lifecycle {
 
         glRenderer.getStaticArrayObject().unbind();
         ShadowBuffer.unbindFramebuffer();
-
-        glViewport(0, 0, glRenderer.getApplication().getCurio().getWindow().getWidth(), glRenderer.getApplication().getCurio().getWindow().getHeight());
-        glDepthRange(-1.0f, 1.0f);
 
         shaderProgram.unbind();
     }
