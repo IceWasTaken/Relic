@@ -1,26 +1,27 @@
 package net.ice.relic.core.rendering.pipeline;
 
-import net.ice.relic.core.rendering.backend.opengl.GLShaderProgram;
-import net.ice.relic.core.rendering.backend.opengl.VertexArrayObject;
-import net.ice.relic.core.rendering.backend.opengl.buffer.FrameBufferObject;
-import net.ice.relic.core.rendering.backend.opengl.buffer.VertexBufferObject;
-import net.ice.relic.core.rendering.backend.opengl.enums.BufferTarget;
+import net.ice.curio.library.opengl.wrapper.enums.FramebufferTarget;
+import net.ice.curio.library.opengl.object.VertexArrayObject;
+import net.ice.curio.library.opengl.object.buffer.DrawIndirectBuffer;
+import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
+import org.tinylog.Logger;
+import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
+import net.ice.curio.library.opengl.object.framebuffer.FramebufferObject;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-import static net.ice.relic.core.rendering.backend.opengl.GLUtil.assertNoError;
 import static org.lwjgl.opengl.ARBBindlessTexture.glUniformHandleui64ARB;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glUniform2f;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL43.glMultiDrawArraysIndirect;
+import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
 import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
+@Deprecated
 public class Pipeline {
 
     private final List<PipelineCommand> commands = new ArrayList<>();
@@ -82,7 +83,6 @@ public class Pipeline {
     public void setUniform(String uniformName, Matrix4f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             glUniformMatrix4fv(getUniformLocation(uniformName), false, value.get(stack.mallocFloat(16)));
-            assertNoError();
         }
     }
 
@@ -92,8 +92,6 @@ public class Pipeline {
 
     public void setUniform(String uniformName, int value) {
         glUniform1i(getUniformLocation(uniformName), value);
-        assertNoError();
-
     }
 
     public void setUniform(String uniformName, Vector3f value) {
@@ -127,18 +125,20 @@ public class Pipeline {
             pipeline.addCommand("bindShader", (unused) -> shaderProgram.bind());
             return this;
         }
-
         public PipelineBuilder unbindShaderProgram(GLShaderProgram shaderProgram) {
-            pipeline.addCommand("unbindShader", (unused) -> shaderProgram.unbind());
+            pipeline.addCommand("unbindShader", (unused) -> {
+
+            });
             return this;
         }
 
         public PipelineBuilder uniform(String name, GLShaderProgram shaderProgram) {
             int loc = glGetUniformLocation(shaderProgram.getProgramID(), name);
+            if (loc < 0) Logger.error("Uniform not found: " + name);
             pipeline.uniforms.put(name, loc);
+
             return this;
         }
-
         public PipelineBuilder uniformAssert(String name, GLShaderProgram shaderProgram) {
             int loc = glGetUniformLocation(shaderProgram.getProgramID(), name);
             if (loc < 0) Logger.error("Uniform not found: " + name);
@@ -146,13 +146,25 @@ public class Pipeline {
             return this;
         }
 
-        public PipelineBuilder bindFramebuffer(FrameBufferObject fbo) {
+        public PipelineBuilder bindFramebuffer(FramebufferObject fbo, FramebufferTarget framebufferTarget) {
             pipeline.addCommand("bindFramebuffer", (unused) -> {
-                fbo.bindFrameBuffer();
+                fbo.bind(framebufferTarget);
+            });
+            return this;
+        }
+        public PipelineBuilder unbindFramebuffer(FramebufferObject fbo, FramebufferTarget framebufferTarget) {
+            pipeline.addCommand("unbindFramebuffer", (unused) -> {
+                fbo.unbind(framebufferTarget);
             });
             return this;
         }
 
+        public PipelineBuilder drawElements(int mode, int count, int type, long indices) {
+            pipeline.addCommand("drawElements", (unused) -> {
+                glDrawElements(mode, count, type, indices);
+            });
+            return this;
+        }
         public PipelineBuilder multiDrawElementsIndirect(int mode, int type, long indirect, int count, int stride) {
             pipeline.addCommand("multiDrawElementsIndirect", (unused) -> {
                 glMultiDrawElementsIndirect(mode, type, indirect, count, stride);
@@ -160,9 +172,9 @@ public class Pipeline {
             return this;
         }
 
-        public PipelineBuilder bindVertexBufferObject(VertexBufferObject vertexBufferObject, BufferTarget target) {
+        public PipelineBuilder bindVertexBufferObject(VertexBufferObject vertexBufferObject) {
             pipeline.addCommand("bindVertexBufferObject", (unused -> {
-                vertexBufferObject.bind(target.raw());
+                vertexBufferObject.bind();
             }));
             return this;
         }
@@ -171,10 +183,20 @@ public class Pipeline {
             pipeline.addCommand("bindVertexArrayObject", (unused -> vertexArrayObject.bind()));
             return this;
         }
-
         public PipelineBuilder unbindVertexArrayObject() {
             pipeline.addCommand("unbindVertexArrayObject", (unused -> {
                 glBindVertexArray(0);
+            }));
+            return this;
+        }
+
+        public PipelineBuilder bindDrawIndirectBuffer(DrawIndirectBuffer drawIndirectBuffer) {
+            pipeline.addCommand("bindDrawIndirectBuffer", (unused -> drawIndirectBuffer.bind()));
+            return this;
+        }
+        public PipelineBuilder unbindDrawIndirectBuffer() {
+            pipeline.addCommand("unbindDrawIndirectBuffer", (unused -> {
+                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
             }));
             return this;
         }
@@ -183,9 +205,27 @@ public class Pipeline {
             pipeline.addCommand("enable", (unused) -> glEnable(target));
             return this;
         }
+        public PipelineBuilder disable(int target) {
+            pipeline.addCommand("disable", (unused) -> glDisable(target));
+            return this;
+        }
+        public PipelineBuilder clear(int target) {
+            pipeline.addCommand("clear", (unused) -> glClear(target));
+            return this;
+        }
+
+        public PipelineBuilder clearColor(float r, float g, float b, float a) {
+            pipeline.addCommand("clearColor", (unused) -> glClearColor(r, g, b, a));
+            return this;
+        }
 
         public PipelineBuilder pauseHere() {
             pipeline.addCommand("pause", (unused) -> pipeline.pause());
+            return this;
+        }
+
+        public PipelineBuilder customCommand(String name, Consumer<Void> action) {
+            pipeline.addCommand(name, action);
             return this;
         }
 

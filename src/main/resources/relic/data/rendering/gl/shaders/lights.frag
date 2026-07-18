@@ -1,213 +1,228 @@
-#version 330
+#version 460
 
-const int MAX_POINT_LIGHTS = 5;
-const int MAX_SPOT_LIGHTS = 5;
-const float SPECULAR_POWER = 10;
-const int NUM_CASCADES = 3;
-const float BIAS = 0.0005;
-const float SHADOW_FACTOR = 0.25;
+const int SHADOW_MAP_CASCADE_COUNT = 3;
+const int DEBUG_SHADOWS = 0;
+const float PI = 3.1459265359;
 
-in vec2 outTextCoord;
-out vec4 fragColor;
+layout(location = 0) in vec2 inTextureCoord;
+out vec4 outFragColor;
 
-struct Attenuation
-{
-    float constant;
-    float linear;
-    float exponent;
-};
-struct AmbientLight
-{
-    float factor;
-    vec3 color;
-};
-struct PointLight {
+struct Light {
     vec3 position;
     vec3 color;
-    float intensity;
-    Attenuation attenuation;
-};
-struct SpotLight
-{
-    PointLight pl;
-    vec3 direction;
-    float cutoff;
-};
-struct DirLight
-{
-    vec3 color;
-    vec3 direction;
+
+    int directional;
     float intensity;
 };
-struct Fog
-{
+
+struct Fog {
     int activeFog;
     vec3 color;
     float density;
 };
 struct CascadeShadow {
     mat4 shadowProjectionMatrix;
-    float splitDistance;
+    vec4 splitDistance;
 };
 
+uniform sampler2D posSampler;
 uniform sampler2D albedoSampler;
 uniform sampler2D normalSampler;
-uniform sampler2D specularSampler;
-uniform sampler2D depthSampler;
+uniform sampler2D pbrSampler;
+uniform sampler2DArray shadowSampler;
 
-uniform mat4 invProjectionMatrix;
-uniform mat4 invViewMatrix;
+uniform vec3 cameraPos;
+uniform mat4 viewMatrix;
 
-uniform AmbientLight ambientLight;
-uniform PointLight pointLights[MAX_POINT_LIGHTS];
-uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
-uniform DirLight directionalLight;
+uniform float ambientLightIntensity;
+uniform vec3 ambientLightColor;
+
+uniform int lightCount;
+
 uniform Fog fog;
-uniform CascadeShadow shadowMap[NUM_CASCADES];
-uniform sampler2D shadowMap_0;
-uniform sampler2D shadowMap_1;
-uniform sampler2D shadowMap_2;
+uniform Light lights[200];
+uniform CascadeShadow shadows[3];
 
-vec4 calcAmbient(AmbientLight ambientLight, vec4 ambient) {
-    return vec4(ambientLight.factor * ambientLight.color, 1) * ambient;
+float chebyshevUpperBound(vec2 moments, float t) {
+    // Surface is fully lit if the current fragment is before the light occluder
+    if (t <= moments.x)
+    return 1.0;
+
+    // Compute variance
+    float variance = moments.y - (moments.x * moments.x);
+    variance = max(variance, 0.00002); // Small epsilon to avoid divide by zero
+
+    // Compute probabilistic upper bound
+    float d = t - moments.x;
+    float p_max = variance / (variance + d * d);
+
+    // Reduce light bleeding
+    p_max = smoothstep(0.2, 1.0, p_max);
+
+    return p_max;
 }
 
-vec4 calcLightColor(vec4 diffuse, vec4 specular, float reflectance, vec3 lightColor, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal) {
-    vec4 diffuseColor = vec4(0, 0, 0, 1);
-    vec4 specColor = vec4(0, 0, 0, 1);
+float calculateVisibility(vec4 worldPosition, uint cascadeIndex) {
+    vec4 shadowMapPosition = shadows[cascadeIndex].shadowProjectionMatrix * worldPosition;
 
-    // Diffuse Light
-    float diffuseFactor = max(dot(normal, to_light_dir), 0.0);
-    diffuseColor = diffuse * vec4(lightColor, 1.0) * light_intensity * diffuseFactor;
+    vec2 uv = shadowMapPosition.xy * 0.5 + 0.5;
+    float depth = shadowMapPosition.z;
+    vec2 moments = texture(shadowSampler, vec3(uv, cascadeIndex)).rg;
 
-    // Specular Light
-    vec3 camera_direction = normalize(-position);
-    vec3 from_light_dir = -to_light_dir;
-    vec3 reflected_light = normalize(reflect(from_light_dir, normal));
-    float specularFactor = max(dot(camera_direction, reflected_light), 0.0);
-    specularFactor = pow(specularFactor, SPECULAR_POWER);
-    specColor = specular * light_intensity  * specularFactor * reflectance * vec4(lightColor, 1.0);
-
-    return (diffuseColor + specColor);
+    float visibility = chebyshevUpperBound(moments, depth);
+    return visibility;
 }
 
-vec4 calcPointLight(vec4 diffuse, vec4 specular, float reflectance, PointLight light, vec3 position, vec3 normal) {
-    vec3 light_direction = light.position - position;
-    vec3 to_light_dir  = normalize(light_direction);
-    vec4 light_color = calcLightColor(diffuse, specular, reflectance, light.color, light.intensity, position, to_light_dir, normal);
+float distributionGGX(vec3 N, vec3 H, float roughness) {
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
 
-    // Apply Attenuation
-    float distance = length(light_direction);
-    float attenuationInv = light.attenuation.constant + light.attenuation.linear * distance +
-    light.attenuation.exponent * pow(distance, 2);
-    return light_color / attenuationInv;
+    float nom = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return nom / denom;
 }
 
-vec4 calcSpotLight(vec4 diffuse, vec4 specular, float reflectance, SpotLight light, vec3 position, vec3 normal) {
-    vec3 light_direction = light.pl.position - position;
-    vec3 to_light_dir  = normalize(light_direction);
-    vec3 from_light_dir  = -to_light_dir;
-    float spot_alfa = dot(from_light_dir, normalize(light.direction));
+float geometrySchlickGGX(float NdotV, float roughness) {
+    float r = (roughness + 1.0);
+    float k = (r * r) / 8.0;
 
-    vec4 color = vec4(0, 0, 0, 0);
+    float nom = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
 
-    if (spot_alfa > light.cutoff)
-    {
-        color = calcPointLight(diffuse, specular, reflectance, light.pl, position, normal);
-        color *= (1.0 - (1.0 - spot_alfa)/(1.0 - light.cutoff));
-    }
-    return color;
+    return nom / denom;
 }
 
-vec4 calcDirLight(vec4 diffuse, vec4 specular, float reflectance, DirLight light, vec3 position, vec3 normal) {
-    return calcLightColor(diffuse, specular, reflectance, light.color, light.intensity, position, normalize(light.direction), normal);
+float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx2 = geometrySchlickGGX(NdotV, roughness);
+    float ggx1 = geometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
 }
 
-vec4 calcFog(vec3 pos, vec4 color, Fog fog, vec3 ambientLight, DirLight dirLight) {
-    vec3 fogColor = fog.color * (ambientLight + dirLight.color * dirLight.intensity);
-    float distance = length(pos);
-    float fogFactor = 1.0 / exp((distance * fog.density) * (distance * fog.density));
-    fogFactor = clamp(fogFactor, 0.0, 1.0);
-
-    vec3 resultColor = mix(fogColor, color.xyz, fogFactor);
-    return vec4(resultColor.xyz, color.w);
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float textureProj(vec4 shadowCoord, vec2 offset, int idx) {
-    float shadow = 1.0;
+vec3 calculatePointLight(Light light, vec3 worldPos, vec3 V, vec3 N, vec3 F0, vec3 albedo, float metallic, float roughness) {
+    vec3 tmpSub = light.position - worldPos;
+    vec3 L = normalize(tmpSub - worldPos);
+    vec3 H = normalize(V + L);
 
-    if (shadowCoord.z > -1.0 && shadowCoord.z < 1.0) {
-        float dist = 0.0;
-        if (idx == 0) {
-            dist = texture(shadowMap_0, vec2(shadowCoord.xy + offset)).r;
-        } else if (idx == 1) {
-            dist = texture(shadowMap_1, vec2(shadowCoord.xy + offset)).r;
-        } else {
-            dist = texture(shadowMap_2, vec2(shadowCoord.xy + offset)).r;
-        }
-        if (shadowCoord.w > 0 && dist < shadowCoord.z - BIAS) {
-            shadow = SHADOW_FACTOR;
-        }
-    }
-    return shadow;
+    // Calculate distance and attenuation
+    float distance = length(tmpSub);
+    float attenuation = 1.0 / (distance * distance);
+    float intensity = 10.0f;
+    vec3 radiance = light.color * light.intensity * attenuation;
+
+    // Cook-Torrance BRDF
+    float NDF = distributionGGX(N, H, roughness);
+    float G = geometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    vec3 specular = numerator / denominator;
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+
+    float NdotL = max(dot(N, L), 0.0);
+    return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
-float calcShadow(vec4 worldPosition, int idx) {
-    vec4 shadowMapPosition = shadowMap[idx].shadowProjectionMatrix * worldPosition;
-    float shadow = 1.0;
-    vec4 shadowCoord = (shadowMapPosition / shadowMapPosition.w) * 0.5 + 0.5;
-    shadow = textureProj(shadowCoord, vec2(0, 0), idx);
-    return shadow;
+vec3 calculateDirectionalLight(Light light, vec3 V, vec3 N, vec3 F0, vec3 albedo, float metallic, float roughness) {
+    vec3 L = normalize(-light.position);
+    vec3 H = normalize(V + L);
+
+    vec3 radiance = light.color * light.intensity;
+
+    // Cook-Torrance BRDF
+    float NDF = distributionGGX(N, H, roughness);
+    float G = geometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    vec3 specular = numerator / denominator;
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+
+    float NdotL = max(dot(N, L), 0.0);
+    return (kD * albedo / PI + specular) * radiance * NdotL;
 }
+
 
 void main()
 {
-    vec4 albedoSamplerValue = texture(albedoSampler, outTextCoord);
-    vec3 albedo  = albedoSamplerValue.rgb;
-    vec4 diffuse = vec4(albedo, 1);
+    vec3 albedo = texture(albedoSampler, inTextureCoord).rgb;
+    vec3 normal = texture(normalSampler, inTextureCoord).rgb;
+    vec4 worldPosW = texture(posSampler, inTextureCoord);
+    vec3 worldPos = worldPosW.xyz;
+    vec3 pbr = texture(pbrSampler, inTextureCoord).rgb;
 
-    float reflectance = albedoSamplerValue.a;
-    vec3 normal = normalize(2.0 * texture(normalSampler, outTextCoord).rgb  - 1.0);
-    vec4 specular = texture(specularSampler, outTextCoord);
+    float roughness = pbr.g;
+    float metallic = pbr.b;
 
-    // Retrieve position from depth
-    float depth = texture(depthSampler, outTextCoord).x * 2.0 - 1.0;
-    if (depth == 1) {
-        discard;
-    }
-    vec4 clip      = vec4(outTextCoord.x * 2.0 - 1.0, outTextCoord.y * 2.0 - 1.0, depth, 1.0);
-    vec4 view_w    = invProjectionMatrix * clip;
-    vec3 view_pos  = view_w.xyz / view_w.w;
-    vec4 world_pos = invViewMatrix * vec4(view_pos, 1);
+    vec3 N = normalize(normal);
+    vec3 V = normalize(cameraPos - worldPos);
 
-    vec4 diffuseSpecularComp = calcDirLight(diffuse, specular, reflectance, directionalLight, view_pos, normal);
+    vec3 F0 = vec3(0.04);
+    F0 = mix(F0, albedo, metallic);
 
-    int cascadeIndex = 0;
-    for (int i=0; i<NUM_CASCADES - 1; i++) {
-        if (view_pos.z < shadowMap[i].splitDistance) {
+    uint cascadeIndex = 0;
+    vec4 viewPos = viewMatrix * worldPosW;
+    for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
+        if(viewPos.z < shadows[i].splitDistance.x) {
             cascadeIndex = i + 1;
         }
     }
-    float shadowFactor = calcShadow(world_pos, cascadeIndex);
 
-    for (int i=0; i<MAX_POINT_LIGHTS; i++) {
-        if (pointLights[i].intensity > 0) {
-            diffuseSpecularComp += calcPointLight(diffuse, specular, reflectance, pointLights[i], view_pos, normal);
+    float shadow = calculateVisibility(vec4(worldPos, 1), cascadeIndex);
+
+    vec3 Lo = vec3(0.0);
+    for (uint i = 0; i < lightCount; i++) {
+        Light light = lights[i];
+        if (light.directional == 1) {
+            Lo += calculateDirectionalLight(light, V, N, F0, albedo, metallic, roughness);
+        } else {
+            Lo += calculatePointLight(light, worldPos, V, N, F0, albedo, metallic, roughness);
         }
     }
 
-    for (int i=0; i<MAX_SPOT_LIGHTS; i++) {
-        if (spotLights[i].pl.intensity > 0) {
-            diffuseSpecularComp += calcSpotLight(diffuse, specular, reflectance, spotLights[i], view_pos, normal);
+    vec3 ambient = ambientLightColor * albedo * ambientLightIntensity;
+    outFragColor = vec4(Lo * shadow + ambient, 1.0f);
+    //outFragColor = vec4(albedo * shadow + ambient, 1.0f);
+    //outFragColor = vec4(normal, 1);
+    //outFragColor = vec4(worldPos, 1);
+    //outFragColor = texture(shadowSampler, vec3(inTextureCoord, 2));
+
+    if (DEBUG_SHADOWS == 1) {
+        switch (cascadeIndex) {
+            case 0:
+                outFragColor.rgb *= vec3(1.0f, 0.25f, 0.25f);
+                break;
+            case 1:
+                outFragColor.rgb *= vec3(0.25f, 1.0f, 0.25f);
+                break;
+            case 2:
+                outFragColor.rgb *= vec3(0.25f, 0.25f, 1.0f);
+                break;
+            default:
+                outFragColor.rgb *= vec3(1.0f, 1.0f, 0.25f);
+                break;
         }
     }
-    vec4 ambient = calcAmbient(ambientLight, diffuse);
 
-
-    fragColor = ambient + diffuseSpecularComp;
-    fragColor.rgb = fragColor.rgb * shadowFactor;
-
-    if (fog.activeFog == 1) {
-        fragColor = calcFog(view_pos, fragColor, fog, ambientLight.color, directionalLight);
-    }
+    //if (fog.activeFog == 1) {
+    //fragColor = calcFog(view_pos, fragColor, fog, ambientLight.color, directionalLight);
+    //}
 }

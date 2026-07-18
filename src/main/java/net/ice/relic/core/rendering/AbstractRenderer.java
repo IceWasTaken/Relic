@@ -5,6 +5,4 @@ public abstract class AbstractRenderer  {
     public AbstractRenderer() {
 
     }
-
-
 }

@@ -1,24 +1,26 @@
 #version 460
 
-layout(triangles, invocations = 6) in; // e.g., 6 layers for a point light cube
+#define SHADOW_MAP_CASCADE_COUNT 3
+
+layout(triangles, invocations = SHADOW_MAP_CASCADE_COUNT) in;
 layout(triangle_strip, max_vertices = 3) out;
 
-layout(location = 0) in vec3 inPosition[]; // from vertex shader
-layout(location = 0) out vec4 fragPos;     // optional, for debugging depth in fragment
+layout(location = 0) in vec2 inTextCoords[];
+layout(location = 1) in flat uint inMaterialIndex[];
 
-uniform mat4 projViewMatrices[6]; // one per layer
+layout(location = 0) out vec2 outTextCoords;
+layout(location = 1) out flat uint outMaterialIndex;
 
-void main()
-{
-    for (int layer = 0; layer < 6; layer++)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            gl_Layer = layer;
-            gl_Position = projViewMatrices[layer] * gl_in[i].gl_Position;
-            fragPos = gl_in[i].gl_Position; // optional
-            EmitVertex();
-        }
-        EndPrimitive();
+uniform mat4 projViewMatrices[3];
+
+void main() {
+
+    for (int i = 0; i < 3; i++) {
+        outTextCoords = inTextCoords[i];
+        outMaterialIndex = inMaterialIndex[i];
+        gl_Layer = gl_InvocationID;
+        gl_Position = projViewMatrices[gl_InvocationID] * gl_in[i].gl_Position;
+        EmitVertex();
     }
+    EndPrimitive();
 }

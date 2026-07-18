@@ -1,7 +1,6 @@
 package net.ice.relic.core;
 
-import org.tinylog.Logger;
-
+ import org.tinylog.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;

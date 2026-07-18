@@ -1,12 +1,12 @@
 package net.ice.relic.common.test.scene;
 
+import net.ice.heirloom.color.Colors;
 import net.ice.relic.application.RelicApplication;
+import net.ice.heirloom.io.resource.Resource;
 import net.ice.relic.common.test.gui.DebugGui;
-import net.ice.relic.core.resource.Resource;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.SceneObject;
-import net.ice.relic.core.scene.Skybox;
-import net.ice.relic.core.scene.light.PointLight;
+import net.ice.relic.core.scene.light.Light;
 import org.joml.Vector3f;
 
 public class TestingScene extends Scene {
@@ -17,25 +17,26 @@ public class TestingScene extends Scene {
 
     @Override
     protected void sceneInit() {
-        setSkybox(new Skybox("assets/models/skybox4/skybox.glb", getModelLoader()));
+        //setSkybox(new Skybox("assets/models/skybox4/skybox.glb", getModelLoader()));
 
-        SceneObject sceneObject = new SceneObject("blahaj", getModelLoader().loadModel("blahaj", Resource.getResourceWithDefaultNamespace("/assets/models/sponza/sponza.gltf"), false));
-        sceneObject.getTransform().setScale(0.01f);
+        SceneObject sceneObject = new SceneObject("blahaj", getModelLoader().loadModel(Resource.getResource("", "resources/assets/models/sponza/Sponza.gltf"), false));
+        sceneObject.getTransform().setPosition(0,0,0);
         addSceneObject("blahaj", sceneObject);
 
-        //getPointLights().add(new PointLight(new Vector3f(0,1,0), new Vector3f(0,2,0), 10));
-
+        getLights().add(new Light(new Vector3f(1, -1, 2), false, 2, Colors.GRAY.getRGBColor()));
         setGUI(new DebugGui(application));
 
+        camera.setPosition(-5, 3, 0);
+        camera.setRotation((float) Math.toRadians(20.0f), (float) Math.toRadians(90));
     }
 
     @Override
     protected void sceneUpdate(float deltaTime) {
-
     }
 
     @Override
     protected void sceneDestroy() {
 
     }
+
 }

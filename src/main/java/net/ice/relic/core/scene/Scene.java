@@ -1,40 +1,34 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.Lifecycle;
+import net.ice.heirloom.Lifecycle;
+import net.ice.heirloom.color.Colors;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.annotations.Rewrite;
-import net.ice.relic.common.util.ColorUtil;
+ import org.tinylog.Logger;
 import net.ice.relic.core.ProjectionMatrix;
 import net.ice.relic.core.gui.Gui;
-import net.ice.relic.core.rendering.backend.opengl.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.model.ModelLoader;
-import net.ice.relic.core.scene.light.AmbientLight;
-import net.ice.relic.core.scene.light.DirectionalLight;
-import net.ice.relic.core.scene.light.PointLight;
-import net.ice.relic.core.scene.light.SpotLight;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
+import net.ice.relic.core.scene.light.*;
 import org.joml.Vector3f;
-import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Rewrite
+@Deprecated
 public abstract class Scene implements Lifecycle {
 
     private final String name;
 
     private AmbientLight ambientLight;
-    private DirectionalLight directionalLight;
 
-    private List<PointLight> pointLights;
-    private List<SpotLight> spotLights;
+    private final List<Light> lights;
 
     private Map<String, SceneObject> objects;
 
     private ProjectionMatrix matrix;
-    private Camera camera;
+    protected Camera camera;
 
     private Skybox skybox;
     private Fog fog;
@@ -52,16 +46,15 @@ public abstract class Scene implements Lifecycle {
     public Scene(String name, RelicApplication application) {
         this.name = name;
         this.application = application;
-        this.modelLoader = new ModelLoader(application, application.getTextureCache(), application.getMaterialCache(), application.getModelCache());
-        this.camera = new Camera(application);
+        this.modelLoader = new ModelLoader(application.getTextureCache(), application.getMaterialCache(), application.getModelCache());
+        this.camera = new Camera();
         this.matrix = new ProjectionMatrix(application);
         this.objects = new HashMap<>();
-        this.fog = new Fog(false, ColorUtil.ColorDefaults.WHITE.getColor(), 0.2f);
+        this.fog = new Fog(false, Colors.WHITE.getRGBColor(), 0.2f);
+        this.ambientLight = new AmbientLight().setIntensity(0.2f).setColor(Colors.WHITE.getRGBColor());
+        this.lights = new ArrayList<>();
 
-        this.ambientLight = new AmbientLight().setIntensity(10).setColor(0.3f, 0.3f, 0.3f);
-        this.directionalLight = new DirectionalLight(ColorUtil.ColorDefaults.WHITE.getColor(), new Vector3f(0, 1, 0), 1);
-        this.spotLights = new ArrayList<>();
-        this.pointLights = new ArrayList<>();
+        lights.add(new Light(new Vector3f(0, -1.0f,0), true, 8, Colors.LIME.getRGBColor()));
     }
 
     @Override
@@ -87,6 +80,7 @@ public abstract class Scene implements Lifecycle {
 
     @Override
     public void update(float deltaTime) {
+        matrix.update();
         sceneUpdate(deltaTime);
     }
 
@@ -114,23 +108,12 @@ public abstract class Scene implements Lifecycle {
         }
     }
 
-    public List<SpotLight> getSpotLights() {
-        return spotLights;
-    }
-
-    public List<PointLight> getPointLights() {
-        return pointLights;
+    public List<Light> getLights() {
+        return lights;
     }
 
     public AmbientLight getAmbientLight() {
         return ambientLight;
-    }
-
-    public DirectionalLight getDirectionalLight() {
-        return directionalLight;
-    }
-    public void setDirectionalLight(DirectionalLight directionalLight) {
-        this.directionalLight = directionalLight;
     }
 
     public ModelLoader getModelLoader() {
@@ -147,6 +130,10 @@ public abstract class Scene implements Lifecycle {
 
     public Skybox getSkybox() {
         return skybox;
+    }
+
+    public int getLightCount() {
+        return lights.size();
     }
 
     public void setSkybox(Skybox skybox) {
@@ -168,8 +155,6 @@ public abstract class Scene implements Lifecycle {
 
     public void setApplication(RelicApplication application) {
         this.application = application;
-        this.camera = new Camera(application);
-        this.matrix = new ProjectionMatrix(application).init();
     }
 
     public Map<String, SceneObject> getObjects() {
