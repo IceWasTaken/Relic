@@ -2,9 +2,6 @@ package net.ice.relic.application;
 
 import imgui.ImGui;
 import imgui.ImGuiIO;
-import net.bytebuddy.agent.ByteBuddyAgent;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
 import net.ice.curio.Curio;
 import net.ice.curio.input.Input;
 import net.ice.curio.window.Window;
@@ -29,7 +26,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static net.bytebuddy.matcher.ElementMatchers.*;
 import static net.ice.relic.EngineState.*;
 import static net.ice.curio.system.SystemInfo.logSystemInfo;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
