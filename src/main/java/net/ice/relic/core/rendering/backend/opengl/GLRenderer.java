@@ -33,7 +33,6 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS;
-import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public class GLRenderer extends Renderer implements Lifecycle {
 
@@ -85,7 +84,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
-        setupDebugMessageCallback();
+        //setupDebugMessageCallback();
         SystemInfo.logGLInfo();
 
         this.geometryBuffer = new FramebufferObject(new Vector2i(application.getWindow().getWidth(), application.getWindow().getHeight()), 5);

@@ -22,6 +22,7 @@ public class VulkanTest extends RelicApplication {
         super(new ApplicationProperties(
                 "Relic Application Test",
                 new Version(0, 0, 1),
+                new Version(0, 5, 0),
                 true
         ));
     }
