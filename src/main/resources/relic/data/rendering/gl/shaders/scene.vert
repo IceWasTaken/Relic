@@ -1,50 +1,43 @@
 #version 460
 
 const int MAX_DRAW_ELEMENTS = 200;
-const int MAX_ENTITIES = 50;
+const int MAX_ENTITIES = 100;
 
-layout (location=0) in vec3 position;
-layout (location=1) in vec3 normal;
-layout (location=2) in vec3 tangent;
-layout (location=3) in vec3 bitangent;
-layout (location=4) in vec2 texCoord;
+layout (location = 0) in vec3 inPosition;
+layout (location = 1) in vec3 inNormal;
+layout (location = 2) in vec3 inTangent;
+layout (location = 3) in vec3 inBitangent;
+layout (location = 4) in vec2 inTexCoord;
 
-out vec3 outNormal;
-out vec3 outTangent;
-out vec3 outBitangent;
-out vec2 outTextCoord;
-out vec4 outViewPosition;
-out vec4 outWorldPosition;
-flat out uint outMaterialIdx;
+layout (location = 0) out vec4 outPos;
+layout (location = 1) out vec3 outNormal;
+layout (location = 2) out vec3 outTangent;
+layout (location = 3) out vec3 outBitangent;
+layout (location = 4) out vec2 outTextureCoords;
+layout (location = 5) out uint outMaterialIndex;
 
-struct DrawElement
+struct Instance
 {
-    int modelMatrixIndex;
+    mat4 modelMatrix;
     int materialIndex;
 };
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform DrawElement drawElements[MAX_DRAW_ELEMENTS];
-uniform mat4 modelMatrices[MAX_ENTITIES];
 
-void main()
-{
-    vec4 initPos = vec4(position, 1.0);
-    vec4 initNormal = vec4(normal, 0.0);
-    vec4 initTangent = vec4(tangent, 0.0);
-    vec4 initBitangent = vec4(bitangent, 0.0);
+uniform Instance instances[MAX_DRAW_ELEMENTS];
 
-    uint idx = gl_BaseInstance + gl_InstanceID;
-    DrawElement drawElement = drawElements[idx];
-    outMaterialIdx = drawElement.materialIndex;
-    mat4 modelMatrix =  modelMatrices[drawElement.modelMatrixIndex];
-    mat4 modelViewMatrix = viewMatrix * modelMatrix;
-    outWorldPosition = modelMatrix * initPos;
-    outViewPosition  = viewMatrix * outWorldPosition;
-    gl_Position   = projectionMatrix * outViewPosition;
-    outNormal     = normalize(modelViewMatrix * initNormal).xyz;
-    outTangent    = normalize(modelViewMatrix * initTangent).xyz;
-    outBitangent  = normalize(modelViewMatrix * initBitangent).xyz;
-    outTextCoord  = texCoord;
+void main() {
+    Instance instance = instances[gl_BaseInstance + gl_InstanceID];
+
+    vec4 worldPos = instance.modelMatrix * vec4(inPosition, 1);
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
+    mat3 normal = transpose(inverse(mat3(instance.modelMatrix)));
+
+    outPos = worldPos;
+    outNormal = normal * normalize(inNormal);
+    outTangent = normal * normalize(inTangent);
+    outBitangent = normal * normalize(inBitangent);
+    outTextureCoords = inTexCoord;
+    outMaterialIndex = instance.materialIndex;
 }

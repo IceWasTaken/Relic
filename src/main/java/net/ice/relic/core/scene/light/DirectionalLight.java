@@ -1,22 +1,22 @@
 package net.ice.relic.core.scene.light;
 
-import net.ice.relic.common.util.ColorUtil;
+import net.ice.heirloom.color.RGBColor;
 import org.joml.Vector3f;
 
 public class DirectionalLight {
 
-    private ColorUtil.Color color;
+    private RGBColor color;
     private Vector3f direction;
 
     private float intensity;
 
-    public DirectionalLight(ColorUtil.Color color, Vector3f direction, float intensity) {
+    public DirectionalLight(RGBColor color, Vector3f direction, float intensity) {
         this.color = color;
         this.direction = direction;
         this.intensity = intensity;
     }
 
-    public ColorUtil.Color getColor() {
+    public RGBColor getColor() {
         return color;
     }
 
@@ -28,12 +28,12 @@ public class DirectionalLight {
         return intensity;
     }
 
-    public void setColor(ColorUtil.Color color) {
+    public void setColor(RGBColor color) {
         this.color = color;
     }
 
     public void setColor(float r, float g, float b) {
-        this.color = new ColorUtil.Color(r, g, b);
+        this.color = new RGBColor(r, g, b);
     }
 
     public void setDirection(Vector3f direction) {

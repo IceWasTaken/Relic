@@ -3,66 +3,87 @@
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : require
 
-const int MAX_MATERIALS  = 200;
-const int MAX_TEXTURES = 160;
+const int MAX_MATERIALS = 200;
 
-in vec3 outNormal;
-in vec3 outTangent;
-in vec3 outBitangent;
-in vec2 outTextCoord;
-in vec4 outViewPosition;
-in vec4 outWorldPosition;
-flat in uint outMaterialIdx;
+layout (location = 0) in vec4 pos;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec3 tangent;
+layout (location = 3) in vec3 bitangent;
+layout (location = 4) in vec2 textureCoords;
+layout (location = 5) flat in uint materialIndex;
 
-layout (location = 0) out vec4 buffAlbedo;
-layout (location = 1) out vec4 buffNormal;
-layout (location = 2) out vec4 buffSpecular;
+layout (location = 0) out vec4 outPos;
+layout (location = 1) out vec4 outAlbedo;
+layout (location = 2) out vec4 outNormal;
+layout (location = 3) out vec4 outPBR;
 
 struct Material
 {
     vec4 diffuse;
     vec4 specular;
     float reflectance;
+    float roughnessFactor;
+    float metallicFactor;
     float _padding;
-    float _padding1;
-    float _padding2;
-    uint64_t textureHandle;
-    uint64_t normalHandle;
-    //uint64_t emissiveHandle;
-    //uint64_t specularHandle;
-    //uint64_t AOHandle;
 };
 
-layout(std430, binding = 5) buffer MaterialBuffer {
+layout(std430, binding = 7) buffer MaterialBuffer {
     Material materials[MAX_MATERIALS];
 };
 
-vec3 calcNormal(Material mat, vec3 normal, vec3 tangent, vec3 bitangent, vec2 textCoords) {
-    mat3 TBN = mat3(tangent, bitangent, normal);
-    vec3 newNormal = texture(sampler2D(mat.normalHandle), textCoords).rgb;
-    newNormal = normalize(newNormal * 2.0 - 1.0);
-    newNormal = normalize(TBN * newNormal);
+layout(std430, binding = 8) buffer AlbedoMapBuffer {
+    uint64_t albedoMaps[MAX_MATERIALS];
+};
+
+layout(std430, binding = 9) buffer NormalMapBuffer {
+    uint64_t normalMaps[MAX_MATERIALS];
+};
+
+layout(std430, binding = 10) buffer PBRMapBuffer {
+    uint64_t pbrMaps[MAX_MATERIALS];
+};
+
+vec3 calculateNormals(Material material, vec3 normal, vec2 textCoords, mat3 TBN) {
+    vec3 newNormal = normal;
+
+    if(normalMaps[materialIndex] != 0) {
+        newNormal = texture(sampler2D(normalMaps[materialIndex]), textCoords).rgb;
+        newNormal = normalize(newNormal * 2.0 - 1.0);
+        newNormal = normalize(TBN * newNormal);
+    }
+
     return newNormal;
 }
 
 void main() {
-    Material material = materials[outMaterialIdx];
+    outPos = pos;
 
-    sampler2D albedo = sampler2D(material.textureHandle);
+    Material material = materials[materialIndex];
+    if(albedoMaps[materialIndex] != 0) {
+        outAlbedo = texture(sampler2D(albedoMaps[materialIndex]), textureCoords);
+    } else {
+        outAlbedo = material.diffuse;
+    }
 
-    vec4 text_color = texture(albedo, outTextCoord);
-    vec4 diffuse = text_color + material.diffuse;
-    if (diffuse.a < 0.5) {
+    if(outAlbedo.a < 0.5) {
         discard;
     }
-    vec4 specular = text_color + material.specular;
-    vec3 normal = outNormal;
-    if (material.normalHandle != 0u) {
-        normal = calcNormal(material, outNormal, outTangent, outBitangent, outTextCoord);
+
+    mat3 TBN = mat3(tangent, bitangent, normal);
+    vec3 newNormal = calculateNormals(material, normal, textureCoords, TBN);
+    outNormal = vec4(newNormal, 1.0);
+
+    float ao = 0.5f;
+    float roughnessFactor = 0.0f;
+    float metallicFactor = 0.0f;
+    if(pbrMaps[materialIndex] != 0) {
+        vec4 pbrMapValue = texture(sampler2D(pbrMaps[materialIndex]), textureCoords);
+        roughnessFactor = pbrMapValue.g;
+        metallicFactor = pbrMapValue.b;
+    } else {
+        roughnessFactor = material.roughnessFactor;
+        metallicFactor = material.metallicFactor;
     }
 
-    buffAlbedo = vec4(diffuse.xyz, material.reflectance);
-    buffNormal = vec4(0.5 * normal + 0.5, 1.0);
-    buffSpecular = specular;
-
+    outPBR = vec4(ao, roughnessFactor, metallicFactor, 1.0f);
 }

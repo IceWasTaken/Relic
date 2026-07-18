@@ -7,9 +7,12 @@ import org.joml.Vector3f;
 public class Transform {
 
     public Vector3f position;
-    public Quaternionf rotation;
     public Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
+
+    public Quaternionf rotation;
+
     public Matrix4f transformMatrix;
+
 
     public Transform() {
         position = new Vector3f();
@@ -23,8 +26,7 @@ public class Transform {
     }
 
     private void update() {
-        transformMatrix.identity()
-                .translate(position)
+        transformMatrix.translate(position)
                 .rotate(rotation)
                 .scale(scale);
     }

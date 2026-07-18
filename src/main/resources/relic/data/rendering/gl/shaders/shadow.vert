@@ -3,28 +3,30 @@
 const int MAX_DRAW_ELEMENTS = 200;
 const int MAX_ENTITIES = 100;
 
-layout (location=0) in vec3 position;
-layout (location=1) in vec3 normal;
-layout (location=2) in vec3 tangent;
-layout (location=3) in vec3 bitangent;
-layout (location=4) in vec2 texCoord;
+layout(location=0) in vec3 position;
+layout(location=1) in vec3 normal;
+layout(location=2) in vec3 tangent;
+layout(location=3) in vec3 bitangent;
+layout(location=4) in vec2 texCoord;
 
+layout(location = 0) out vec2 outTextCoord;
+layout(location = 1) out flat uint outMaterialIndex;
 
-struct DrawElement
-{
-    int modelMatrixIndex;
+struct Instance{
+    mat4 modelMatrix;
+    int materialIndex;
 };
 
-uniform mat4 modelMatrix;
-uniform mat4 projectionMatrix;
-uniform DrawElement drawElements[MAX_DRAW_ELEMENTS];
-uniform mat4 modelMatrices[MAX_ENTITIES];
+uniform Instance instances[MAX_DRAW_ELEMENTS];
 
 void main()
 {
-    vec4 initPos = vec4(position, 1.0);
-    uint idx = gl_BaseInstance + gl_InstanceID;
-    int modelMatrixIdx = drawElements[idx].modelMatrixIndex;
-    mat4 modelMatrix = modelMatrices[modelMatrixIdx];
-    gl_Position = projectionMatrix * modelMatrix * initPos;
+    uint index = gl_BaseInstance + gl_InstanceID;
+
+    Instance instance = instances[index];
+
+    outTextCoord = texCoord;
+    outMaterialIndex = instance.materialIndex;
+
+    gl_Position = instance.modelMatrix * vec4(position, 1.0f);
 }

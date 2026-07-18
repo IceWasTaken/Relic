@@ -2,32 +2,29 @@ package net.ice.relic.core;
 
 import net.ice.relic.application.RelicApplication;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class ProjectionMatrix {
 
-    private static final float FOV = (float) Math.toRadians(90.0f);
-    private static final float Z_FAR = 10000.f;
-    private static final float Z_NEAR = 0.01f;
+    public static final float FOV = (float) Math.toRadians(90.0f);
+    public static final float Z_FAR = 50.f;
+    public static final float Z_NEAR = 0.5f;
+
+    private static boolean shouldResize = false;
 
     private final RelicApplication application;
-
-    private final Matrix4f inverseProjectionMatrix;
     private final Matrix4f projectionMatrix;
 
     public ProjectionMatrix(RelicApplication application) {
         this.application = application;
 
         projectionMatrix = new Matrix4f();
-        inverseProjectionMatrix = new Matrix4f();
-    }
-
-    public ProjectionMatrix init() {
         updateProjMatrix(application.getWindow().getWidth(), application.getWindow().getHeight());
-        return this;
     }
 
-    public Matrix4f getInvProjMatrix() {
-        return inverseProjectionMatrix;
+    public void update() {
+        //updateProjMatrix(application.getWindow().getWidth(), application.getWindow().getHeight());
     }
 
     public Matrix4f getProjMatrix() {
@@ -35,7 +32,7 @@ public class ProjectionMatrix {
     }
 
     public void updateProjMatrix(int width, int height) {
-        projectionMatrix.setPerspective(FOV, (float) width / height, Z_NEAR, Z_FAR);
-        inverseProjectionMatrix.set(projectionMatrix).invert();
+        projectionMatrix.identity();
+        projectionMatrix.perspective(FOV, (float) width / (float) height, Z_NEAR, Z_FAR, true);
     }
 }

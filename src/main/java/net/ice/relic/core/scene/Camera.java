@@ -1,78 +1,84 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.application.RelicApplication;
-import net.ice.relic.common.annotations.Rewrite;
-import net.ice.relic.core.Input;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import static org.lwjgl.glfw.GLFW.*;
-
-@Rewrite
+@Deprecated
 public class Camera {
 
-    private boolean hasUpdated;
+    private final Vector3f direction;
+    private final Vector3f position;
+    private final Vector3f right;
+    private final Vector2f rotation;
+    private final Vector3f up;
+    private final Matrix4f viewMatrix;
 
-    public Matrix4f viewMatrix = new Matrix4f();
-    private Vector3f position = new Vector3f(0,0,0);
-    private Quaternionf orientation = new Quaternionf();
-
-    public Camera(RelicApplication application) {
+    public Camera() {
+        direction = new Vector3f();
+        right = new Vector3f();
+        up = new Vector3f();
+        position = new Vector3f();
+        viewMatrix = new Matrix4f();
+        rotation = new Vector2f();
     }
 
-    public void update(float deltaTime) {
-        if (!hasUpdated) {
-            float speed = Input.isKeyDown(GLFW_KEY_LEFT_SHIFT) ? 20f : 5f;
-            float rotateZ = 0f;
-            float rotateX = 0f;
-            float rotateY = 0f;
-
-            if (Input.isKeyDown(GLFW_KEY_W)) {
-                position.sub(orientation.positiveZ(new Vector3f()).mul(deltaTime * speed));
-            }
-            if (Input.isKeyDown(GLFW_KEY_S)) {
-                position.add(orientation.positiveZ(new Vector3f()).mul(deltaTime * speed));
-            }
-            if (Input.isKeyDown(GLFW_KEY_A)) {
-                position.add(orientation.positiveX(new Vector3f()).mul(deltaTime * -speed));
-            }
-            if (Input.isKeyDown(GLFW_KEY_D)) {
-                position.add(orientation.positiveX(new Vector3f()).mul(deltaTime * speed));
-            }
-            if (Input.isKeyDown(GLFW_KEY_Q)) {
-                rotateZ -= 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_E)) {
-                rotateZ += 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_UP)) {
-                rotateX -= 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_DOWN)) {
-                rotateX += 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_LEFT)) {
-                rotateY -= 1f;
-            }
-            if (Input.isKeyDown(GLFW_KEY_RIGHT)) {
-                rotateY += 1f;
-            }
-
-            orientation.rotateLocalZ(rotateZ * deltaTime * 2);
-            orientation.rotateLocalX(rotateX * deltaTime * 2);
-            orientation.rotateLocalY(rotateY * deltaTime * 2);
-
-            viewMatrix.identity()
-                    .rotate(orientation)
-                    .translate(new Vector3f(position).negate());
-
-            hasUpdated = true;
-        }
+    public void addRotation(float x, float y) {
+        rotation.add(x, y);
+        update();
     }
 
-    public void newFrame() {
-        hasUpdated = false;
+    public void moveBackwards(float inc) {
+        viewMatrix.positiveZ(direction).negate().mul(inc);
+        position.sub(direction);
+        update();
+    }
+
+    public void moveDown(float inc) {
+        viewMatrix.positiveY(up).mul(inc);
+        position.sub(up);
+        update();
+    }
+
+    public void moveForward(float inc) {
+        viewMatrix.positiveZ(direction).negate().mul(inc);
+        position.add(direction);
+        update();
+    }
+
+    public void moveLeft(float inc) {
+        viewMatrix.positiveX(right).mul(inc);
+        position.sub(right);
+        update();
+    }
+
+    public void moveRight(float inc) {
+        viewMatrix.positiveX(right).mul(inc);
+        position.add(right);
+        update();
+    }
+
+    public void moveUp(float inc) {
+        viewMatrix.positiveY(up).mul(inc);
+        position.add(up);
+        update();
+    }
+
+    public void update() {
+        viewMatrix.identity()
+                .rotateX(rotation.x)
+                .rotateY(rotation.y)
+                .translate(-position.x, -position.y, -position.z);
+    }
+
+    public void setPosition(float x, float y, float z) {
+        position.set(x, y, z);
+        update();
+    }
+
+    public void setRotation(float x, float y) {
+        rotation.set(x, y);
+        update();
     }
 
     public Matrix4f getViewMatrix() {
@@ -83,15 +89,4 @@ public class Camera {
         return position;
     }
 
-    public Quaternionf getOrientation() {
-        return orientation;
-    }
-
-    public void setPosition(Vector3f position) {
-        this.position = position;
-    }
-
-    public void setOrientation(Quaternionf orientation) {
-        this.orientation = orientation;
-    }
 }

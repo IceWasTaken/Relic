@@ -1,9 +1,8 @@
 package net.ice.relic.core.rendering.shader;
 
-import net.ice.relic.core.resource.Resource;
+import net.ice.heirloom.io.resource.Resource;
 import org.lwjgl.util.shaderc.Shaderc;
-import org.tinylog.Logger;
-
+ import org.tinylog.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -128,7 +127,7 @@ public class ShaderCompiler {
     public static void compileShaderIfChanged(Resource glsShaderFile, Resource spvLocation, int shaderType) {
         byte[] compiledShader;
         try {
-            File glslFile = glsShaderFile.getAsFile();
+            File glslFile = glsShaderFile.getFromJar();
             File spvFile = new File(spvLocation.getPath());
             if (!spvFile.exists() || glslFile.lastModified() > spvFile.lastModified()) {
 

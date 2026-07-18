@@ -1,9 +1,8 @@
 package net.ice.relic.application;
 
-import net.ice.relic.core.Clock;
-import net.ice.relic.core.Input;
+import net.ice.curio.window.Window;
+import net.ice.relic.core.Timer;
 import net.ice.relic.core.rendering.backend.Renderer;
-import net.ice.relic.core.window.Window;
 
 public interface ApplicationContext {
 
@@ -11,11 +10,8 @@ public interface ApplicationContext {
 
     Renderer getRenderer();
 
-    Clock getClock();
-
-    Input getInput();
+    Timer getClock();
 
 
     //Stats getStats();
-
 }
