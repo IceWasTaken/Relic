@@ -1,14 +1,10 @@
 package net.ice.heirloom.event;
 
-public abstract class Event {
+import net.ice.heirloom.register.autoregister.Registerable;
 
-    private boolean canceled = false;
+public interface Event extends Registerable<Event, EventRegistry> {
 
-    public void cancel() {
-        this.canceled = true;
-    }
+    @Override
+    void register(EventRegistry registry);
 
-    public boolean isCanceled() {
-        return canceled;
-    }
 }

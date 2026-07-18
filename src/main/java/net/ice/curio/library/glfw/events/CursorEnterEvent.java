@@ -1,8 +1,9 @@
 package net.ice.curio.library.glfw.events;
 
 import net.ice.heirloom.event.Event;
+import net.ice.heirloom.event.EventRegistry;
 
-public class CursorEnterEvent extends Event {
+public class CursorEnterEvent implements Event {
 
     private final long window;
     private final boolean entered;
@@ -14,5 +15,10 @@ public class CursorEnterEvent extends Event {
 
     public boolean isEntered() {
         return entered;
+    }
+
+    @Override
+    public void register(EventRegistry registry) {
+
     }
 }
