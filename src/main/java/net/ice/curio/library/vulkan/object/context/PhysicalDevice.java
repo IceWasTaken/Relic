@@ -4,7 +4,6 @@ import net.ice.curio.library.vulkan.object.properties.PhysicalDeviceProperties;
 import net.ice.curio.window.backend.vulkan.Surface;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.util.vma.VmaAllocatorCreateInfo;
 import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
 
@@ -68,10 +67,6 @@ public class PhysicalDevice {
             checkVulkan(vkCreateDevice(vkPhysicalDevice, createInfo, null, pointerBuffer), "PhysicalDevice: Failed to create logical device.");
             return new VkDevice(pointerBuffer.get(0), vkPhysicalDevice, createInfo);
         }
-    }
-
-    public void setupVMACreateInfo(VmaAllocatorCreateInfo allocatorCreateInfo) {
-        allocatorCreateInfo.physicalDevice(vkPhysicalDevice);
     }
 
     public void logPhysicalDeviceProperties() {

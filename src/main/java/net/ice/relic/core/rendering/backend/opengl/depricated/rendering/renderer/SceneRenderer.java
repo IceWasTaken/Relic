@@ -1,14 +1,10 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated.rendering.renderer;
 
 import net.ice.curio.config.RendererConfig;
-import net.ice.relic.core.cache.MaterialCache;
-import net.ice.relic.core.model.Material;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
-import net.ice.curio.library.opengl.wrapper.enums.DataType;
-import net.ice.curio.library.opengl.wrapper.glsl.GLSLStruct;
 import net.ice.curio.library.opengl.object.buffer.ShaderStorageBufferObject;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.depricated.rendering.enums.RenderType;
@@ -25,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.ice.curio.library.opengl.wrapper.enums.Usage.DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL43.*;
 
@@ -178,7 +173,7 @@ public class SceneRenderer {
     public void setupData() {
         setupObjectData();
         setupAnimationCommandBuffer();
-        setupMaterialUniforms(manager.getApplication().getCurrentScene().getModelLoader().getMaterialCache());
+        //setupMaterialUniforms(manager.getApplication().getCurrentScene().getModelLoader().getMaterialCache());
         setupPipeline();
     }
 
@@ -225,61 +220,61 @@ public class SceneRenderer {
 //        MemoryUtil.memFree(commandBuffer);
     }
 
-    public void setupMaterialUniforms(MaterialCache materialCache) {
-        List<Material> materialList = materialCache.getMaterialsList();
-        int materialCount = materialList.size();
-
-        GLSLStruct materialStructFormat = new GLSLStruct(List.of(
-                DataType.VEC4, //16
-                DataType.VEC4, //32
-                DataType.FLOAT32, //36
-                DataType.FLOAT32, //40
-                DataType.FLOAT32, //44
-                DataType.FLOAT32
-        ));
-
-        GLSLStruct mapStructFormat = new GLSLStruct(List.of(DataType.UINT64));
-
-        this.materialBuffer = new ShaderStorageBufferObject(materialStructFormat, materialCount);
-        this.albedoMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
-        this.normalMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
-        this.pbrMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
-
-        int index = 0;
-        for (Material material : materialList) {
-            materialBuffer
-                    .setVec4(0, index, material.getDiffuseColor().div().vec4f())
-                    .setVec4(1, index, material.getSpecularColor().div().vec4f());
-
-            albedoMapBuffer.setLong(0, index, material.getTextureHandle());
-            normalMapBuffer.setLong(0, index, material.getNormalHandle());
-            pbrMapBuffer.setLong(0, index, material.getRoughnessHandle());
-
-            materialBuffer
-                    .setFloat(2, index, material.getReflectance())
-                    .setFloat(3, index, material.getRoughnessFactor())
-                    .setFloat(4, index, material.getMetallicFactor())
-                    .setFloat(5, index, 0);
-
-            index++;
-        }
-
-        materialBuffer.bind();
-        materialBuffer.bindBase(7);
-        materialBuffer.syncToGPU(DYNAMIC_DRAW);
-
-        albedoMapBuffer.bind();
-        albedoMapBuffer.bindBase(8);
-        albedoMapBuffer.syncToGPU(DYNAMIC_DRAW);
-
-        normalMapBuffer.bind();
-        normalMapBuffer.bindBase(9);
-        normalMapBuffer.syncToGPU(DYNAMIC_DRAW);
-
-        pbrMapBuffer.bind();
-        pbrMapBuffer.bindBase(10);
-        pbrMapBuffer.syncToGPU(DYNAMIC_DRAW);
-    }
+//    public void setupMaterialUniforms(MaterialCache materialCache) {
+//        List<Material> materialList = materialCache.getMaterialsList();
+//        int materialCount = materialList.size();
+//
+//        GLSLStruct materialStructFormat = new GLSLStruct(List.of(
+//                StructEntry.Type.VEC4, //16
+//                StructEntry.Type.VEC4, //32
+//                StructEntry.Type.FLOAT32, //36
+//                StructEntry.Type.FLOAT32, //40
+//                StructEntry.Type.FLOAT32, //44
+//                StructEntry.Type.FLOAT32
+//        ));
+//
+//        GLSLStruct mapStructFormat = new GLSLStruct(List.of(StructEntry.Type.UINT64));
+//
+//        this.materialBuffer = new ShaderStorageBufferObject(materialStructFormat, materialCount);
+//        this.albedoMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
+//        this.normalMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
+//        this.pbrMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
+//
+//        int index = 0;
+//        for (Material material : materialList) {
+//            materialBuffer
+//                    .setVec4(0, index, material.getDiffuseColor().div().vec4f())
+//                    .setVec4(1, index, material.getSpecularColor().div().vec4f());
+//
+//            albedoMapBuffer.setLong(0, index, material.getTextureHandle());
+//            normalMapBuffer.setLong(0, index, material.getNormalHandle());
+//            pbrMapBuffer.setLong(0, index, material.getRoughnessHandle());
+//
+//            materialBuffer
+//                    .setFloat(2, index, material.getReflectance())
+//                    .setFloat(3, index, material.getRoughnessFactor())
+//                    .setFloat(4, index, material.getMetallicFactor())
+//                    .setFloat(5, index, 0);
+//
+//            index++;
+//        }
+//
+//        materialBuffer.bind();
+//        materialBuffer.bindBase(7);
+//        materialBuffer.syncToGPU(DYNAMIC_DRAW);
+//
+//        albedoMapBuffer.bind();
+//        albedoMapBuffer.bindBase(8);
+//        albedoMapBuffer.syncToGPU(DYNAMIC_DRAW);
+//
+//        normalMapBuffer.bind();
+//        normalMapBuffer.bindBase(9);
+//        normalMapBuffer.syncToGPU(DYNAMIC_DRAW);
+//
+//        pbrMapBuffer.bind();
+//        pbrMapBuffer.bindBase(10);
+//        pbrMapBuffer.syncToGPU(DYNAMIC_DRAW);
+//    }
 
     private void setupPipeline() {
         Pipeline.PipelineBuilder pipelineBuilder = new Pipeline.PipelineBuilder()

@@ -1,18 +1,17 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.memory.Struct;
+import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.object.GLViewport;
-import net.ice.curio.library.opengl.wrapper.enums.DataType;
 import net.ice.curio.library.opengl.wrapper.enums.FramebufferTarget;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
-import net.ice.curio.library.opengl.wrapper.glsl.GLSLStruct;
 import net.ice.curio.library.opengl.object.buffer.DrawIndirectBuffer;
 import net.ice.curio.library.opengl.object.buffer.ShaderStorageBufferObject;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.model.Material;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.UniformBufferObject;
@@ -45,9 +44,7 @@ public class GLSceneRenderer implements Lifecycle {
     private Viewport viewport;
 
     private ShaderStorageBufferObject materialBuffer;
-    private ShaderStorageBufferObject albedoMapBuffer;
-    private ShaderStorageBufferObject normalMapBuffer;
-    private ShaderStorageBufferObject pbrMapBuffer;
+    private ShaderStorageBufferObject mapBuffer;
 
     public GLSceneRenderer(GLRenderer glRenderer) {
         this.glRenderer = glRenderer;
@@ -177,37 +174,30 @@ public class GLSceneRenderer implements Lifecycle {
         List<Material> materialList = materialCache.getMaterialsList();
         int materialCount = materialList.size();
 
-        GLSLStruct materialStructFormat = new GLSLStruct(List.of(
-                DataType.VEC4, //16
-                DataType.VEC4, //32
-                DataType.FLOAT32, //36
-                DataType.FLOAT32, //40
-                DataType.FLOAT32, //44
-                DataType.FLOAT32
-        ));
+        Struct materialStructFormat = new Material.MaterialStruct(StructType.STD430);
 
-        GLSLStruct mapStructFormat = new GLSLStruct(List.of(DataType.UINT64));
+        Struct mapStructFormat = new Struct(StructType.STD430) {
+            @Override
+            public Class<?> getRecord() {
+                return MapRecord.class;
+            }
+        };
 
         this.materialBuffer = new ShaderStorageBufferObject(materialStructFormat, materialCount);
-        this.albedoMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
-        this.normalMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
-        this.pbrMapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
+        this.mapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
 
         int index = 0;
         for (Material material : materialList) {
             materialBuffer
                     .setVec4(0, index, material.getDiffuseColor().div().vec4f())
-                    .setVec4(1, index, material.getSpecularColor().div().vec4f());
-
-            albedoMapBuffer.setLong(0, index, material.getTextureHandle());
-            normalMapBuffer.setLong(0, index, material.getNormalHandle());
-            pbrMapBuffer.setLong(0, index, material.getRoughnessHandle());
-
-            materialBuffer
+                    .setVec4(1, index, material.getSpecularColor().div().vec4f())
                     .setFloat(2, index, material.getReflectance())
                     .setFloat(3, index, material.getRoughnessFactor())
-                    .setFloat(4, index, material.getMetallicFactor())
-                    .setFloat(5, index, 0);
+                    .setFloat(4, index, material.getMetallicFactor());
+
+            mapBuffer.setLong(0, index, material.getTextureHandle());
+            mapBuffer.setLong(1, index, material.getNormalHandle());
+            mapBuffer.setLong(2, index, material.getRoughnessHandle());
 
             index++;
         }
@@ -216,16 +206,16 @@ public class GLSceneRenderer implements Lifecycle {
         materialBuffer.bindBase(7);
         materialBuffer.syncToGPU(DYNAMIC_DRAW);
 
-        albedoMapBuffer.bind();
-        albedoMapBuffer.bindBase(8);
-        albedoMapBuffer.syncToGPU(DYNAMIC_DRAW);
+        mapBuffer.bind();
+        mapBuffer.bindBase(8);
+        mapBuffer.syncToGPU(DYNAMIC_DRAW);
+    }
 
-        normalMapBuffer.bind();
-        normalMapBuffer.bindBase(9);
-        normalMapBuffer.syncToGPU(DYNAMIC_DRAW);
+    public record MapRecord(
+            long albedoMaps,
+            long normalMaps,
+            long pbrMaps
+    ) {
 
-        pbrMapBuffer.bind();
-        pbrMapBuffer.bindBase(10);
-        pbrMapBuffer.syncToGPU(DYNAMIC_DRAW);
     }
 }

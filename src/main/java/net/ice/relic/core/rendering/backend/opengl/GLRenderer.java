@@ -15,6 +15,7 @@ import net.ice.relic.core.rendering.backend.opengl.renderers.*;
 import net.ice.curio.system.SystemInfo;
 import net.ice.relic.core.scene.SceneObject;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -194,6 +195,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
     }
 
     private void defineVertexAttributes() {
+
         int stride = 3 * 4 * 4 + 2 * 4;
         int pointer = 0;
 

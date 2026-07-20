@@ -5,7 +5,6 @@ import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.curio.library.vma.VMAInstance;
 import net.ice.curio.library.vulkan.object.VulkanViewport;
 import net.ice.curio.library.vulkan.object.context.Device;
 import net.ice.curio.library.vulkan.object.context.PhysicalDevice;
@@ -18,7 +17,6 @@ public class VulkanContext extends GraphicsContext {
     private final VulkanInstance instance;
     private final PhysicalDevice physicalDevice;
     private final Device device;
-    private final VMAInstance VMAInstance;
 
     private Surface surface;
 
@@ -28,7 +26,6 @@ public class VulkanContext extends GraphicsContext {
         this.instance = new VulkanInstance(curio.getApplicationProperties());
         this.physicalDevice = instance.createPhysicalDevice(null);
         this.device = new Device(physicalDevice);
-        this.VMAInstance = new VMAInstance(this);
         this.surface = new Surface(this, (VulkanWindow) curio.getWindow());
     }
 
@@ -51,9 +48,5 @@ public class VulkanContext extends GraphicsContext {
 
     public Device getDevice() {
         return device;
-    }
-
-    public VMAInstance getVMAInstance() {
-        return VMAInstance;
     }
 }

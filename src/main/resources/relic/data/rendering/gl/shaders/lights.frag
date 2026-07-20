@@ -9,15 +9,15 @@ out vec4 outFragColor;
 
 struct Light {
     vec3 position;
-    vec3 color;
-
-    int directional;
     float intensity;
+
+    vec3 color;
+    int directional;
 };
 
 struct Fog {
-    int activeFog;
     vec3 color;
+    int activeFog;
     float density;
 };
 struct CascadeShadow {
@@ -201,10 +201,6 @@ void main()
 
     vec3 ambient = ambientLightColor * albedo * ambientLightIntensity;
     outFragColor = vec4(Lo * shadow + ambient, 1.0f);
-    //outFragColor = vec4(albedo * shadow + ambient, 1.0f);
-    //outFragColor = vec4(albedo, 1);
-    //outFragColor = vec4(worldPos, 1);
-    //outFragColor = texture(shadowSampler, vec3(inTextureCoord, 0));
 
     if (DEBUG_SHADOWS == 1) {
         switch (cascadeIndex) {
