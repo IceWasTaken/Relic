@@ -16,7 +16,7 @@ import java.util.List;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Mesh {
+public class  Mesh {
 
     public static final int MAX_WEIGHTS = 4;
 

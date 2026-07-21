@@ -1,4 +1,4 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.rendering;
+package net.ice.relic.core.rendering.backend.opengl.mesh;
 
 import imgui.ImDrawData;
 import imgui.ImGui;
@@ -6,8 +6,6 @@ import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
 import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
-
-import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;

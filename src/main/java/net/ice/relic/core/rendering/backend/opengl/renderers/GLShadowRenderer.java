@@ -6,11 +6,10 @@ import net.ice.curio.library.opengl.object.buffer.DrawIndirectBuffer;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.ShadowBuffer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.UniformBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
+import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.SceneObject;
@@ -24,7 +23,6 @@ import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.GL_LOWER_LEFT;
-import static org.lwjgl.opengl.GL32.GL_DEPTH_CLAMP;
 import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 import static org.lwjgl.opengl.GL45.*;
 
@@ -41,7 +39,7 @@ public class GLShadowRenderer implements Lifecycle {
 
     private Shadows shadows;
 
-    private UniformBufferObject uniforms;
+    private Uniforms uniforms;
 
     private Map<String, Integer> objectIndexMap;
 
@@ -55,11 +53,11 @@ public class GLShadowRenderer implements Lifecycle {
     @Override
     public void init() {
         this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("shadow.vert", ShaderType.VERTEX, false),
-                new GLShader(ShaderType.GEOMETRY).load("shadow.geom", ShaderType.GEOMETRY, false),
-                new GLShader(ShaderType.FRAGMENT).load("shadow.frag", ShaderType.FRAGMENT, false)
+                new GLShader(ShaderType.VERTEX).load("shadow.vert", ShaderType.VERTEX),
+                new GLShader(ShaderType.GEOMETRY).load("shadow.geom", ShaderType.GEOMETRY),
+                new GLShader(ShaderType.FRAGMENT).load("shadow.frag", ShaderType.FRAGMENT)
         ));
-        this.uniforms = new UniformBufferObject(shaderProgram);
+        this.uniforms = new Uniforms(shaderProgram);
 
         for (int i = 0; i < 3; i++) {
             uniforms.createUniform("projViewMatrices[" + i + "]");

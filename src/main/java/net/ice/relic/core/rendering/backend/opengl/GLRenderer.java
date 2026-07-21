@@ -1,37 +1,30 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
 import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
-import net.ice.curio.library.opengl.object.framebuffer.FramebufferObject;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.rendering.backend.Renderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.GeometryBuffer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.framebuffers.GeometryBuffer;
+import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
+import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
 import net.ice.relic.core.rendering.backend.opengl.renderers.*;
 import net.ice.curio.system.SystemInfo;
 import net.ice.relic.core.scene.SceneObject;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
@@ -51,6 +44,8 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     private GeometryBuffer geometryBuffer;
     private ShadowBuffer shadowBuffer;
+    private SwapBuffer swapBuffer;
+
 
     private final GlobalBuffers globalBuffers;
 
@@ -59,19 +54,21 @@ public class GLRenderer extends Renderer implements Lifecycle {
     private final GLShadowRenderer shadowRenderer;
     private final GLGuiRenderer guiRenderer;
     private final GLDebugRenderer visualizeRenderer;
+    private final GLPostRenderer postRenderer;
 
     @Override
     public void resize(int width, int height) {
         this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
+        this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.guiRenderer.onResize(width, height);
         this.sceneRenderer.resize(width, height);
         this.lightRenderer.resize(width, height);
+        this.postRenderer.resize(width, height);
     }
 
     @Override
     public void setupData() {
         loadStaticModels();
-
 
         sceneRenderer.setupBuffers();
         shadowRenderer.setupBuffers();
@@ -81,11 +78,15 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public GLRenderer(RelicApplication relicApplication) {
         super(relicApplication);
         this.globalBuffers = new GlobalBuffers();
+
         this.sceneRenderer = new GLSceneRenderer(this);
-        this.lightRenderer = new GLLightRenderer(this);
         this.shadowRenderer = new GLShadowRenderer(this);
-        this.guiRenderer = new GLGuiRenderer(this);
+        this.lightRenderer = new GLLightRenderer(this);
+
+        this.postRenderer = new GLPostRenderer(this);
+
         this.visualizeRenderer = new GLDebugRenderer(this);
+        this.guiRenderer = new GLGuiRenderer(this);
     }
 
     @Override
@@ -98,14 +99,18 @@ public class GLRenderer extends Renderer implements Lifecycle {
         SystemInfo.logGLInfo();
 
         this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
+        this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.shadowBuffer = new ShadowBuffer();
         this.globalBuffers.createInstanceBuffer();
-        shadowRenderer.init();
-        sceneRenderer.init();
-        lightRenderer.init();
-        guiRenderer.init();
-        visualizeRenderer.init();
 
+        sceneRenderer.init();
+        shadowRenderer.init();
+        lightRenderer.init();
+
+        postRenderer.init();
+
+        visualizeRenderer.init();
+        guiRenderer.init();
     }
 
     @Override
@@ -113,9 +118,28 @@ public class GLRenderer extends Renderer implements Lifecycle {
         globalBuffers.updateInstanceBuffer(this);
 
         glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
+
         sceneRenderer.render();
         shadowRenderer.render();
+
+        if(postRenderer.shouldRender()) {
+            renderWithPost();
+            return;
+        }
+
         lightRenderer.render();
+
+        visualizeRenderer.render();
+        guiRenderer.render();
+    }
+
+    private void renderWithPost() {
+        swapBuffer.bind();
+        lightRenderer.render();
+        swapBuffer.unbind();
+
+        postRenderer.render();
+
         visualizeRenderer.render();
         guiRenderer.render();
     }
@@ -228,6 +252,10 @@ public class GLRenderer extends Renderer implements Lifecycle {
         return shadowBuffer;
     }
 
+    public SwapBuffer getSwapBuffer() {
+        return swapBuffer;
+    }
+
     public VertexArrayObject getStaticArrayObject() {
         return staticArrayObject;
     }
@@ -238,6 +266,10 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     public GLShadowRenderer getShadowRenderer() {
         return shadowRenderer;
+    }
+
+    public GLPostRenderer getPostRenderer() {
+        return postRenderer;
     }
 
     public record AnimMeshDrawData(SceneObject entity, int bindingPoseOffset, int weightsOffset) { }

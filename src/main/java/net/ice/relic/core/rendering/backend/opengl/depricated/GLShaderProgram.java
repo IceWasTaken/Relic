@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
+import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.shader.IShader;
 import net.ice.relic.core.rendering.shader.IShaderProgram;
 
@@ -8,22 +9,18 @@ import java.util.List;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL20.*;
 
-public class GLShaderProgram implements IShaderProgram, AutoCloseable {
+public class GLShaderProgram implements IShaderProgram {
 
     private final int programID;
+    private final Uniforms uniforms;
 
     public GLShaderProgram() {
         this.programID = glCreateProgram();
+        this.uniforms = new Uniforms(this);
 
         if(programID == 0) {
             throw new RuntimeException("Error while creating new shader shaderProgram. \nMost recent OpenGL error: " + glGetError());
         }
-    }
-
-    public GLShaderProgram(GLShaderProgram shaderProgram) {
-        this.programID = shaderProgram.programID;
-
-        shaderProgram.bind();
     }
 
     @Override
@@ -76,9 +73,7 @@ public class GLShaderProgram implements IShaderProgram, AutoCloseable {
         return programID;
     }
 
-
-    @Override
-    public void close() {
-        unbind();
+    public Uniforms getUniforms() {
+        return uniforms;
     }
 }

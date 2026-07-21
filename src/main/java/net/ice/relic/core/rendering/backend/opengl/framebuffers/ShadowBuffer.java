@@ -1,11 +1,9 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.buffer;
+package net.ice.relic.core.rendering.backend.opengl.framebuffers;
 
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import org.joml.Vector2i;
-import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glGenTextures;

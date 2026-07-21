@@ -1,11 +1,9 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
-import net.ice.curio.config.RendererConfig;
 import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.object.GLViewport;
-import net.ice.curio.library.opengl.wrapper.enums.FramebufferTarget;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.curio.library.opengl.object.buffer.DrawIndirectBuffer;
 import net.ice.curio.library.opengl.object.buffer.ShaderStorageBufferObject;
@@ -15,7 +13,7 @@ import net.ice.relic.core.model.Material;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.UniformBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.SceneObject;
@@ -43,7 +41,7 @@ public class GLSceneRenderer implements Lifecycle {
     private final GLRenderer glRenderer;
 
     private final Map<String, Integer> objectIndexMap;
-    private UniformBufferObject uniforms;
+    private Uniforms uniforms;
     private Viewport viewport;
 
     private ShaderStorageBufferObject materialBuffer;
@@ -61,11 +59,11 @@ public class GLSceneRenderer implements Lifecycle {
     @Override
     public void init() {
         this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("scene.vert", ShaderType.VERTEX, false),
-                new GLShader(ShaderType.FRAGMENT).load("scene.frag", ShaderType.FRAGMENT, false)
+                new GLShader(ShaderType.VERTEX).load("scene.vert", ShaderType.VERTEX),
+                new GLShader(ShaderType.FRAGMENT).load("scene.frag", ShaderType.FRAGMENT)
         ));
 
-        this.uniforms = new UniformBufferObject(shaderProgram);
+        this.uniforms = new Uniforms(shaderProgram);
         uniforms.createUniform("projectionMatrix");
         uniforms.createUniform("viewMatrix");
     }

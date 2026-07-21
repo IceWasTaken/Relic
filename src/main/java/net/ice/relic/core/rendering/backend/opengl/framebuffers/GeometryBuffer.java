@@ -1,4 +1,4 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.buffer;
+package net.ice.relic.core.rendering.backend.opengl.framebuffers;
 
 import org.lwjgl.system.MemoryStack;
 

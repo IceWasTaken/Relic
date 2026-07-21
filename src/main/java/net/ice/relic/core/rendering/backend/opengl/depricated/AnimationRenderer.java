@@ -1,14 +1,11 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.rendering.renderer;
+package net.ice.relic.core.rendering.backend.opengl.depricated;
 
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.AbstractGLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.SceneObject;
 
-import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL43.*;
 
 @Deprecated

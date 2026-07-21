@@ -1,6 +1,5 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.model.texture;
+package net.ice.curio.library.opengl.object.resource;
 
-import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.heirloom.Lifecycle;
  import org.tinylog.Logger;
 import static org.lwjgl.opengl.ARBBindlessTexture.*;

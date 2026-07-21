@@ -1,4 +1,4 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.buffer;
+package net.ice.relic.core.rendering.backend.opengl;
 
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import org.joml.*;
@@ -10,12 +10,12 @@ import java.util.Map;
 import static org.lwjgl.opengl.ARBBindlessTexture.glUniformHandleui64ARB;
 import static org.lwjgl.opengl.GL20.*;
 
-public class UniformBufferObject {
+public class Uniforms {
 
     private final GLShaderProgram shaderProgram;
     private final Map<String, Integer> uniformMap;
 
-    public UniformBufferObject(GLShaderProgram shaderProgram) {
+    public Uniforms(GLShaderProgram shaderProgram) {
         this.shaderProgram = shaderProgram;
         this.uniformMap = new HashMap<>();
     }

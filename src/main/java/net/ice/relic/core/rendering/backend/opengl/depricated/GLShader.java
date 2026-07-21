@@ -39,7 +39,7 @@ public class GLShader implements IShader {
     }
 
     @Override
-    public GLShader load(String fileName, ShaderType type, boolean postShader) {
+    public GLShader load(String fileName, ShaderType type) {
         StringBuilder shaderSource = new StringBuilder();
 
         try(InputStream stream = GLShader.class.getResourceAsStream("/relic/data/rendering/gl/shaders/" + fileName)) {

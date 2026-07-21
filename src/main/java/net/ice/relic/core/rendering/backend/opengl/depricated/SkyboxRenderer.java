@@ -1,9 +1,7 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.rendering.renderer;
+package net.ice.relic.core.rendering.backend.opengl.depricated;
 
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.model.Material;
-import net.ice.relic.core.rendering.backend.opengl.depricated.AbstractGLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLManager;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Mesh;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;

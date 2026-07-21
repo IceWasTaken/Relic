@@ -7,7 +7,6 @@ import net.ice.relic.core.rendering.backend.BackendManager;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.depricated.rendering.buffer.ShadowBuffer;
 import net.ice.relic.core.scene.SceneObject;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
@@ -15,7 +14,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL.createCapabilities;
@@ -34,7 +32,7 @@ public class GLManager extends BackendManager implements Lifecycle {
 //    private VertexBufferObject bonesIndicesWeightsBuffer;
 //    private VertexBufferObject destinationAnimationBuffer;
 
-    private ShadowBuffer shadowBuffer;
+    //private ShadowBuffer shadowBuffer;
     //private ReflectionBuffer reflectionBuffer;
     //private RefractionRenderer refractionRenderer;
 
@@ -48,7 +46,7 @@ public class GLManager extends BackendManager implements Lifecycle {
 
     @Override
     public void init() {
-        this.shadowBuffer = new ShadowBuffer();
+        //this.shadowBuffer = new ShadowBuffer();
     }
 
     @Override
@@ -267,9 +265,9 @@ public class GLManager extends BackendManager implements Lifecycle {
 //    public VertexBufferObject getDestinationAnimationBuffer() {
 //        return destinationAnimationBuffer;
 //    }
-    public ShadowBuffer getShadowBuffer() {
-        return shadowBuffer;
-    }
+    //public ShadowBuffer getShadowBuffer() {
+        //return shadowBuffer;
+    //}
 
     @Override
     public RelicApplication getApplication() {

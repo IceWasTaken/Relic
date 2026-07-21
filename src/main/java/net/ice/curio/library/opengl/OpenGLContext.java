@@ -8,7 +8,7 @@ import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.texture.BindlessTexture;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 

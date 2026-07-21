@@ -9,7 +9,7 @@ import net.ice.heirloom.color.RGBColor;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.UniformBufferObject;
+import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
@@ -31,7 +31,7 @@ import static org.lwjgl.system.MemoryUtil.memFree;
 public class GLDebugRenderer implements Lifecycle {
 
 	private GLShaderProgram shaderProgram;
-	private UniformBufferObject uniforms;
+	private Uniforms uniforms;
 
 	private VertexBufferObject vbo;
 	private VertexArrayObject vao;
@@ -74,11 +74,11 @@ public class GLDebugRenderer implements Lifecycle {
 		glBindVertexArray(0);
 
 		this.shaderProgram = new GLShaderProgram().attach(List.of(
-				new GLShader(ShaderType.VERTEX).load("debug.vert", ShaderType.VERTEX, false),
-				new GLShader(ShaderType.FRAGMENT).load("debug.frag", ShaderType.FRAGMENT, false)
+				new GLShader(ShaderType.VERTEX).load("debug.vert", ShaderType.VERTEX),
+				new GLShader(ShaderType.FRAGMENT).load("debug.frag", ShaderType.FRAGMENT)
 		));
 
-		this.uniforms = new UniformBufferObject(shaderProgram);
+		this.uniforms = new Uniforms(shaderProgram);
 
 		uniforms.createUniform("color");
 		uniforms.createUniform("centerPos");
@@ -92,31 +92,32 @@ public class GLDebugRenderer implements Lifecycle {
 
 	@Override
 	public void render() {
-		try(GLShaderProgram program = new GLShaderProgram(shaderProgram)) {
-			Scene scene = glRenderer.getApplication().getCurrentScene();
+		shaderProgram.bind();
+		Scene scene = glRenderer.getApplication().getCurrentScene();
 
-			uniforms.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
-			uniforms.setUniform("projectionMatrix", scene.getMatrix().getProjMatrix());
+		uniforms.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
+		uniforms.setUniform("projectionMatrix", scene.getMatrix().getProjMatrix());
 
-			vao.bind();
+		vao.bind();
 
-			glDisable(GL_DEPTH_TEST);
-			uniforms.setUniform("color", notVisibleColor.div().vec3f());
-			for(Light light : scene.getLights()) {
-				drawCube(light.getPosition());
-			}
-
-
-
-			glEnable(GL_DEPTH_TEST);
-			uniforms.setUniform("color", visibleColor.div().vec3f());
-			for(Light light : scene.getLights()) {
-				drawCube(light.getPosition());
-			}
-
-
-			glBindVertexArray(0);
+		glDisable(GL_DEPTH_TEST);
+		uniforms.setUniform("color", notVisibleColor.div().vec3f());
+		for(Light light : scene.getLights()) {
+			drawCube(light.getPosition());
 		}
+
+
+
+		glEnable(GL_DEPTH_TEST);
+		uniforms.setUniform("color", visibleColor.div().vec3f());
+		for(Light light : scene.getLights()) {
+			drawCube(light.getPosition());
+		}
+
+
+		glBindVertexArray(0);
+		shaderProgram.unbind();
+
 	}
 
 

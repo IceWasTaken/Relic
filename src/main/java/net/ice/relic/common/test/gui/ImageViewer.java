@@ -5,7 +5,7 @@ import imgui.ImVec2;
 import imgui.type.ImString;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.texture.BindlessTexture;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 
 import java.util.ArrayList;
 import java.util.List;
