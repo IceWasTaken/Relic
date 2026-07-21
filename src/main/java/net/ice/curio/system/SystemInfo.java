@@ -50,18 +50,18 @@ public class SystemInfo {
     public static void logSystemInfo() {
         SystemInfo systemInfo = new SystemInfo();
 
-        Logger.info("OS Type: {}", getOSType());
-        Logger.info("OS Version: {}\n", systemInfo.osVersion);
+        Logger.info("[SystemInfo] OS Type: {}", getOSType());
+        Logger.info("[SystemInfo] OS Version: {}", systemInfo.osVersion);
 
-        Logger.info("Java Version: {}", systemInfo.javaVersion);
-        Logger.info("Java Vendor: {}\n", systemInfo.javaVendor);
+        Logger.info("[SystemInfo] Java Version: {}", systemInfo.javaVersion);
+        Logger.info("[SystemInfo] Java Vendor: {}", systemInfo.javaVendor);
 
-        Logger.info("CPU Architecture: {}", getOSArchitecture());
-        Logger.info("Processor Count: {}", systemInfo.processors);
-        Logger.info("Max Memory (MB): {}\n", (systemInfo.maxMemory / (1024 * 1024)));
+        Logger.info("[SystemInfo] CPU Architecture: {}", getOSArchitecture());
+        Logger.info("[SystemInfo] Processor Count: {}", systemInfo.processors);
+        Logger.info("[SystemInfo] Max Memory (MB): {}", (systemInfo.maxMemory / (1024 * 1024)));
 
-        Logger.info("Locale: {}", systemInfo.locale);
-        Logger.info("Timezone: {} \n", systemInfo.timezone);
+        Logger.info("[SystemInfo] Locale: {}", systemInfo.locale);
+        Logger.info("[SystemInfo] Timezone: {} ", systemInfo.timezone);
 
     }
 
@@ -127,8 +127,6 @@ public class SystemInfo {
         long memoryKB = memoryBytes / 1024;
         long memoryMB = memoryKB / 1024;
 
-        //Logger.info("Used memory: {} B.", memoryBytes);
-        //Logger.info("Used memory: {} KB.", memoryKB);
         Logger.info("Used memory: {} MB.", memoryMB);
     }
 
@@ -140,24 +138,10 @@ public class SystemInfo {
         long memoryKB = memoryBytes / 1024;
         long memoryMB = memoryKB / 1024;
 
-        //Logger.info("Unused memory: {} B.", memoryBytes);
-        //Logger.info("Unused memory: {} KB.", memoryKB);
         Logger.info("Unused memory: {} MB.", memoryMB);
     }
 
-
-
-
-
-
-
-
     public static void logGLInfo() {
-        if (!GL.getCapabilities().OpenGL40) {
-            Logger.warn("OpenGL 4.0 or higher is not available!");
-            return;
-        }
-
         try (MemoryStack stack = MemoryStack.stackPush()) {
             System.out.print("\n");
             Logger.info("------------ OpenGL INFO ------------");
