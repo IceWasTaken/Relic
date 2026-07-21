@@ -5,7 +5,7 @@ import imgui.ImVec2;
 import imgui.type.ImString;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.texture.BindlessTexture;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,8 +77,8 @@ public class ImageViewer {
 
     private ImVec2 showImage() {
         float scale = 0.5f;
-        int width = 2048;
-        int height = 2048;
+        int width = selectedTexture.getImage().getWidth();
+        int height = selectedTexture.getImage().getHeight();
 
         int scaledWidth = Math.max((int) (width * scale), 512);
         int scaledHeight = Math.max((int) (height * scale), 512);

@@ -3,12 +3,7 @@ package net.ice.heirloom.color;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-public final class RGBColor {
-	private final float red;
-	private final float green;
-	private final float blue;
-	private final float alpha;
-
+public record RGBColor(float red, float green, float blue, float alpha) {
 	public RGBColor(float red, float green, float blue, float alpha) {
 		this.red = Math.clamp(red, 0, 255);
 		this.green = Math.clamp(green, 0, 255);
@@ -36,7 +31,7 @@ public final class RGBColor {
 		return toHSLColor().lighter(percent).toRGBColor();
 	}
 
-	///[Based on](https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/)
+	/// [Based on](https://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/)
 	public HSLColor toHSLColor() {
 		RGBColor adjRangeColor = this.div();
 
@@ -68,7 +63,7 @@ public final class RGBColor {
 		S *= 100;
 		L *= 100;
 
-		if(H < 0) {
+		if (H < 0) {
 			H += 360;
 		}
 
@@ -111,19 +106,5 @@ public final class RGBColor {
 		return Math.min(Math.min(red, green), blue);
 	}
 
-	public float getRed() {
-		return red;
-	}
 
-	public float getGreen() {
-		return green;
-	}
-
-	public float getBlue() {
-		return blue;
-	}
-
-	public float getAlpha() {
-		return alpha;
-	}
 }

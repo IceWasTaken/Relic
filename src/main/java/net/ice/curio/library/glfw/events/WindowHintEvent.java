@@ -4,8 +4,9 @@ import net.ice.curio.library.glfw.GLFWWindow;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
 import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.heirloom.event.Event;
+import net.ice.heirloom.event.EventRegistry;
 
-public class WindowHintEvent extends Event {
+public class WindowHintEvent implements Event {
 
     private final GLFWWindow window;
 
@@ -27,5 +28,10 @@ public class WindowHintEvent extends Event {
 
     public GLFWWindow getWindow() {
         return window;
+    }
+
+    @Override
+    public void register(EventRegistry registry) {
+
     }
 }

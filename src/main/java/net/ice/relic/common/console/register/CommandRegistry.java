@@ -10,4 +10,5 @@ public class CommandRegistry extends Registry<Command> {
     public CommandNode literal(String name) {
         return Console.root.addChild(new LiteralNode(name));
     }
+
 }

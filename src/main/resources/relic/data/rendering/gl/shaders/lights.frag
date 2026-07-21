@@ -9,15 +9,15 @@ out vec4 outFragColor;
 
 struct Light {
     vec3 position;
-    vec3 color;
-
-    int directional;
     float intensity;
+
+    vec3 color;
+    int directional;
 };
 
 struct Fog {
-    int activeFog;
     vec3 color;
+    int activeFog;
     float density;
 };
 struct CascadeShadow {
@@ -25,11 +25,11 @@ struct CascadeShadow {
     vec4 splitDistance;
 };
 
-uniform sampler2D posSampler;
-uniform sampler2D albedoSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D pbrSampler;
-uniform sampler2DArray shadowSampler;
+layout(binding = 0) uniform sampler2D posSampler;
+layout(binding = 1) uniform sampler2D albedoSampler;
+layout(binding = 2) uniform sampler2D normalSampler;
+layout(binding = 3) uniform sampler2D pbrSampler;
+layout(binding = 4) uniform sampler2DArray shadowSampler;
 
 uniform vec3 cameraPos;
 uniform mat4 viewMatrix;
@@ -44,19 +44,19 @@ uniform Light lights[200];
 uniform CascadeShadow shadows[3];
 
 float chebyshevUpperBound(vec2 moments, float t) {
-    // Surface is fully lit if the current fragment is before the light occluder
-    if (t <= moments.x)
-    return 1.0;
+    //fully lit if current fragment is close to light
+    if (t <= moments.x) {
+        return 1.0;
+    }
 
-    // Compute variance
     float variance = moments.y - (moments.x * moments.x);
-    variance = max(variance, 0.00002); // Small epsilon to avoid divide by zero
+    variance = max(variance, 0.00002);
 
-    // Compute probabilistic upper bound
+    //probablistic upper bound
     float d = t - moments.x;
     float p_max = variance / (variance + d * d);
 
-    // Reduce light bleeding
+    //reduce light bleeding
     p_max = smoothstep(0.2, 1.0, p_max);
 
     return p_max;
@@ -64,6 +64,7 @@ float chebyshevUpperBound(vec2 moments, float t) {
 
 float calculateVisibility(vec4 worldPosition, uint cascadeIndex) {
     vec4 shadowMapPosition = shadows[cascadeIndex].shadowProjectionMatrix * worldPosition;
+    shadowMapPosition /= shadowMapPosition.w;
 
     vec2 uv = shadowMapPosition.xy * 0.5 + 0.5;
     float depth = shadowMapPosition.z;
@@ -200,10 +201,6 @@ void main()
 
     vec3 ambient = ambientLightColor * albedo * ambientLightIntensity;
     outFragColor = vec4(Lo * shadow + ambient, 1.0f);
-    //outFragColor = vec4(albedo * shadow + ambient, 1.0f);
-    //outFragColor = vec4(normal, 1);
-    //outFragColor = vec4(worldPos, 1);
-    //outFragColor = texture(shadowSampler, vec3(inTextureCoord, 2));
 
     if (DEBUG_SHADOWS == 1) {
         switch (cascadeIndex) {

@@ -1,8 +1,9 @@
 package net.ice.curio.library.glfw.events;
 
 import net.ice.heirloom.event.Event;
+import net.ice.heirloom.event.EventRegistry;
 
-public class ScrollEvent extends Event {
+public class ScrollEvent implements Event {
 
     private final long window;
     private final double xoffset;
@@ -24,5 +25,10 @@ public class ScrollEvent extends Event {
 
     public double getYoffset() {
         return yoffset;
+    }
+
+    @Override
+    public void register(EventRegistry registry) {
+
     }
 }

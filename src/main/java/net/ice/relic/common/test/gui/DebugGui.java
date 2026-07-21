@@ -8,7 +8,7 @@ import net.ice.curio.input.Input;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.gui.Gui;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.rendering.enums.RenderType;
+import net.ice.relic.core.rendering.backend.opengl.depricated.RenderType;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,8 +26,13 @@ public class DebugGui implements Gui {
     private ImageViewer imageViewer;
     private SceneInfoGui sceneInfoGui;
 
-    private boolean viewerOpen;
-    private boolean infoOpen;
+    private boolean viewerOpen = false;
+    private boolean infoOpen = false;
+
+    private ImBoolean fileViewerOpen = new ImBoolean(false);
+
+    private ImBoolean postRendering = new ImBoolean(false);
+
 
     private int itemSelectedIndex = 0;
 
@@ -48,7 +53,6 @@ public class DebugGui implements Gui {
     public void draw() {
         newFrame();
 
-
         setNextWindowPos(0,0, Always);
         debugMenu();
 
@@ -59,7 +63,7 @@ public class DebugGui implements Gui {
         }
 
         if(infoOpen) {
-                sceneInfoGui.draw(application.getCurrentScene());
+            sceneInfoGui.draw(application.getCurrentScene());
         }
 
         endFrame();
@@ -79,10 +83,15 @@ public class DebugGui implements Gui {
                 viewerOpen = !viewerOpen;
             }
             if(button("File Viewer")) {
-                FileBrowse.show(new ImBoolean(false));
+                fileViewerOpen.set(!fileViewerOpen.get());
+                FileBrowse.show(new ImBoolean(fileViewerOpen));
             }
             if(button("Scene Info")) {
                 infoOpen = !infoOpen;
+
+            }
+            if(checkbox("Post Rendering", glRenderer.getPostRenderer().shouldRender())) {
+                glRenderer.getPostRenderer().toggleRendering();
             }
 
             end();

@@ -5,8 +5,6 @@ import net.ice.curio.library.vulkan.object.sync.Fence;
 import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.util.vma.VmaAllocatorCreateInfo;
-import org.lwjgl.util.vma.VmaVulkanFunctions;
 import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
 
@@ -102,13 +100,6 @@ public class Device implements Lifecycle {
 
     public Queue createQueue(int queueFamilyIndex, int index) {
         return new Queue(vkDevice, queueFamilyIndex, index);
-    }
-
-    public VmaVulkanFunctions createVMAVulkanFunctions(VulkanContext context, MemoryStack stack) {
-        return context.getInstance().createVMAVulkanFunctions(vkDevice, stack);
-    }
-    public void setupVMACreateInfo(VmaAllocatorCreateInfo allocatorCreateInfo) {
-        allocatorCreateInfo.device(vkDevice);
     }
 
     private PointerBuffer createRequiredExtensions(PhysicalDevice physicalDevice, MemoryStack stack) {

@@ -1,20 +1,18 @@
 package net.ice.curio.library.opengl;
 
 import net.ice.curio.Curio;
-import net.ice.curio.config.enums.BackendType;
 import net.ice.curio.graphics.context.GraphicsContext;
+import net.ice.curio.graphics.exception.UnsupportedGraphicsContextException;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.texture.BindlessTexture;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
 public class OpenGLContext extends GraphicsContext {
-
-    public static boolean init = false;
 
     private GLCapabilities capabilities;
 
@@ -27,16 +25,14 @@ public class OpenGLContext extends GraphicsContext {
         this.capabilities = GL.createCapabilities();
 
         if(!capabilities.OpenGL46) {
-            throw new RuntimeException("Relic requires an OpenGL 4.6 capable GPU");
+            throw new UnsupportedGraphicsContextException("OpenGL backend requires an OpenGL 4.6 capable GPU");
         }
         if(!capabilities.GL_ARB_bindless_texture) {
-            throw new RuntimeException("OpenGL backend requires GL_ARB_bindless_texture extension");
+            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_bindless_texture extension");
         }
         if(!capabilities.GL_ARB_gpu_shader_int64) {
-            throw new RuntimeException("OpenGL backend requires GL_ARB_gpu_shader_int64");
+            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_gpu_shader_int64");
         }
-
-        init = true;
     }
 
     @Override

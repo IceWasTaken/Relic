@@ -6,8 +6,6 @@ import net.ice.curio.library.vulkan.utils.DebugUtils;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.ApplicationProperties;
-import org.lwjgl.util.vma.VmaAllocatorCreateInfo;
-import org.lwjgl.util.vma.VmaVulkanFunctions;
 import org.tinylog.Logger;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -168,9 +166,6 @@ public class VulkanInstance implements Lifecycle {
         vkDestroyInstance(vkInstance, null);
     }
 
-    public VmaVulkanFunctions createVMAVulkanFunctions(VkDevice device, MemoryStack stack) {
-        return VmaVulkanFunctions.calloc(stack).set(vkInstance, device);
-    }
 
     public void createWindowSurface(VulkanWindow window, LongBuffer surface) {
         window.createSurface(vkInstance, surface);
@@ -182,10 +177,5 @@ public class VulkanInstance implements Lifecycle {
     public void destroyDebugUtilsMessenger(long handle) {
         vkDestroyDebugUtilsMessengerEXT(vkInstance, handle, null);
     }
-
-    public void setupVMACreateInfo(VmaAllocatorCreateInfo allocatorCreateInfo) {
-        allocatorCreateInfo.instance(vkInstance);
-    }
-
 
 }

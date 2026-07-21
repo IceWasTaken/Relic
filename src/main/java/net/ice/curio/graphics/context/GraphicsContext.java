@@ -32,4 +32,8 @@ public abstract class GraphicsContext implements Lifecycle {
         }
         return INSTANCE;
     }
+
+    public Curio getCurio() {
+        return curio;
+    }
 }

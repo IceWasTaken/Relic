@@ -10,7 +10,7 @@ public class RendererConfig extends ConfigBase {
 
     private static final String fileName = "rendererConfig.properties";
 
-    private static Integer maxDrawElements = 200;
+    private static Integer maxDrawElements = 500;
     private static Integer maxSceneObjects = 100;
     private static Integer maxTextures = 200;
     private static Integer maxMaterials = 200;

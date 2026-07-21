@@ -7,14 +7,11 @@ import net.ice.curio.library.vulkan.VulkanContext;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.util.vma.VmaAllocationCreateInfo;
 import org.lwjgl.vulkan.VkImageCreateInfo;
 
 import java.nio.LongBuffer;
 import java.util.EnumSet;
 
-import static org.lwjgl.util.vma.Vma.VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-import static org.lwjgl.util.vma.Vma.VMA_MEMORY_USAGE_AUTO;
 import static org.lwjgl.vulkan.VK10.*;
 
 public final class VulkanImage extends Image {
@@ -43,16 +40,16 @@ public final class VulkanImage extends Image {
                     .tiling(VK_IMAGE_TILING_OPTIMAL)
                     .usage(getUsage(info.imageUsage));
 
-            VmaAllocationCreateInfo allocationCreateInfo = VmaAllocationCreateInfo.calloc(1, stack)
-                    .get(0)
-                    .usage(VMA_MEMORY_USAGE_AUTO)
-                    .flags(vulkanImageInfo.vmaFlags)
-                    .priority(1.0f);
+//            VmaAllocationCreateInfo allocationCreateInfo = VmaAllocationCreateInfo.calloc(1, stack)
+//                    .get(0)
+//                    .usage(VMA_MEMORY_USAGE_AUTO)
+//                    .flags(vulkanImageInfo.vmaFlags)
+//                    .priority(1.0f);
 
             PointerBuffer allocation = stack.callocPointer(1);
             LongBuffer longBuffer = stack.mallocLong(1);
 
-            vulkanContext.getVMAInstance().createImage(imageCreateInfo, allocationCreateInfo, longBuffer, allocation);
+            //vulkanContext.getVMAInstance().createImage(imageCreateInfo, allocationCreateInfo, longBuffer, allocation);
 
             this.vkImage = longBuffer.get(0);
             this.allocation = allocation.get(0);
@@ -80,7 +77,7 @@ public final class VulkanImage extends Image {
     }
 
     public void cleanup(VulkanContext vulkanContext) {
-        vulkanContext.getVMAInstance().destroyImage(vkImage, allocation);
+        //vulkanContext.getVMAInstance().destroyImage(vkImage, allocation);
         super.cleanup();
     }
 
@@ -88,16 +85,11 @@ public final class VulkanImage extends Image {
 
         private static final VulkanImageInfo DEFAULT_INFO = new VulkanImageInfo();
 
-        private int vmaFlags;
 
         public VulkanImageInfo() {
-            this.vmaFlags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+            //this.vmaFlags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
         }
 
-        public VulkanImageInfo vmaFlags(int flags) {
-            this.vmaFlags = flags;
-            return this;
-        }
     }
 
 

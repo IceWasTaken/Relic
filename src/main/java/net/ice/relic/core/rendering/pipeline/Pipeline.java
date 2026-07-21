@@ -172,12 +172,12 @@ public class Pipeline {
             return this;
         }
 
-        public PipelineBuilder bindVertexBufferObject(VertexBufferObject vertexBufferObject) {
-            pipeline.addCommand("bindVertexBufferObject", (unused -> {
-                vertexBufferObject.bind();
-            }));
-            return this;
-        }
+//        public PipelineBuilder bindVertexBufferObject(VertexBufferObject vertexBufferObject) {
+//            pipeline.addCommand("bindVertexBufferObject", (unused -> {
+//                vertexBufferObject.bind();
+//            }));
+//            return this;
+//        }
 
         public PipelineBuilder bindVertexArrayObject(VertexArrayObject vertexArrayObject) {
             pipeline.addCommand("bindVertexArrayObject", (unused -> vertexArrayObject.bind()));
@@ -190,16 +190,16 @@ public class Pipeline {
             return this;
         }
 
-        public PipelineBuilder bindDrawIndirectBuffer(DrawIndirectBuffer drawIndirectBuffer) {
-            pipeline.addCommand("bindDrawIndirectBuffer", (unused -> drawIndirectBuffer.bind()));
-            return this;
-        }
-        public PipelineBuilder unbindDrawIndirectBuffer() {
-            pipeline.addCommand("unbindDrawIndirectBuffer", (unused -> {
-                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
-            }));
-            return this;
-        }
+//        public PipelineBuilder bindDrawIndirectBuffer(DrawIndirectBuffer drawIndirectBuffer) {
+//            pipeline.addCommand("bindDrawIndirectBuffer", (unused -> drawIndirectBuffer.bind()));
+//            return this;
+//        }
+//        public PipelineBuilder unbindDrawIndirectBuffer() {
+//            pipeline.addCommand("unbindDrawIndirectBuffer", (unused -> {
+//                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+//            }));
+//            return this;
+//        }
 
         public PipelineBuilder enable(int target) {
             pipeline.addCommand("enable", (unused) -> glEnable(target));

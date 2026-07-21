@@ -16,6 +16,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
 import static org.lwjgl.opengl.GL14.GL_TEXTURE_COMPARE_MODE;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.lwjgl.opengl.GL45.*;
 
 public class GLTexture extends Texture {
 
@@ -108,36 +109,38 @@ public class GLTexture extends Texture {
         }
 
         public GLTexture buildWithData(Bitmap bitmap) {
-            int textureHandle = glGenTextures();
+            int textureHandle = glCreateTextures(textureType.getGLEnum());
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
 
-            glBindTexture(textureType.getGLEnum(), textureHandle);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_MIN_FILTER, minificationFilter.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_MAG_FILTER, magnificationFiler.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_WRAP_S, wrapParameterS.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_WRAP_T, wrapParameterT.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_WRAP_R, wrapParameterR.getGLEnum());
-            glTexImage2D(textureType.getGLEnum(), 0, imageFormat.getGLEnum(), width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getData());
+            glTextureParameteri(textureHandle, GL_TEXTURE_MIN_FILTER, minificationFilter.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_MAG_FILTER, magnificationFiler.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_S, wrapParameterS.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_T, wrapParameterT.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_R, wrapParameterR.getGLEnum());
+            glTextureStorage2D(textureHandle, 1, imageFormat.getGLEnum(), width, height);
+            glTextureSubImage2D(textureHandle, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getData());
 
             return new GLTexture(textureHandle, textureType, bitmap);
         }
 
         public GLTexture buildWithDataAndMipmaps(Bitmap bitmap) {
-            int textureHandle = glGenTextures();
+            int textureHandle = glCreateTextures(textureType.getGLEnum());
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
+            int levels = (int) (1 + Math.floor(log2(Math.max(width, height))));
 
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glBindTexture(textureType.getGLEnum(), textureHandle);
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_MIN_FILTER, minificationFilter.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_MAG_FILTER, magnificationFiler.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_WRAP_S, wrapParameterS.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_WRAP_T, wrapParameterT.getGLEnum());
-            glTexParameteri(textureType.getGLEnum(), GL_TEXTURE_WRAP_R, wrapParameterR.getGLEnum());
-            glTexImage2D(textureType.getGLEnum(), 0, imageFormat.getGLEnum(), width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getData());
-            glGenerateMipmap(textureType.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_MIN_FILTER, minificationFilter.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_MAG_FILTER, magnificationFiler.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_S, wrapParameterS.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_T, wrapParameterT.getGLEnum());
+            glTextureParameteri(textureHandle, GL_TEXTURE_WRAP_R, wrapParameterR.getGLEnum());
+            glTextureStorage2D(textureHandle, levels, imageFormat.getGLEnum(), width, height);
+            glTextureSubImage2D(textureHandle, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getData());
+            glGenerateTextureMipmap(textureHandle);
+
 
             return new GLTexture(textureHandle, textureType, bitmap);
         }
@@ -155,6 +158,14 @@ public class GLTexture extends Texture {
             glTexImage2D(textureType.getGLEnum(), 0, imageFormat.getGLEnum(), width, height, 0, GL_RGBA, GL_FLOAT, (ByteBuffer) null);
 
             return new GLTexture(textureHandle, textureType, null);
+        }
+
+        public static double log2(double x) {
+            return Math.log(x) / Math.log(2);
+        }
+
+        public static int log2Integer(int x) {
+            return (int) (Math.log(x) / Math.log(2));
         }
     }
 }

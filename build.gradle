@@ -34,7 +34,6 @@ dependencies {
     implementation "org.lwjgl:lwjgl-shaderc"
     implementation "org.lwjgl:lwjgl-spvc"
     implementation "org.lwjgl:lwjgl-stb"
-    implementation "org.lwjgl:lwjgl-vma"
     implementation "org.lwjgl:lwjgl-sdl"
     implementation "org.lwjgl:lwjgl-vulkan"
     implementation "org.lwjgl:lwjgl-openxr"
@@ -62,7 +61,6 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-nuklear::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-vma::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-spvc::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
@@ -94,6 +92,13 @@ tasks.named('jar') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.named('distZip') {
+    entryCompression = ZipEntryCompression.STORED
+}
+
+tasks.named("distTar") {
+    enabled = false
+}
 
 
 

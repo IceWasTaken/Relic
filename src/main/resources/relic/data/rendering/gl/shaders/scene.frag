@@ -17,37 +17,34 @@ layout (location = 1) out vec4 outAlbedo;
 layout (location = 2) out vec4 outNormal;
 layout (location = 3) out vec4 outPBR;
 
-struct Material
-{
+struct Material {
     vec4 diffuse;
     vec4 specular;
     float reflectance;
     float roughnessFactor;
     float metallicFactor;
-    float _padding;
+};
+
+struct Map {
+    uint64_t albedoMap;
+    uint64_t normalMap;
+    uint64_t pbrMap;
 };
 
 layout(std430, binding = 7) buffer MaterialBuffer {
     Material materials[MAX_MATERIALS];
 };
 
-layout(std430, binding = 8) buffer AlbedoMapBuffer {
-    uint64_t albedoMaps[MAX_MATERIALS];
+layout(std430, binding = 8) buffer MapBuffer {
+    Map maps[MAX_MATERIALS];
 };
 
-layout(std430, binding = 9) buffer NormalMapBuffer {
-    uint64_t normalMaps[MAX_MATERIALS];
-};
-
-layout(std430, binding = 10) buffer PBRMapBuffer {
-    uint64_t pbrMaps[MAX_MATERIALS];
-};
 
 vec3 calculateNormals(Material material, vec3 normal, vec2 textCoords, mat3 TBN) {
     vec3 newNormal = normal;
 
-    if(normalMaps[materialIndex] != 0) {
-        newNormal = texture(sampler2D(normalMaps[materialIndex]), textCoords).rgb;
+    if(maps[materialIndex].normalMap != 0) {
+        newNormal = texture(sampler2D(maps[materialIndex].normalMap), textCoords).rgb;
         newNormal = normalize(newNormal * 2.0 - 1.0);
         newNormal = normalize(TBN * newNormal);
     }
@@ -59,8 +56,13 @@ void main() {
     outPos = pos;
 
     Material material = materials[materialIndex];
-    if(albedoMaps[materialIndex] != 0) {
-        outAlbedo = texture(sampler2D(albedoMaps[materialIndex]), textureCoords);
+
+    uint64_t albedoMap = maps[materialIndex].albedoMap;
+    uint64_t normalMap = maps[materialIndex].normalMap;
+    uint64_t pbrMap = maps[materialIndex].pbrMap;
+
+    if(albedoMap != 0u) {
+        outAlbedo = texture(sampler2D(albedoMap), textureCoords);
     } else {
         outAlbedo = material.diffuse;
     }
@@ -76,8 +78,8 @@ void main() {
     float ao = 0.5f;
     float roughnessFactor = 0.0f;
     float metallicFactor = 0.0f;
-    if(pbrMaps[materialIndex] != 0) {
-        vec4 pbrMapValue = texture(sampler2D(pbrMaps[materialIndex]), textureCoords);
+    if(pbrMap != 0) {
+        vec4 pbrMapValue = texture(sampler2D(pbrMap), textureCoords);
         roughnessFactor = pbrMapValue.g;
         metallicFactor = pbrMapValue.b;
     } else {

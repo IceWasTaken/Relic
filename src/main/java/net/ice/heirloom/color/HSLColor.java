@@ -1,16 +1,6 @@
 package net.ice.heirloom.color;
 
-public final class HSLColor {
-
-	private final float hue;
-	private final float saturation;
-	private final float luminance;
-
-	public HSLColor(float hue, float saturation, float luminance) {
-		this.hue = hue;
-		this.saturation = saturation;
-		this.luminance = luminance;
-	}
+public record HSLColor(float hue, float saturation, float luminance) {
 
 	public HSLColor lighter() {
 		return lighter(10);
@@ -45,7 +35,7 @@ public final class HSLColor {
 		float g;
 		float b;
 
-		if(S == 0) {
+		if (S == 0) {
 			//grayscale color
 			r = g = b = L;
 		} else {
@@ -65,11 +55,11 @@ public final class HSLColor {
 	}
 
 	private float hueToRGB(float min, float max, float H) {
-		if(!(0.0f < H && H < 1.0f)) {
+		if (!(0.0f < H && H < 1.0f)) {
 			H = Math.abs(1 - Math.abs(H));
 		}
 
-		if (H < 1.0f / 6.0f){
+		if (H < 1.0f / 6.0f) {
 			return min + (max - min) * 6.0f * H;
 		}
 
@@ -84,15 +74,5 @@ public final class HSLColor {
 		return min;
 	}
 
-	public float getHue() {
-		return hue;
-	}
 
-	public float getSaturation() {
-		return saturation;
-	}
-
-	public float getLuminance() {
-		return luminance;
-	}
 }

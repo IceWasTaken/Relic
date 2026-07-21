@@ -1,9 +1,12 @@
 package net.ice.relic.core.model;
 
+import net.ice.curio.graphics.memory.Struct;
+import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.heirloom.color.RGBColor;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.heirloom.io.resource.Resource;
+import org.joml.Vector4f;
 import org.lwjgl.assimp.AIMaterial;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.AIString;
@@ -27,7 +30,7 @@ public class Material {
      *   <li>Reflectance: 1 × float = <b>4 bytes</b></li>
      *   <li>Roughness: 1 × float = <b>4 bytes</b></li>
      *   <li>Metallic-ness: 1 × <b>4 bytes</b></li>
-     *   <li>Texture handles: 3 × uint64_t (8 bytes each) = <b>24 bytes</b></li>
+     *   <li>Texture handles: 3 × uint64_t (8 bytes extends Struct each) = <b>24 bytes</b></li>
      * </ul>
      * <b>Total: 68 bytes</b>
      */
@@ -192,5 +195,27 @@ public class Material {
     public void setNormalMap(Texture normalMap) { this.normalMap = normalMap; }
     public void setRoughnessMap(Texture roughnessMap) {
         this.roughnessMap = roughnessMap;
+    }
+
+
+
+    public static class MaterialStruct extends Struct {
+
+        public MaterialStruct(StructType structType) {
+            super(structType);
+        }
+
+        @Override
+        public Class<?> getRecord() {
+            return MaterialRecord.class;
+        }
+
+        public record MaterialRecord(
+                Vector4f diffuse,
+                Vector4f specular,
+                float reflectance,
+                float roughnessFactor,
+                float metallicFactor
+        ){}
     }
 }

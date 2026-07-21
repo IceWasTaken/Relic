@@ -1,8 +1,9 @@
 package net.ice.curio.library.glfw.events;
 
 import net.ice.heirloom.event.Event;
+import net.ice.heirloom.event.EventRegistry;
 
-public class CursorEvent extends Event {
+public class CursorEvent implements Event {
 
     private final long window;
     private final double xpos;
@@ -24,5 +25,10 @@ public class CursorEvent extends Event {
 
     public double getYpos() {
         return ypos;
+    }
+
+    @Override
+    public void register(EventRegistry registry) {
+
     }
 }

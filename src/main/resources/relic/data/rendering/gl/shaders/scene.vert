@@ -1,6 +1,6 @@
 #version 460
 
-const int MAX_DRAW_ELEMENTS = 200;
+const int MAX_DRAW_ELEMENTS = 500;
 const int MAX_ENTITIES = 100;
 
 layout (location = 0) in vec3 inPosition;
@@ -16,8 +16,7 @@ layout (location = 3) out vec3 outBitangent;
 layout (location = 4) out vec2 outTextureCoords;
 layout (location = 5) out uint outMaterialIndex;
 
-struct Instance
-{
+struct Instance {
     mat4 modelMatrix;
     int materialIndex;
 };
@@ -25,7 +24,9 @@ struct Instance
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 
-uniform Instance instances[MAX_DRAW_ELEMENTS];
+layout(std430, binding = 9) buffer InstanceBuffer {
+    Instance instances[MAX_DRAW_ELEMENTS];
+};
 
 void main() {
     Instance instance = instances[gl_BaseInstance + gl_InstanceID];

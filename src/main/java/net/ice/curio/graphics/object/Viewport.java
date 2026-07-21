@@ -17,7 +17,7 @@ public abstract class Viewport implements Lifecycle {
 		this.height = height;
 	}
 
-	protected void resize(int width, int height) {
+	public void resize(int width, int height) {
 		this.height = height;
 		this.width = width;
 	}

@@ -19,9 +19,9 @@ import net.ice.relic.core.gui.Gui;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
-import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.UniformBufferObject;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.texture.BindlessTexture;
-import net.ice.relic.core.rendering.backend.opengl.depricated.rendering.GuiMesh;
+import net.ice.relic.core.rendering.backend.opengl.Uniforms;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
+import net.ice.relic.core.rendering.backend.opengl.mesh.GuiMesh;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import org.joml.Vector2f;
 
@@ -37,9 +37,9 @@ import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL15.GL_STREAM_DRAW;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
+import static org.lwjgl.opengl.GL45.glGetVertexArrayIndexediv;
+import static org.lwjgl.opengl.GL45.glGetVertexArrayiv;
 
 public class GLGuiRenderer implements Lifecycle {
 
@@ -47,7 +47,7 @@ public class GLGuiRenderer implements Lifecycle {
     private GuiMesh guiMesh;
     private Vector2f scale;
     private BindlessTexture texture;
-    private UniformBufferObject uniforms;
+    private Uniforms uniforms;
 
     private final GLRenderer glRenderer;
 
@@ -61,10 +61,10 @@ public class GLGuiRenderer implements Lifecycle {
     @Override
     public void init() {
         this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("gui.vert", ShaderType.VERTEX, false),
-                new GLShader(ShaderType.VERTEX).load("gui.frag", ShaderType.FRAGMENT, false)
+                new GLShader(ShaderType.VERTEX).load("gui.vert", ShaderType.VERTEX),
+                new GLShader(ShaderType.VERTEX).load("gui.frag", ShaderType.FRAGMENT)
         ));
-        this.uniforms = new UniformBufferObject(shaderProgram);
+        this.uniforms = new Uniforms(shaderProgram);
         this.scale = new Vector2f();
 
         uniforms.createUniform("scale");
@@ -92,19 +92,16 @@ public class GLGuiRenderer implements Lifecycle {
 
         guiMesh.getVAO().bind();
 
-        guiMesh.getVerticesVBO().bind();
-        guiMesh.getIndicesVBO().bind();
-
         ImGuiIO io = ImGui.getIO();
         scale.x = 2.0f / io.getDisplaySizeX();
         scale.y = -2.0f / io.getDisplaySizeY();
         uniforms.setUniform("scale", scale);
 
+
         ImDrawData drawData = ImGui.getDrawData();
         int numLists = drawData.getCmdListsCount();
         for (int i = 0; i < numLists; i++) {
-            glBufferData(GL_ARRAY_BUFFER, drawData.getCmdListVtxBufferData(i), GL_STREAM_DRAW);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawData.getCmdListIdxBufferData(i), GL_STREAM_DRAW);
+            guiMesh.updateBuffers(i);
 
             int numCmds = drawData.getCmdListCmdBufferSize(i);
             for (int j = 0; j < numCmds; j++) {
@@ -157,7 +154,7 @@ public class GLGuiRenderer implements Lifecycle {
                 .minificationFilter(FilteringParameter.NEAREST)
                 .magnificationFiler(FilteringParameter.NEAREST)
                 .textureType(TextureType.TEXTURE_2D)
-                .imageFormat(ImageFormat.RGBA)
+                .imageFormat(ImageFormat.RGBA8)
                 .buildWithDataAndMipmaps(new Bitmap(width.get(), height.get(), 4,  buf)));
         guiMesh = new GuiMesh();
     }

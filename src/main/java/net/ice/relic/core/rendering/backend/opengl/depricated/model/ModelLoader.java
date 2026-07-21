@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated.model;
 
+ import net.ice.heirloom.io.exception.AssetLoadException;
  import org.tinylog.Logger;import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
@@ -137,10 +138,10 @@ public class ModelLoader {
     }
 
     public Model loadModel(Resource resource, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
-        Logger.debug("LOADING MODEL: {}", resource.getFromFileSystem().getPath());
+        Logger.debug("[ModelLoader] Loading Model: {}", resource.getFromFileSystem().getName());
         AIScene aiScene = aiImportFile(resource.getFromFileSystem().getPath(), flags);
         if (aiScene == null) {
-            throw new RuntimeException("Error loading model: " + aiGetErrorString());
+            throw new AssetLoadException("[ModelLoader] Error loading model: " + aiGetErrorString());
         }
 
         return load(aiScene, textureCache, resource, materialCache, cache);
@@ -188,6 +189,7 @@ public class ModelLoader {
 
         cache.addModel(new Model(resource.getFromFileSystem().getName(), meshDataList, animations));
 
+        Logger.info("[ModelLoader] Loaded Model: {}", resource.getFromFileSystem().getName());
         return new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
     }
 
