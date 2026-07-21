@@ -1,7 +1,7 @@
 package net.ice.relic.core;
 
-import net.ice.relic.core.rendering.backend.opengl.model.Animation;
-import net.ice.relic.core.rendering.backend.opengl.model.ModelLoader;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
 import org.joml.Matrix4f;
 
 import java.util.Arrays;

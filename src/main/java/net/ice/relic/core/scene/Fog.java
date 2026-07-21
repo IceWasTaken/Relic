@@ -1,26 +1,27 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.common.util.ColorUtil;
+import net.ice.heirloom.color.Colors;
+import net.ice.heirloom.color.RGBColor;
 
 public class Fog {
 
-    private ColorUtil.Color color;
+    private RGBColor color;
 
     private boolean active;
     private float density;
 
     public Fog() {
         active = false;
-        color = ColorUtil.ColorDefaults.BLACK.getColor();
+        color = Colors.BLACK.getRGBColor();
     }
 
-    public Fog(boolean active, ColorUtil.Color color, float density) {
+    public Fog(boolean active, RGBColor color, float density) {
         this.color = color;
         this.density = density;
         this.active = active;
     }
 
-    public ColorUtil.Color getColor() {
+    public RGBColor getColor() {
         return color;
     }
 
@@ -36,7 +37,7 @@ public class Fog {
         this.active = active;
     }
 
-    public void setColor(ColorUtil.Color color) {
+    public void setColor(RGBColor color) {
         this.color = color;
     }
 

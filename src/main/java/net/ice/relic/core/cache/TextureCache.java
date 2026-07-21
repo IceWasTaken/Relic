@@ -1,7 +1,10 @@
 package net.ice.relic.core.cache;
 
-import net.ice.relic.common.asset.image.Image;
-import net.ice.relic.core.rendering.backend.opengl.model.texture.GLTexture;
+import net.ice.curio.graphics.context.GraphicsContext;
+import net.ice.curio.graphics.object.resource.Texture;
+import net.ice.curio.library.stb.Bitmap;
+import org.tinylog.Logger;
+import net.ice.heirloom.io.resource.Resource;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,43 +12,53 @@ import java.util.Map;
 
 public class TextureCache {
 
-    public static final String DEFAULT_TEXTURE = "resources/textures/default.png";
-    private final Map<String, GLTexture> textureMap;
+    public static final Resource DEFAULT_TEXTURE = Resource.getResource("relic", "assets/textures/default.png");
 
-    public TextureCache() {
+    private final Map<Resource, Texture> textureMap;
+
+    private final GraphicsContext graphicsContext;
+
+    public TextureCache(GraphicsContext graphicsContext) {
+        this.graphicsContext = graphicsContext;
         textureMap = new HashMap<>();
+
     }
 
     public void init() {
-        textureMap.put(DEFAULT_TEXTURE, new GLTexture(new Image(DEFAULT_TEXTURE)));
-        textureMap.put("grass", new GLTexture(new Image("resources/textures/terrain/grass/grass.png")));
-        textureMap.put("grass_normal", new GLTexture(new Image("resources/textures/terrain/grass/grass_normal.png")));
+        createTexture(DEFAULT_TEXTURE);
     }
 
     public void cleanup() {
-        textureMap.values().forEach(GLTexture::cleanup);
+        textureMap.values().forEach(Texture::cleanup);
     }
 
-    public GLTexture createTexture(String texturePath) {
-        return textureMap.computeIfAbsent(texturePath, GLTexture::new);
+    public Texture createTexture(Resource texturePath) {
+        return textureMap.computeIfAbsent(texturePath, (res) -> graphicsContext.createTexture(new Bitmap(res)));
     }
 
-    public GLTexture getTexture(String texturePath) {
-        GLTexture texture = null;
+    public Texture getTexture(Resource texturePath) {
+        Texture texture = null;
         if(texturePath != null) {
             texture = textureMap.get(texturePath);
         }
         if(texture == null) {
+            Logger.error("Texture not found in cache: [{}] - [{}]", texturePath);
             texture = textureMap.get(DEFAULT_TEXTURE);
         }
         return texture;
     }
 
-    public Collection<GLTexture> getTextures() {
+    public Texture getTexture(String texturePath) {
+        return getTexture(Resource.getResource("relic", texturePath));
+    }
+
+
+    public Collection<Texture> getTextureMaps() {
         return textureMap.values();
     }
 
-    public Map<String, GLTexture> getTextureMap() {
+    public Map<Resource, Texture> getTextureMap() {
         return textureMap;
     }
+
 }

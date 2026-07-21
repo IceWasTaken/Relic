@@ -1,7 +1,6 @@
 package net.ice.relic.core.cache;
 
-
-import net.ice.relic.core.model.Material;
+ import org.tinylog.Logger;import net.ice.relic.core.model.Material;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public class MaterialCache {
         materialList = new ArrayList<>();
         Material defaultMaterial = new Material();
         defaultMaterial.setMaterialIndex(DEFAULT_MATERIAL_INDEX);
-        defaultMaterial.setTexturePath("resources/textures/default.png");
+        //defaultMaterial.setTexturePath("resources/textures/default.png");
         materialList.add(defaultMaterial);
     }
 
@@ -26,6 +25,9 @@ public class MaterialCache {
     }
 
     public Material getMaterial(int idx) {
+        if(materialList.get(idx) == null) {
+            Logger.error("Failed to get material from cache.");
+        }
         return materialList.get(idx);
     }
 

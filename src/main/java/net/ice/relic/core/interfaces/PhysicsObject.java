@@ -1,4 +1,0 @@
-package net.ice.relic.core.interfaces;
-
-public interface PhysicsObject {
-}

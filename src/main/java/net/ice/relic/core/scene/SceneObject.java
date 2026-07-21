@@ -1,20 +1,19 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.common.annotations.Rewrite;
+import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.AnimationData;
-import net.ice.relic.core.component.Component;
-import net.ice.relic.core.interfaces.Updatable;
-import net.ice.relic.core.rendering.backend.opengl.model.Model;
+import net.ice.relic.core.ecs.component.Component;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Rewrite
-public class SceneObject implements Updatable {
+@Deprecated
+public class SceneObject implements Lifecycle {
 
     private final String name;
-
     private final Model model;
+
     private AnimationData animationData;
     private List<Component> components;
     private Transform transform;
@@ -31,7 +30,6 @@ public class SceneObject implements Updatable {
 
     @Override
     public void update(float deltaTime) {
-        transform.update();
     }
 
     public AnimationData getAnimationData() {
@@ -59,7 +57,6 @@ public class SceneObject implements Updatable {
     }
 
     public void addComponent(Component component) {
-        component.setAttachedObject(this);
         components.add(component);
     }
 

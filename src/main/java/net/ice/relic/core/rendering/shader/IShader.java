@@ -1,9 +1,9 @@
 package net.ice.relic.core.rendering.shader;
 
-import net.ice.relic.core.rendering.backend.opengl.GLShader;
+import net.ice.heirloom.Lifecycle;
 
-public interface IShader {
+public interface IShader extends Lifecycle {
 
-    IShader load(String fileName, GLShader.ShaderType type, boolean postShader);
+    IShader load(String fileName, ShaderType type);
     long getHandle();
 }

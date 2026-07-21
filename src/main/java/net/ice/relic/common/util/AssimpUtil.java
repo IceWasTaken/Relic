@@ -1,14 +1,15 @@
 package net.ice.relic.common.util;
 
-import org.lwjgl.assimp.AIFace;
-import org.lwjgl.assimp.AIMesh;
-import org.lwjgl.assimp.AIVector3D;
+import net.ice.heirloom.color.RGBColor;
+import org.lwjgl.assimp.*;
+import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.assimp.Assimp.aiImportFile;
+import static java.lang.Integer.parseInt;
+import static org.lwjgl.assimp.Assimp.*;
 
 public class AssimpUtil {
 
@@ -44,6 +45,10 @@ public class AssimpUtil {
      * @see #processAIVectorBuffer(AIVector3D.Buffer)
      */
     public static float[] processAIVectorBufferBackup(AIVector3D.Buffer buffer, float[] backup) {
+        if(buffer == null || buffer.remaining() == 0) {
+            return backup;
+        }
+
         float[] data = new float[buffer.remaining() * 3];
         int pos = 0;
         while (buffer.remaining() > 0) {
@@ -83,4 +88,78 @@ public class AssimpUtil {
         }
         return indices.stream().mapToInt(Integer::intValue).toArray();
     }
+
+    public static RGBColor getMaterialColor(AIMaterial aiMaterial, String matKey, int textureType, int index) {
+
+        AIColor4D color = AIColor4D.create();
+        int result = aiGetMaterialColor(aiMaterial, matKey, textureType, index, color);
+        if (result == aiReturn_SUCCESS) {
+            return new RGBColor(color.r(), color.g(), color.b(), color.a());
+        }
+        return new RGBColor(0, 0, 0, 0);
+    }
+
+    public static RGBColor getMaterialColor(AIMaterial aiMaterial, String matKey, int textureType) {
+
+        AIColor4D color = AIColor4D.create();
+        int result = aiGetMaterialColor(aiMaterial, matKey, textureType, 0, color);
+        if (result == aiReturn_SUCCESS) {
+            return new RGBColor(color.r(), color.g(), color.b(), color.a());
+        }
+        return new RGBColor(0, 0, 0, 0);
+    }
+
+    public static RGBColor getMaterialColor(AIMaterial aiMaterial, String matKey) {
+
+        AIColor4D color = AIColor4D.create();
+        int result = aiGetMaterialColor(aiMaterial, matKey, aiTextureType_NONE, 0, color);
+        if (result == aiReturn_SUCCESS) {
+            return new RGBColor(color.r(), color.g(), color.b(), color.a());
+        }
+        return new RGBColor(0, 0, 0, 0);
+    }
+
+    public static String getTexturePath(AIMaterial aiMaterial, int textureType, int index) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            AIString aiPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, textureType, index, aiPath, (IntBuffer) null, null, null, null, null, null);
+            return aiPath.dataString();
+        }
+    }
+
+    public static String getTexturePath(AIMaterial aiMaterial, int textureType) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            AIString aiPath = AIString.calloc(stack);
+            Assimp.aiGetMaterialTexture(aiMaterial, textureType, 0, aiPath, (IntBuffer) null, null, null, null, null, null);
+            return aiPath.dataString();
+        }
+    }
+
+//    public static GLTexture getTexture(AIScene aiScene, AIMaterial aiMaterial, TextureCache textureCache, Material material, int textureType) {
+//        try(MemoryStack stack = MemoryStack.stackPush()) {
+//            AIString aiTexturePath = AIString.calloc(stack);
+//            aiGetMaterialTexture(aiMaterial, textureType, 0, aiTexturePath, (IntBuffer) null, null, null, null, null, null);
+//            String texturePath = aiTexturePath.dataString();
+//            if (!texturePath.isEmpty()) {
+//                if(isInternalTexture(texturePath)) {
+//                    AITexture aiTexture = getInternalTexture(aiScene, parseInt(texturePath.substring(1)));
+//                    return textureCache.createTexture(aiTexture.pcDataCompressed());
+//                } else {
+//                    return textureCache.createTexture(Resource.getResourceDefaultNamespace(material.getTexturePath()));
+//                }
+//            }
+//        }
+//        return null;
+//    }
+
+    private static AITexture getInternalTexture(AIScene aiScene, int index) {
+        return AITexture.create(aiScene.mTextures().get(index));
+    }
+    private static boolean isInternalTexture(String path) {
+        return path.startsWith("*");
+    }
+
+
+
+
 }
