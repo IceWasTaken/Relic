@@ -60,19 +60,21 @@ public abstract class Scene implements Lifecycle {
     @Override
     public void init() {
         if (initialized) {
-            throw new IllegalStateException("Scene already initialized.");
+            Logger.error("[Scene] Initialization called while already initialized");
+            return;
         }
 
         sceneInit();
 
-        Logger.info("Loaded scene: " + name);
+        Logger.info("[Scene] Loaded scene: {}", name);
         initialized = true;
     }
 
     @Override
     public void cleanup() {
         if (!initialized) {
-            throw new IllegalStateException("Scene not initialized or not loaded.");
+            Logger.error("[Scene] Cleanup called while not initialized");
+            return;
         }
 
         objects.clear();

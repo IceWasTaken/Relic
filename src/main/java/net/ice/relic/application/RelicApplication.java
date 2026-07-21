@@ -79,7 +79,7 @@ public abstract class RelicApplication implements ApplicationContext {
             init();
             loop();
         } catch (Exception exception) {
-            Logger.error("Error while initializing application: ", exception);
+            Logger.error("[Relic] Error while initializing application: ", exception);
             changeState(ERROR);
             File file;
             try {
@@ -101,7 +101,7 @@ public abstract class RelicApplication implements ApplicationContext {
 
     private void init() {
         if(currentState != INITIALIZING) {
-            throw new IllegalStateException("Application is not in initializing state");
+            throw new IllegalStateException("[Relic] Attempted initialization not in initializing state");
         }
 
         registrationManager.openRegistry(Command.class, new CommandRegistry());
@@ -166,7 +166,7 @@ public abstract class RelicApplication implements ApplicationContext {
     private void changeState(EngineState state) {
         if(currentState != state) {
             currentState = state;
-            Logger.info("Application state changed to: " + currentState);
+            Logger.info("[Relic] State changed to: " + currentState);
         }
     }
 

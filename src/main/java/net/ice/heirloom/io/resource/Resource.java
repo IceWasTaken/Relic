@@ -31,7 +31,7 @@ public class Resource {
 
 
         if(Resource.class.getClassLoader().getResource(getAsPath()) == null) {
-            Logger.warn("Could not find resource: " + path);
+            Logger.warn("Could not find resource {} in namespace {}", path, namespace);
         }
     }
 

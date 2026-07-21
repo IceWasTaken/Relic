@@ -138,8 +138,8 @@ public class ModelLoader {
     }
 
     public Model loadModel(Resource resource, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
-        Logger.debug("[ModelLoader] Loading Model: {}", resource.getFromFileSystem().getName());
-        AIScene aiScene = aiImportFile(resource.getFromFileSystem().getPath(), flags);
+        Logger.debug("[ModelLoader] Loading Model: {}", resource.getFromJar().getName());
+        AIScene aiScene = aiImportFile(resource.getFromJar().getPath(), flags);
         if (aiScene == null) {
             throw new AssetLoadException("[ModelLoader] Error loading model: " + aiGetErrorString());
         }
