@@ -67,6 +67,17 @@ public abstract class Struct {
 				int count = off / 4;
 				fields.add(new StructEntry("std140Padding", getTypeFromSize(count), true));
 			}
+		} else {
+			//must be padded to size of largest alignment
+			int largest = 0;
+			for (StructEntry field : fields) {
+				largest = Math.max(largest, field.type().getAlignment());
+			}
+
+			int off = (stride % largest);
+			if(off != 0) {
+				fields.add(new StructEntry("std430Padding", getTypeFromSize(largest - off), true));
+			}
 		}
 
 		this.stride = calculateStride();

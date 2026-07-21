@@ -21,6 +21,9 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.lwjgl.opengl.GL45.glBindTextureUnit;
 
 public class GLLightRenderer implements Lifecycle {
 
@@ -91,9 +94,7 @@ public class GLLightRenderer implements Lifecycle {
             glEnable(GL_BLEND);
             glBlendEquation(GL_FUNC_ADD);
             glBlendFunc(GL_ONE, GL_ONE);
-
-            glRenderer.getGeometryBuffer().bind(FramebufferTarget.READ_FRAMEBUFFER);
-
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             uniformBufferObject.setUniform("ambientLightColor", scene.getAmbientLight().getColor().div().vec3f());
             uniformBufferObject.setUniform("ambientLightIntensity", scene.getAmbientLight().getIntensity());
@@ -102,13 +103,7 @@ public class GLLightRenderer implements Lifecycle {
             uniformBufferObject.setUniform("cameraPos", scene.getCamera().getPosition());
             uniformBufferObject.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 
-            int[] textureIds = glRenderer.getGeometryBuffer().getTextures();
-            int numTextures = textureIds != null ? textureIds.length : 0;
-            for (int i = 0; i < numTextures; i++) {
-                glActiveTexture(GL_TEXTURE0 + i);
-                glBindTexture(GL_TEXTURE_2D, textureIds[i]);
-            }
-
+            glRenderer.getGeometryBuffer().bindTextures();
             glRenderer.getShadowBuffer().bindTextureArray(GL_TEXTURE4);
 
             uniformBufferObject.setUniform("posSampler", 0);

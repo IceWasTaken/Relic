@@ -61,7 +61,7 @@ void main() {
     uint64_t normalMap = maps[materialIndex].normalMap;
     uint64_t pbrMap = maps[materialIndex].pbrMap;
 
-    if(albedoMap != 0) {
+    if(albedoMap != 0u) {
         outAlbedo = texture(sampler2D(albedoMap), textureCoords);
     } else {
         outAlbedo = material.diffuse;

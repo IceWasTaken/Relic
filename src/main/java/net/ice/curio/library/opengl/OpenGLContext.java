@@ -27,12 +27,12 @@ public class OpenGLContext extends GraphicsContext {
         if(!capabilities.OpenGL46) {
             throw new UnsupportedGraphicsContextException("OpenGL backend requires an OpenGL 4.6 capable GPU");
         }
-        if(!capabilities.GL_ARB_bindless_texture) {
-            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_bindless_texture extension");
-        }
-        if(!capabilities.GL_ARB_gpu_shader_int64) {
-            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_gpu_shader_int64");
-        }
+//        if(!capabilities.GL_ARB_bindless_texture) {
+//            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_bindless_texture extension");
+//        }
+//        if(!capabilities.GL_ARB_gpu_shader_int64) {
+//            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_gpu_shader_int64");
+//        }
     }
 
     @Override

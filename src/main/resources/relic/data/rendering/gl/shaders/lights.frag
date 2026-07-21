@@ -25,11 +25,11 @@ struct CascadeShadow {
     vec4 splitDistance;
 };
 
-uniform sampler2D posSampler;
-uniform sampler2D albedoSampler;
-uniform sampler2D normalSampler;
-uniform sampler2D pbrSampler;
-uniform sampler2DArray shadowSampler;
+layout(binding = 0) uniform sampler2D posSampler;
+layout(binding = 1) uniform sampler2D albedoSampler;
+layout(binding = 2) uniform sampler2D normalSampler;
+layout(binding = 3) uniform sampler2D pbrSampler;
+layout(binding = 4) uniform sampler2DArray shadowSampler;
 
 uniform vec3 cameraPos;
 uniform mat4 viewMatrix;

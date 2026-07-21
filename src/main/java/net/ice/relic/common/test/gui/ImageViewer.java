@@ -77,8 +77,8 @@ public class ImageViewer {
 
     private ImVec2 showImage() {
         float scale = 0.5f;
-        int width = 2048;
-        int height = 2048;
+        int width = selectedTexture.getImage().getWidth();
+        int height = selectedTexture.getImage().getHeight();
 
         int scaledWidth = Math.max((int) (width * scale), 512);
         int scaledHeight = Math.max((int) (height * scale), 512);

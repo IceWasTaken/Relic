@@ -92,6 +92,13 @@ tasks.named('jar') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.named('distZip') {
+    entryCompression = ZipEntryCompression.STORED
+}
+
+tasks.named("distTar") {
+    enabled = false
+}
 
 
 

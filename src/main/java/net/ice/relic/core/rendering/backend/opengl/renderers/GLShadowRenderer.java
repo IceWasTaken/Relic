@@ -60,14 +60,10 @@ public class GLShadowRenderer implements Lifecycle {
                 new GLShader(ShaderType.FRAGMENT).load("shadow.frag", ShaderType.FRAGMENT, false)
         ));
         this.uniforms = new UniformBufferObject(shaderProgram);
-        for (int i = 0; i < 200; i++) {
-            uniforms.createUniform("instances[" + i + "]" + ".modelMatrix");
-            uniforms.createUniform("instances[" + i + "]" + ".materialIndex");
-        }
+
         for (int i = 0; i < 3; i++) {
             uniforms.createUniform("projViewMatrices[" + i + "]");
         }
-
 
     }
 
@@ -85,24 +81,12 @@ public class GLShadowRenderer implements Lifecycle {
         glClearColor(1.f, 1.f, 0f, 0f);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        int drawElement = 0;
-        for (Model model : glRenderer.getApplication().getCurrentScene().getModels().values()) {
-            if (model.isAnimated()) continue;
-            for (GLRenderer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
-                for (SceneObject object : model.getSceneObjects()) {
-                    String name = uniforms.formatUniform("instances", drawElement);
-                    uniforms.setUniform(name + ".modelMatrix", object.getTransform().getTransformMatrix());
-                    uniforms.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
-                    drawElement++;
-                }
-            }
-        }
         for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             Matrix4f shadowData = shadows.getShadowData().get(i).getProjViewMatrix();
             uniforms.setUniform("projViewMatrices[" + i + "]", shadowData);
         }
 
-        staticCommandBuffer.bind();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, staticCommandBuffer.getHandle());
         glRenderer.getStaticArrayObject().bind();
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0);
 
@@ -110,7 +94,7 @@ public class GLShadowRenderer implements Lifecycle {
 //      .bindVertexArrayObject(manager.getAnimationArrayObject())
 //      .multiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, animationDrawCount, 0)
 
-        glRenderer.getStaticArrayObject().unbind();
+        glBindVertexArray(0);
         ShadowBuffer.unbindFramebuffer();
 
         shaderProgram.unbind();
@@ -167,7 +151,6 @@ public class GLShadowRenderer implements Lifecycle {
         staticDrawCount = commandBuffer.remaining() / 20;
 
         staticCommandBuffer = new DrawIndirectBuffer();
-        staticCommandBuffer.bind();
         staticCommandBuffer.bufferData(commandBuffer, Usage.DYNAMIC_DRAW);
 
         MemoryUtil.memFree(commandBuffer);

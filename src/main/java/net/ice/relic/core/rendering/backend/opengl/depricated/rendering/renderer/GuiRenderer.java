@@ -78,8 +78,8 @@ public class GuiRenderer extends AbstractGLRenderer {
 
         guiMesh.getVAO().bind();
 
-        guiMesh.getVerticesVBO().bind();
-        guiMesh.getIndicesVBO().bind();
+//        guiMesh.getVerticesVBO().bind();
+//        guiMesh.getIndicesVBO().bind();
 
         ImGuiIO io = ImGui.getIO();
         scale.x = 2.0f / io.getDisplaySizeX();

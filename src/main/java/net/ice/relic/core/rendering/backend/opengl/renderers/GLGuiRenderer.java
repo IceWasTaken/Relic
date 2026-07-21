@@ -39,7 +39,11 @@ import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL15.GL_STREAM_DRAW;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_ATTRIB_ARRAY_ENABLED;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
+import static org.lwjgl.opengl.GL43.GL_VERTEX_ATTRIB_BINDING;
+import static org.lwjgl.opengl.GL45.glGetVertexArrayIndexediv;
+import static org.lwjgl.opengl.GL45.glGetVertexArrayiv;
 
 public class GLGuiRenderer implements Lifecycle {
 
@@ -92,19 +96,16 @@ public class GLGuiRenderer implements Lifecycle {
 
         guiMesh.getVAO().bind();
 
-        guiMesh.getVerticesVBO().bind();
-        guiMesh.getIndicesVBO().bind();
-
         ImGuiIO io = ImGui.getIO();
         scale.x = 2.0f / io.getDisplaySizeX();
         scale.y = -2.0f / io.getDisplaySizeY();
         uniforms.setUniform("scale", scale);
 
+
         ImDrawData drawData = ImGui.getDrawData();
         int numLists = drawData.getCmdListsCount();
         for (int i = 0; i < numLists; i++) {
-            glBufferData(GL_ARRAY_BUFFER, drawData.getCmdListVtxBufferData(i), GL_STREAM_DRAW);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawData.getCmdListIdxBufferData(i), GL_STREAM_DRAW);
+            guiMesh.updateBuffers(i);
 
             int numCmds = drawData.getCmdListCmdBufferSize(i);
             for (int j = 0; j < numCmds; j++) {
@@ -157,7 +158,7 @@ public class GLGuiRenderer implements Lifecycle {
                 .minificationFilter(FilteringParameter.NEAREST)
                 .magnificationFiler(FilteringParameter.NEAREST)
                 .textureType(TextureType.TEXTURE_2D)
-                .imageFormat(ImageFormat.RGBA)
+                .imageFormat(ImageFormat.RGBA8)
                 .buildWithDataAndMipmaps(new Bitmap(width.get(), height.get(), 4,  buf)));
         guiMesh = new GuiMesh();
     }

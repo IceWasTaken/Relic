@@ -21,12 +21,11 @@ public class TextureCache {
     public TextureCache(GraphicsContext graphicsContext) {
         this.graphicsContext = graphicsContext;
         textureMap = new HashMap<>();
+
     }
 
     public void init() {
-//        textureMap.put(Resource.getResourceDefaultNamespace(DEFAULT_TEXTURE.getPath()), new GLTexture(new Image(DEFAULT_TEXTURE)));
-//        textureMap.put(Resource.getResourceDefaultNamespace("grass"), new GLTexture(new Image(Resource.getResourceDefaultNamespace("assets/textures/terrain/grass/grass.png"))));
-//        textureMap.put(Resource.getResourceDefaultNamespace("grass_normal"), new GLTexture(new Image(Resource.getResourceDefaultNamespace("assets/textures/terrain/grass/grass_normal.png"))));
+        createTexture(DEFAULT_TEXTURE);
     }
 
     public void cleanup() {

@@ -23,8 +23,10 @@ import java.nio.IntBuffer;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.system.MemoryUtil.memFree;
 
 public class GLDebugRenderer implements Lifecycle {
 
@@ -33,7 +35,7 @@ public class GLDebugRenderer implements Lifecycle {
 
 	private VertexBufferObject vbo;
 	private VertexArrayObject vao;
-	private IndexBufferObject indexBufferObject;
+	private IndexBufferObject ido;
 
 	private static RGBColor notVisibleColor = new RGBColor(78, 59, 255);
 	private static RGBColor visibleColor = notVisibleColor.lighter();
@@ -50,29 +52,26 @@ public class GLDebugRenderer implements Lifecycle {
 	public void init() {
 		this.vao = new VertexArrayObject();
 		this.vbo = new VertexBufferObject();
-		this.indexBufferObject = new IndexBufferObject();
+		this.ido = new IndexBufferObject();
 
 		vao.bind();
 
-
-
 		FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(lineCube.getVertices().length);
-		floatBuffer.put(lineCube.getVertices());
-		floatBuffer.flip();
-
-		vbo.bind();
+		floatBuffer.put(lineCube.getVertices()).flip();
 		vbo.bufferData(floatBuffer, Usage.STATIC_DRAW);
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		glVertexArrayVertexBuffer(vao.getHandle(), 0, vbo.getHandle(), 0, 12);
+		glVertexArrayAttribFormat(vao.getHandle(), 0, 3, GL_FLOAT, false, 0);
+		glVertexArrayAttribBinding(vao.getHandle(), 0, 0);
+		glEnableVertexArrayAttrib(vao.getHandle(), 0);
 
 		IntBuffer indicesBuffer = MemoryUtil.memCallocInt(lineCube.getIndices().length);
-		indicesBuffer.put(lineCube.getIndices());
-		indicesBuffer.flip();
-		indexBufferObject.bind();
-		indexBufferObject.bufferData(indicesBuffer, Usage.STATIC_DRAW);
+		indicesBuffer.put(lineCube.getIndices()).flip();
+		ido.bufferData(indicesBuffer, Usage.STATIC_DRAW);
 
-		vao.unbind();
+		glVertexArrayElementBuffer(vao.getHandle(), ido.getHandle());
+
+		glBindVertexArray(0);
 
 		this.shaderProgram = new GLShaderProgram().attach(List.of(
 				new GLShader(ShaderType.VERTEX).load("debug.vert", ShaderType.VERTEX, false),
@@ -85,6 +84,10 @@ public class GLDebugRenderer implements Lifecycle {
 		uniforms.createUniform("centerPos");
 		uniforms.createUniform("viewMatrix");
 		uniforms.createUniform("projectionMatrix");
+
+		memFree(floatBuffer);
+		memFree(indicesBuffer);
+
 	}
 
 	@Override
@@ -112,7 +115,7 @@ public class GLDebugRenderer implements Lifecycle {
 			}
 
 
-			vao.unbind();
+			glBindVertexArray(0);
 		}
 	}
 

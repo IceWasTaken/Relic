@@ -85,7 +85,7 @@ public abstract class RelicApplication implements ApplicationContext {
             try {
                 if((file = new File(System.currentTimeMillis() + "-crash.log")).createNewFile()) {
                     try(FileWriter writer = new FileWriter(file)) {
-                        writer.append(exception.getMessage()).append("\n");
+                        writer.append(exception.toString()).append("\n");
                         for(StackTraceElement element : exception.getStackTrace()) {
                             writer.append(element.toString()).append("\n");
                         }

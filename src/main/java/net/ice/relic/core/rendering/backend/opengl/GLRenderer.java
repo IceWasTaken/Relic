@@ -5,10 +5,12 @@ import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
 import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
 import net.ice.curio.library.opengl.object.framebuffer.FramebufferObject;
+import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.rendering.backend.Renderer;
+import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.GeometryBuffer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.buffer.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.renderers.*;
@@ -34,6 +36,9 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS;
+import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.GL45.glVertexArrayAttribFormat;
+import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public class GLRenderer extends Renderer implements Lifecycle {
 
@@ -41,11 +46,13 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public static final Vector2i SHADOW_MAP_SIZE = new Vector2i(4096);
 
     private VertexArrayObject staticArrayObject;
+    private VertexBufferObject vbo;
+    private IndexBufferObject ibo;
 
-    private final List<GLBuffer> vertexBufferObjects;
-
-    private FramebufferObject geometryBuffer;
+    private GeometryBuffer geometryBuffer;
     private ShadowBuffer shadowBuffer;
+
+    private final GlobalBuffers globalBuffers;
 
     private final GLSceneRenderer sceneRenderer;
     private final GLLightRenderer lightRenderer;
@@ -55,7 +62,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void resize(int width, int height) {
-        this.geometryBuffer = new FramebufferObject(new Vector2i(width, height), 5);
+        this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.guiRenderer.onResize(width, height);
         this.sceneRenderer.resize(width, height);
         this.lightRenderer.resize(width, height);
@@ -65,6 +72,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public void setupData() {
         loadStaticModels();
 
+
         sceneRenderer.setupBuffers();
         shadowRenderer.setupBuffers();
         guiRenderer.setupBuffers();
@@ -72,13 +80,12 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     public GLRenderer(RelicApplication relicApplication) {
         super(relicApplication);
+        this.globalBuffers = new GlobalBuffers();
         this.sceneRenderer = new GLSceneRenderer(this);
         this.lightRenderer = new GLLightRenderer(this);
         this.shadowRenderer = new GLShadowRenderer(this);
         this.guiRenderer = new GLGuiRenderer(this);
         this.visualizeRenderer = new GLDebugRenderer(this);
-
-        this.vertexBufferObjects = new ArrayList<>();
     }
 
     @Override
@@ -87,26 +94,30 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
-        //setupDebugMessageCallback();
+        setupDebugMessageCallback();
         SystemInfo.logGLInfo();
 
-        this.geometryBuffer = new FramebufferObject(new Vector2i(application.getWindow().getWidth(), application.getWindow().getHeight()), 5);
+        this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.shadowBuffer = new ShadowBuffer();
+        this.globalBuffers.createInstanceBuffer();
         shadowRenderer.init();
         sceneRenderer.init();
         lightRenderer.init();
         guiRenderer.init();
         visualizeRenderer.init();
+
     }
 
     @Override
     public void render() {
+        globalBuffers.updateInstanceBuffer(this);
+
         glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
         sceneRenderer.render();
         shadowRenderer.render();
         lightRenderer.render();
-        guiRenderer.render();
         visualizeRenderer.render();
+        guiRenderer.render();
     }
 
 
@@ -134,8 +145,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
 
-        GLBuffer vboId = new VertexBufferObject();
-        vertexBufferObjects.add(vboId);
+        this.vbo = new VertexBufferObject();
         FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
         for (Model model : modelList) {
             for (MeshData meshData : model.getMeshData()) {
@@ -143,14 +153,30 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
         meshesBuffer.flip();
-        vboId.bind();
-        glBufferData(GL_ARRAY_BUFFER, meshesBuffer, GL_STATIC_DRAW);
+        vbo.bufferData(meshesBuffer, Usage.STATIC_DRAW);
         MemoryUtil.memFree(meshesBuffer);
 
-        defineVertexAttributes();
+        glVertexArrayVertexBuffer(staticArrayObject.getHandle(), 0, vbo.getHandle(), 0, 56);
 
-        vboId = new IndexBufferObject();
-        vertexBufferObjects.add(vboId);
+        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 0, 3, GL_FLOAT, false, 0);
+        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 1, 3, GL_FLOAT, false, 12);
+        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 2, 3, GL_FLOAT, false, 24);
+        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 3, 3, GL_FLOAT, false, 36);
+        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 4, 2, GL_FLOAT, false, 48);
+
+        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 0, 0);
+        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 1, 0);
+        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 2, 0);
+        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 3, 0);
+        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 4, 0);
+
+        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 0);
+        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 1);
+        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 2);
+        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 3);
+        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 4);
+
+        this.ibo = new IndexBufferObject();
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : modelList) {
             for (MeshData meshData : model.getMeshData()) {
@@ -158,13 +184,13 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
         indicesBuffer.flip();
-        vboId.bind();
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
+        glNamedBufferData(ibo.getHandle(), indicesBuffer, GL_STATIC_DRAW);
         MemoryUtil.memFree(indicesBuffer);
+        glVertexArrayElementBuffer(staticArrayObject.getHandle(), ibo.getHandle());
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+
 
     private void populateMeshBuffer(FloatBuffer meshesBuffer, MeshData meshData) {
         float[] positions = meshData.getVertices();
@@ -194,33 +220,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         }
     }
 
-    private void defineVertexAttributes() {
-
-        int stride = 3 * 4 * 4 + 2 * 4;
-        int pointer = 0;
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, pointer);
-        pointer += 3 * 4;
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, stride, pointer);
-        pointer += 3 * 4;
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, false, stride, pointer);
-        pointer += 3 * 4;
-
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, pointer);
-        pointer += 3 * 4;
-
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 2, GL_FLOAT, false, stride, pointer);
-    }
-
-
-    public FramebufferObject getGeometryBuffer() {
+    public GeometryBuffer getGeometryBuffer() {
         return geometryBuffer;
     }
 

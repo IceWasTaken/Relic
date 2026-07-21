@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL44.GL_QUERY_BUFFER;
 
 ///[GL Spec](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindBuffer.xhtml)
+@Deprecated
 public enum BufferTarget {
 
     ARRAY (GL_ARRAY_BUFFER),

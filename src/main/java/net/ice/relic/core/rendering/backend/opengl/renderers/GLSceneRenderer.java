@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.config.RendererConfig;
 import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
@@ -25,8 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.ice.curio.library.opengl.wrapper.enums.Usage.DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
 import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
 public class GLSceneRenderer implements Lifecycle {
@@ -65,12 +68,6 @@ public class GLSceneRenderer implements Lifecycle {
         this.uniforms = new UniformBufferObject(shaderProgram);
         uniforms.createUniform("projectionMatrix");
         uniforms.createUniform("viewMatrix");
-
-        for (int i = 0; i < 200; i++) {
-            String name = "instances[" + i + "]";
-            uniforms.createUniform(name + ".modelMatrix");
-            uniforms.createUniform(name + ".materialIndex");
-        }
     }
 
     @Override
@@ -78,31 +75,21 @@ public class GLSceneRenderer implements Lifecycle {
         shaderProgram.bind();
         viewport.bind();
 
-        glRenderer.getGeometryBuffer().bind(FramebufferTarget.FRAMEBUFFER);
+        glRenderer.getGeometryBuffer().bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_BLEND);
 
         uniforms.setUniform("projectionMatrix", glRenderer.getApplication().getCurrentScene().getMatrix().getProjMatrix());
         uniforms.setUniform("viewMatrix", glRenderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
 
-        int drawElement = 0;
-        for (Model model : glRenderer.getApplication().getCurrentScene().getModels().values()) {
-            if (model.isAnimated()) continue;
-            for (GLRenderer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
-                for (SceneObject object : model.getSceneObjects()) {
-                    String name = uniforms.formatUniform("instances", drawElement);
-                    uniforms.setUniform(name + ".modelMatrix", object.getTransform().getTransformMatrix());
-                    uniforms.setUniform(name + ".materialIndex", meshDrawData.materialIdx());
-                    drawElement++;
-                }
-            }
-        }
 
-        staticCommandBuffer.bind();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, staticCommandBuffer.getHandle());
         glRenderer.getStaticArrayObject().bind();
+
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0);
-        glRenderer.getStaticArrayObject().unbind();
-        glRenderer.getGeometryBuffer().unbind(FramebufferTarget.FRAMEBUFFER);
+        glBindVertexArray(0);
+
+        glRenderer.getGeometryBuffer().unbind();
         shaderProgram.unbind();
     }
 
@@ -164,7 +151,6 @@ public class GLSceneRenderer implements Lifecycle {
         staticDrawCount = commandBuffer.remaining() / 20;
 
         staticCommandBuffer = new DrawIndirectBuffer();
-        staticCommandBuffer.bind();
         staticCommandBuffer.bufferData(commandBuffer, Usage.DYNAMIC_DRAW);
 
         MemoryUtil.memFree(commandBuffer);
@@ -186,6 +172,14 @@ public class GLSceneRenderer implements Lifecycle {
         this.materialBuffer = new ShaderStorageBufferObject(materialStructFormat, materialCount);
         this.mapBuffer = new ShaderStorageBufferObject(mapStructFormat, materialCount);
 
+        ByteBuffer dummy = MemoryUtil.memAlloc(44 * 200);
+        materialBuffer.bufferData(dummy, Usage.STREAM_DRAW);
+        MemoryUtil.memFree(dummy);
+
+        dummy = MemoryUtil.memAlloc(8 * 3 * 200);
+        mapBuffer.bufferData(dummy, Usage.STREAM_DRAW);
+        MemoryUtil.memFree(dummy);
+
         int index = 0;
         for (Material material : materialList) {
             materialBuffer
@@ -194,21 +188,16 @@ public class GLSceneRenderer implements Lifecycle {
                     .setFloat(2, index, material.getReflectance())
                     .setFloat(3, index, material.getRoughnessFactor())
                     .setFloat(4, index, material.getMetallicFactor());
-
-            mapBuffer.setLong(0, index, material.getTextureHandle());
-            mapBuffer.setLong(1, index, material.getNormalHandle());
-            mapBuffer.setLong(2, index, material.getRoughnessHandle());
+            mapBuffer
+                    .setLong(0, index, material.getTextureHandle())
+                    .setLong(1, index, material.getNormalHandle())
+                    .setLong(2, index, material.getRoughnessHandle());
 
             index++;
         }
 
-        materialBuffer.bind();
         materialBuffer.bindBase(7);
-        materialBuffer.syncToGPU(DYNAMIC_DRAW);
-
-        mapBuffer.bind();
         mapBuffer.bindBase(8);
-        mapBuffer.syncToGPU(DYNAMIC_DRAW);
     }
 
     public record MapRecord(
