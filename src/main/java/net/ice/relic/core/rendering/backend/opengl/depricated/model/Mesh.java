@@ -2,19 +2,10 @@ package net.ice.relic.core.rendering.backend.opengl.depricated.model;
 
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.buffer.GLBuffer;
-import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
-import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
-import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.relic.core.model.mesh.MeshData;
-import org.lwjgl.system.MemoryUtil;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL30.*;
 
 public class  Mesh {
 

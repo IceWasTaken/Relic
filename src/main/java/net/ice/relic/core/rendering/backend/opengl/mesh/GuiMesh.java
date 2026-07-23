@@ -3,8 +3,7 @@ package net.ice.relic.core.rendering.backend.opengl.mesh;
 import imgui.ImDrawData;
 import imgui.ImGui;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
-import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
+import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -15,17 +14,17 @@ import static org.lwjgl.opengl.GL45.*;
 public class GuiMesh {
 
     private final VertexArrayObject vao;
-    private final VertexBufferObject vbo;
-    private final IndexBufferObject ido;
+    private final GLBuffer vertexBuffer;
+    private final GLBuffer indexBuffer;
 
     public GuiMesh() {
         this.vao = new VertexArrayObject();
-        this.vbo = new VertexBufferObject();
-        this.ido = new IndexBufferObject();
+        this.vertexBuffer = new GLBuffer();
+        this.indexBuffer = new GLBuffer();
 
         vao.bind();
 
-        glVertexArrayVertexBuffer(vao.getHandle(), 0, vbo.getHandle(), 0L, 20);
+        glVertexArrayVertexBuffer(vao.getHandle(), 0, vertexBuffer.getHandle(), 0L, 20);
 
         glVertexArrayAttribFormat(vao.getHandle(), 0, 2, GL_FLOAT, false, 0); //inPos
         glVertexArrayAttribFormat(vao.getHandle(), 1, 2, GL_FLOAT, false, 8); //inTextCoords
@@ -39,7 +38,7 @@ public class GuiMesh {
         glEnableVertexArrayAttrib(vao.getHandle(), 1);
         glEnableVertexArrayAttrib(vao.getHandle(), 2);
 
-        glVertexArrayElementBuffer(vao.getHandle(), ido.getHandle());
+        glVertexArrayElementBuffer(vao.getHandle(), indexBuffer.getHandle());
 
         glBindVertexArray(0);
     }
@@ -49,13 +48,13 @@ public class GuiMesh {
     //both getCmdListVtx... and getCmdListIdx... share the same goddamned bytebuffer
     public void updateBuffers(int index) {
         ImDrawData drawData = ImGui.getDrawData();
-        vbo.bufferData(drawData.getCmdListVtxBufferData(index), Usage.STREAM_DRAW);
-        ido.bufferData(drawData.getCmdListIdxBufferData(index), Usage.STREAM_DRAW);
+        vertexBuffer.bufferData(drawData.getCmdListVtxBufferData(index), Usage.STREAM_DRAW);
+        indexBuffer.bufferData(drawData.getCmdListIdxBufferData(index), Usage.STREAM_DRAW);
     }
 
     public void cleanup() {
-        ido.cleanup();
-        vbo.cleanup();
+        indexBuffer.cleanup();
+        vertexBuffer.cleanup();
         vao.delete();
     }
 
@@ -63,11 +62,11 @@ public class GuiMesh {
         return vao;
     }
 
-    public IndexBufferObject getIndicesVBO() {
-        return ido;
+    public GLBuffer getIndexBuffer() {
+        return indexBuffer;
     }
 
-    public VertexBufferObject getVerticesVBO() {
-        return vbo;
+    public GLBuffer getVertexBuffer() {
+        return vertexBuffer;
     }
 }

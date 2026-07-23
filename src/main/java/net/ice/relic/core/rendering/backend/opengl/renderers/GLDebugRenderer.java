@@ -1,16 +1,13 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
-import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
+import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.RGBColor;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
-import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
 import net.ice.relic.core.scene.primitives.threed.LineCube;
@@ -20,7 +17,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -33,9 +29,9 @@ public class GLDebugRenderer implements Lifecycle {
 	private GLShaderProgram shaderProgram;
 	private Uniforms uniforms;
 
-	private VertexBufferObject vbo;
 	private VertexArrayObject vao;
-	private IndexBufferObject ido;
+	private GLBuffer vertexBuffer;
+	private GLBuffer indexBuffer;
 
 	private static RGBColor notVisibleColor = new RGBColor(78, 59, 255);
 	private static RGBColor visibleColor = notVisibleColor.lighter();
@@ -51,32 +47,30 @@ public class GLDebugRenderer implements Lifecycle {
 	@Override
 	public void init() {
 		this.vao = new VertexArrayObject();
-		this.vbo = new VertexBufferObject();
-		this.ido = new IndexBufferObject();
+		this.vertexBuffer = new GLBuffer();
+		this.indexBuffer = new GLBuffer();
 
 		vao.bind();
 
 		FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(lineCube.getVertices().length);
 		floatBuffer.put(lineCube.getVertices()).flip();
-		vbo.bufferData(floatBuffer, Usage.STATIC_DRAW);
+		vertexBuffer.bufferData(floatBuffer, Usage.STATIC_DRAW);
 
-		glVertexArrayVertexBuffer(vao.getHandle(), 0, vbo.getHandle(), 0, 12);
+		glVertexArrayVertexBuffer(vao.getHandle(), 0, vertexBuffer.getHandle(), 0, 12);
 		glVertexArrayAttribFormat(vao.getHandle(), 0, 3, GL_FLOAT, false, 0);
 		glVertexArrayAttribBinding(vao.getHandle(), 0, 0);
 		glEnableVertexArrayAttrib(vao.getHandle(), 0);
 
 		IntBuffer indicesBuffer = MemoryUtil.memCallocInt(lineCube.getIndices().length);
 		indicesBuffer.put(lineCube.getIndices()).flip();
-		ido.bufferData(indicesBuffer, Usage.STATIC_DRAW);
+		indexBuffer.bufferData(indicesBuffer, Usage.STATIC_DRAW);
 
-		glVertexArrayElementBuffer(vao.getHandle(), ido.getHandle());
+		glVertexArrayElementBuffer(vao.getHandle(), indexBuffer.getHandle());
 
 		glBindVertexArray(0);
 
-		this.shaderProgram = new GLShaderProgram().attach(List.of(
-				new GLShader(ShaderType.VERTEX).load("debug.vert", ShaderType.VERTEX),
-				new GLShader(ShaderType.FRAGMENT).load("debug.frag", ShaderType.FRAGMENT)
-		));
+		this.shaderProgram = new GLShaderProgram("debug");
+
 
 		this.uniforms = new Uniforms(shaderProgram);
 

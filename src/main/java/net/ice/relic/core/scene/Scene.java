@@ -54,7 +54,7 @@ public abstract class Scene implements Lifecycle {
         this.ambientLight = new AmbientLight().setIntensity(0.2f).setColor(Colors.WHITE.getRGBColor());
         this.lights = new ArrayList<>();
 
-        lights.add(new Light(new Vector3f(0, -1.0f,0), true, 8, Colors.LIME.getRGBColor()));
+        lights.add(new Light(new Vector3f(0, -1.0f,0), true, 8, Colors.WHITE.getRGBColor()));
     }
 
     @Override

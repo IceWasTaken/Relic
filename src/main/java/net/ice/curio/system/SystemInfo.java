@@ -50,18 +50,18 @@ public class SystemInfo {
     public static void logSystemInfo() {
         SystemInfo systemInfo = new SystemInfo();
 
-        Logger.info("[SystemInfo] OS Type: {}", getOSType());
-        Logger.info("[SystemInfo] OS Version: {}", systemInfo.osVersion);
+        Logger.info("[SystemInfo]: OS Type: {}", getOSType());
+        Logger.info("[SystemInfo]: OS Version: {}", systemInfo.osVersion);
 
-        Logger.info("[SystemInfo] Java Version: {}", systemInfo.javaVersion);
-        Logger.info("[SystemInfo] Java Vendor: {}", systemInfo.javaVendor);
+        Logger.info("[SystemInfo]: Java Version: {}", systemInfo.javaVersion);
+        Logger.info("[SystemInfo]: Java Vendor: {}", systemInfo.javaVendor);
 
-        Logger.info("[SystemInfo] CPU Architecture: {}", getOSArchitecture());
-        Logger.info("[SystemInfo] Processor Count: {}", systemInfo.processors);
-        Logger.info("[SystemInfo] Max Memory (MB): {}", (systemInfo.maxMemory / (1024 * 1024)));
+        Logger.info("[SystemInfo]: CPU Architecture: {}", getOSArchitecture());
+        Logger.info("[SystemInfo]: Processor Count: {}", systemInfo.processors);
+        Logger.info("[SystemInfo]: Max Memory (MB): {}", (systemInfo.maxMemory / (1024 * 1024)));
 
-        Logger.info("[SystemInfo] Locale: {}", systemInfo.locale);
-        Logger.info("[SystemInfo] Timezone: {} ", systemInfo.timezone);
+        Logger.info("[SystemInfo]: Locale: {}", systemInfo.locale);
+        Logger.info("[SystemInfo]: Timezone: {} ", systemInfo.timezone);
 
     }
 

@@ -38,14 +38,20 @@ public class SwapBuffer {
 		}
 	}
 
+	public void clear() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+
 	public void bind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, handle);
 	}
+
 	public void unbind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	public void bindTextures() {
-		glBindTextureUnit(0, swapTexture);
+	public void bindTextures(int inxex) {
+		glBindTextureUnit(inxex, swapTexture);
 	}
 }

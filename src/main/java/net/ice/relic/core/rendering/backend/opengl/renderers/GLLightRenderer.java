@@ -40,10 +40,7 @@ public class GLLightRenderer implements Lifecycle {
 
     @Override
     public void init() {
-        this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("lights.vert", ShaderType.VERTEX),
-                new GLShader(ShaderType.FRAGMENT).load("lights.frag", ShaderType.FRAGMENT)
-        ));
+        this.shaderProgram = new GLShaderProgram("lights");
 
         this.uniformBufferObject = new Uniforms(shaderProgram);
 

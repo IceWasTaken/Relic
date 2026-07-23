@@ -3,7 +3,7 @@ package net.ice.relic.core.rendering.backend.opengl;
 import net.ice.curio.config.RendererConfig;
 import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
-import net.ice.curio.library.opengl.object.buffer.ShaderStorageBufferObject;
+import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.scene.SceneObject;
@@ -12,29 +12,32 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
+import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
+
 public class GlobalBuffers {
 
-	private ShaderStorageBufferObject instanceBuffer;
+	private GLBuffer instanceBuffer;
+	private Struct instanceBufferStruct;
 
 	public GlobalBuffers() {
 
 	}
 
 	public void createInstanceBuffer() {
-		Struct instanceStruct = new Struct(StructType.STD430) {
+		this.instanceBufferStruct = new Struct(StructType.STD430) {
 			@Override
 			public Class<?> getRecord() {
 				return Instances.class;
 			}
 		};
 
-		this.instanceBuffer = new ShaderStorageBufferObject(instanceStruct, RendererConfig.getMaxDrawElements());
+		this.instanceBuffer = new GLBuffer();
 
 		ByteBuffer dummy = MemoryUtil.memAlloc(RendererConfig.getMaxDrawElements() * 80);
 		instanceBuffer.bufferData(dummy, Usage.STREAM_DRAW);
 		MemoryUtil.memFree(dummy);
 
-		instanceBuffer.bindBase(9);
+		instanceBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 9);
 	}
 
 	public void updateInstanceBuffer(GLRenderer renderer) {
@@ -43,8 +46,9 @@ public class GlobalBuffers {
 			if (model.isAnimated()) continue;
 			for (GLRenderer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
 				for (SceneObject object : model.getSceneObjects()) {
-					instanceBuffer.setMat4x4(0, index, object.getTransform().getTransformMatrix());
-					instanceBuffer.setInt(1, index, meshDrawData.materialIdx());
+					int base = instanceBufferStruct.getStride() * index;
+					instanceBuffer.bufferSubData(instanceBufferStruct.getOffset(0) + base, object.getTransform().getTransformMatrix());
+					instanceBuffer.bufferSubData(instanceBufferStruct.getOffset(1) + base, meshDrawData.materialIdx());
 					index++;
 
 				}

@@ -33,7 +33,7 @@ public class EventManager {
             listeners.computeIfAbsent(eventType, k -> {
                 ArrayList<Listener> arrayList = new ArrayList<>();
                 arrayList.add(new Listener(null, method));
-                Logger.info("[EventManager] Added new listener: {}", method.getName());
+                Logger.info("[EventManager] Added new listener: {}#{}", method.getDeclaringClass().getCanonicalName(), method.getName());
                 return arrayList;
 
             });

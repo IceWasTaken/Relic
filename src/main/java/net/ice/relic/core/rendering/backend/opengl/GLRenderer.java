@@ -1,8 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
-import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
+import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
@@ -24,14 +23,11 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL15.glBufferData;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS;
 import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.opengl.GL45.glVertexArrayAttribFormat;
-import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public class GLRenderer extends Renderer implements Lifecycle {
 
@@ -39,31 +35,38 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public static final Vector2i SHADOW_MAP_SIZE = new Vector2i(4096);
 
     private VertexArrayObject staticArrayObject;
-    private VertexBufferObject vbo;
-    private IndexBufferObject ibo;
+    private GLBuffer vertexBuffer;
+    private GLBuffer indexBuffer;
 
     private GeometryBuffer geometryBuffer;
     private ShadowBuffer shadowBuffer;
+    private SwapBuffer lightBuffer;
     private SwapBuffer swapBuffer;
-
 
     private final GlobalBuffers globalBuffers;
 
     private final GLSceneRenderer sceneRenderer;
-    private final GLLightRenderer lightRenderer;
     private final GLShadowRenderer shadowRenderer;
-    private final GLGuiRenderer guiRenderer;
-    private final GLDebugRenderer visualizeRenderer;
+    private final GLLightRenderer lightRenderer;
+    private final GLBloomRenderer bloomRenderer;
+
     private final GLPostRenderer postRenderer;
+    private final GLDebugRenderer visualizeRenderer;
+    private final GLGuiRenderer guiRenderer;
+
 
     @Override
     public void resize(int width, int height) {
-        this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
-        this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
+        this.geometryBuffer = new GeometryBuffer(width, height);
+        this.lightBuffer = new SwapBuffer(width, height);
+        this.swapBuffer = new SwapBuffer(width, height);
+
         this.guiRenderer.onResize(width, height);
+
         this.sceneRenderer.resize(width, height);
         this.lightRenderer.resize(width, height);
         this.postRenderer.resize(width, height);
+        this.bloomRenderer.resize(width, height);
     }
 
     @Override
@@ -82,6 +85,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.sceneRenderer = new GLSceneRenderer(this);
         this.shadowRenderer = new GLShadowRenderer(this);
         this.lightRenderer = new GLLightRenderer(this);
+        this.bloomRenderer = new GLBloomRenderer(this);
 
         this.postRenderer = new GLPostRenderer(this);
 
@@ -99,6 +103,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         SystemInfo.logGLInfo();
 
         this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
+        this.lightBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.shadowBuffer = new ShadowBuffer();
         this.globalBuffers.createInstanceBuffer();
@@ -106,6 +111,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         sceneRenderer.init();
         shadowRenderer.init();
         lightRenderer.init();
+        bloomRenderer.init();
 
         postRenderer.init();
 
@@ -122,23 +128,15 @@ public class GLRenderer extends Renderer implements Lifecycle {
         sceneRenderer.render();
         shadowRenderer.render();
 
-        if(postRenderer.shouldRender()) {
-            renderWithPost();
-            return;
-        }
-
+        lightBuffer.bind();
         lightRenderer.render();
+        lightBuffer.unbind();
 
-        visualizeRenderer.render();
-        guiRenderer.render();
-    }
-
-    private void renderWithPost() {
-        swapBuffer.bind();
-        lightRenderer.render();
-        swapBuffer.unbind();
+        bloomRenderer.render();
 
         postRenderer.render();
+
+        glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
 
         visualizeRenderer.render();
         guiRenderer.render();
@@ -169,7 +167,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
 
-        this.vbo = new VertexBufferObject();
+        this.vertexBuffer = new GLBuffer();
         FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
         for (Model model : modelList) {
             for (MeshData meshData : model.getMeshData()) {
@@ -177,10 +175,10 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
         meshesBuffer.flip();
-        vbo.bufferData(meshesBuffer, Usage.STATIC_DRAW);
+        vertexBuffer.bufferData(meshesBuffer, Usage.STATIC_DRAW);
         MemoryUtil.memFree(meshesBuffer);
 
-        glVertexArrayVertexBuffer(staticArrayObject.getHandle(), 0, vbo.getHandle(), 0, 56);
+        glVertexArrayVertexBuffer(staticArrayObject.getHandle(), 0, vertexBuffer.getHandle(), 0, 56);
 
         glVertexArrayAttribFormat(staticArrayObject.getHandle(), 0, 3, GL_FLOAT, false, 0);
         glVertexArrayAttribFormat(staticArrayObject.getHandle(), 1, 3, GL_FLOAT, false, 12);
@@ -200,7 +198,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 3);
         glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 4);
 
-        this.ibo = new IndexBufferObject();
+        this.indexBuffer = new GLBuffer();
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : modelList) {
             for (MeshData meshData : model.getMeshData()) {
@@ -208,9 +206,9 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
         indicesBuffer.flip();
-        glNamedBufferData(ibo.getHandle(), indicesBuffer, GL_STATIC_DRAW);
+        glNamedBufferData(indexBuffer.getHandle(), indicesBuffer, GL_STATIC_DRAW);
         MemoryUtil.memFree(indicesBuffer);
-        glVertexArrayElementBuffer(staticArrayObject.getHandle(), ibo.getHandle());
+        glVertexArrayElementBuffer(staticArrayObject.getHandle(), indexBuffer.getHandle());
 
         glBindVertexArray(0);
     }
@@ -254,6 +252,10 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     public SwapBuffer getSwapBuffer() {
         return swapBuffer;
+    }
+
+    public SwapBuffer getLightBuffer() {
+        return lightBuffer;
     }
 
     public VertexArrayObject getStaticArrayObject() {

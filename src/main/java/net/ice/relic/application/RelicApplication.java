@@ -25,6 +25,10 @@ import org.lwjgl.system.Configuration;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import static net.ice.relic.EngineState.*;
 import static net.ice.curio.system.SystemInfo.logSystemInfo;
@@ -79,7 +83,7 @@ public abstract class RelicApplication implements ApplicationContext {
             init();
             loop();
         } catch (Exception exception) {
-            Logger.error("[Relic] Error while initializing application: ", exception);
+            Logger.error("[Relic]: Error while initializing application: ", exception);
             changeState(ERROR);
             File file;
             try {
@@ -101,8 +105,10 @@ public abstract class RelicApplication implements ApplicationContext {
 
     private void init() {
         if(currentState != INITIALIZING) {
-            throw new IllegalStateException("[Relic] Attempted initialization not in initializing state");
+            throw new IllegalStateException("[Relic]: Attempted initialization not in initializing state");
         }
+
+        deleteOldCrashLogs();
 
         registrationManager.openRegistry(Command.class, new CommandRegistry());
         registrationManager.register("net.ice.relic");
@@ -166,7 +172,7 @@ public abstract class RelicApplication implements ApplicationContext {
     private void changeState(EngineState state) {
         if(currentState != state) {
             currentState = state;
-            Logger.info("[Relic] State changed to: " + currentState);
+            Logger.info("[Relic]: State changed to: " + currentState);
         }
     }
 
@@ -180,19 +186,39 @@ public abstract class RelicApplication implements ApplicationContext {
     }
 
     private void checkApplicationProperties(ApplicationProperties properties) {
-        Logger.info("[Relic] Loading application: '{}'", properties.applicationName());
+        Logger.info("[Relic]: Loading application: '{}'", properties.applicationName());
 
         if(properties.targetRelicVersion().isNewer(RELIC_VERSION)) {
-            Logger.info("[Relic] Application {} is expecting a newer engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
+            Logger.info("[Relic]: Application {} is expecting a newer engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
         }
 
         if(properties.targetRelicVersion().isOlder(RELIC_VERSION)) {
-            Logger.info("[Relic] Application {} is expecting an older engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
+            Logger.info("[Relic]: Application {} is expecting an older engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
         }
 
         if(properties.debugMode()) {
-            Logger.info("[Relic] Debug mode enabled");
+            Logger.info("[Relic]: Application debugging enabled");
         }
+    }
+
+    private void deleteOldCrashLogs() {
+        Path workingPath = Paths.get(System.getProperty("user.dir"));
+        try(Stream<Path> files = Files.walk(workingPath)) {
+            files.forEach((path) -> {
+                if(path.getFileName().toString().endsWith("-crash.log")) {
+                    String fileName = path.getFileName().toString();
+                    Logger.info("[Relic]: Deleting old crash log: {}", fileName);
+                    if(path.toFile().delete()) {
+                        Logger.info("[Relic]: Deleted crash log: {}", fileName);
+                    } else {
+                        Logger.info("[Relic]: Failed to delete crash log: {}", fileName);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Logger.error("[Relic]: Error while attempting to delete old crash files:", e);
+        }
+
     }
 
     public Curio getCurio() {

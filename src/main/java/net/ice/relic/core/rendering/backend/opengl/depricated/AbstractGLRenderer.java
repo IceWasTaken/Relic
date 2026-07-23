@@ -26,7 +26,7 @@ public abstract class AbstractGLRenderer extends AbstractRenderer {
 
     public void init() {
         initShaders();
-        this.shaderProgram = new GLShaderProgram().attach(shaders);
+        //this.shaderProgram = new GLShaderProgram().attach(shaders);
         this.uniforms = new Uniforms(shaderProgram);
         initUniforms();
     }
@@ -36,7 +36,7 @@ public abstract class AbstractGLRenderer extends AbstractRenderer {
     }
 
     protected void loadShader(String path, ShaderType type) {
-        shaders.add(new GLShader(type).load(path, type));
+        //shaders.add(new GLShader(type).load(path, type));
     }
 
 

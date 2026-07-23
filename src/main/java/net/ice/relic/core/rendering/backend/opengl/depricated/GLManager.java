@@ -3,7 +3,6 @@ package net.ice.relic.core.rendering.backend.opengl.depricated;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.model.mesh.MeshData;
-import net.ice.relic.core.rendering.backend.BackendManager;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
@@ -14,15 +13,14 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL.createCapabilities;
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
-public class GLManager extends BackendManager implements Lifecycle {
+public class GLManager implements Lifecycle {
 
     //private VertexArrayObject staticArrayObject;
     //private VertexArrayObject animationArrayObject;
@@ -39,7 +37,6 @@ public class GLManager extends BackendManager implements Lifecycle {
 //    private final List<VertexBufferObject> vertexBufferObjects;
 
     public GLManager(RelicApplication relicApplication) {
-        super(relicApplication);
 
 //        this.vertexBufferObjects = new ArrayList<>();
     }
@@ -57,7 +54,8 @@ public class GLManager extends BackendManager implements Lifecycle {
     }
 
     public void loadAnimatedModels() {
-        List<Model> models = application.getCurrentScene().getModels().values().stream().filter(Model::isAnimated).toList();
+        //List<Model> models = application.getCurrentScene().getModels().values().stream().filter(Model::isAnimated).toList();
+        List<Model> models = new ArrayList<>();
         loadBindingPoses(models);
         loadBonesMatricesBuffer(models);
         loadBonesIndicesWeights(models);
@@ -269,9 +267,9 @@ public class GLManager extends BackendManager implements Lifecycle {
         //return shadowBuffer;
     //}
 
-    @Override
+
     public RelicApplication getApplication() {
-        return super.getApplication();
+        return null;
     }
 
 

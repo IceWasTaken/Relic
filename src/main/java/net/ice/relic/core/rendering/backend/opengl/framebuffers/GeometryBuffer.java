@@ -95,6 +95,10 @@ public class GeometryBuffer {
 		}
 	}
 
+	public void clear() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
 	public void bindTextures() {
 		glBindTextureUnit(0, posTexture);
 		glBindTextureUnit(1, albedoTexture);

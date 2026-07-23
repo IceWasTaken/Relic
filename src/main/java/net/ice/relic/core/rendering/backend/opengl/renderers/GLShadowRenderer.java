@@ -1,17 +1,15 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.graphics.object.Viewport;
+import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
-import net.ice.curio.library.opengl.object.buffer.DrawIndirectBuffer;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
-import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.SceneObject;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
@@ -28,14 +26,13 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class GLShadowRenderer implements Lifecycle {
 
-
     private GLShaderProgram shaderProgram;
     private final GLRenderer glRenderer;
 
     private final Viewport viewport;
 
     private int staticDrawCount;
-    private DrawIndirectBuffer staticCommandBuffer;
+    private GLBuffer staticCommandBuffer;
 
     private Shadows shadows;
 
@@ -52,11 +49,8 @@ public class GLShadowRenderer implements Lifecycle {
 
     @Override
     public void init() {
-        this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("shadow.vert", ShaderType.VERTEX),
-                new GLShader(ShaderType.GEOMETRY).load("shadow.geom", ShaderType.GEOMETRY),
-                new GLShader(ShaderType.FRAGMENT).load("shadow.frag", ShaderType.FRAGMENT)
-        ));
+        this.shaderProgram = new GLShaderProgram("shadow");
+
         this.uniforms = new Uniforms(shaderProgram);
 
         for (int i = 0; i < 3; i++) {
@@ -148,7 +142,7 @@ public class GLShadowRenderer implements Lifecycle {
         commandBuffer.flip();
         staticDrawCount = commandBuffer.remaining() / 20;
 
-        staticCommandBuffer = new DrawIndirectBuffer();
+        staticCommandBuffer = new GLBuffer();
         staticCommandBuffer.bufferData(commandBuffer, Usage.DYNAMIC_DRAW);
 
         MemoryUtil.memFree(commandBuffer);

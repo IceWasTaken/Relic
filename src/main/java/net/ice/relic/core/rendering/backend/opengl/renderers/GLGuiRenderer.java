@@ -60,10 +60,8 @@ public class GLGuiRenderer implements Lifecycle {
 
     @Override
     public void init() {
-        this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("gui.vert", ShaderType.VERTEX),
-                new GLShader(ShaderType.VERTEX).load("gui.frag", ShaderType.FRAGMENT)
-        ));
+        this.shaderProgram = new GLShaderProgram("gui");
+
         this.uniforms = new Uniforms(shaderProgram);
         this.scale = new Vector2f();
 

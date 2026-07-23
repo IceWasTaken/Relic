@@ -2,8 +2,6 @@ package net.ice.relic.core.rendering.backend.opengl.mesh;
 
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.buffer.GLBuffer;
-import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
-import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import org.lwjgl.system.MemoryUtil;
 
@@ -51,12 +49,12 @@ public class QuadMesh {
         this.meshVAO = new VertexArrayObject();
         meshVAO.bind();
 
-        VertexBufferObject vertexVBO = new VertexBufferObject();
+        GLBuffer vertexVBO = new GLBuffer();
         meshVBOs.add(vertexVBO);
         FloatBuffer positionsBuffer = MemoryUtil.memCallocFloat(positions.length).put(positions).flip();
         vertexVBO.bufferData(positionsBuffer, Usage.STATIC_DRAW);
 
-        VertexBufferObject textureCoordinateVBO = new VertexBufferObject();
+        GLBuffer textureCoordinateVBO = new GLBuffer();
         meshVBOs.add(textureCoordinateVBO);
         FloatBuffer textCoordsBuffer = MemoryUtil.memCallocFloat(textCoords.length).put(textCoords).flip();
         textureCoordinateVBO.bufferData(textCoordsBuffer, Usage.STATIC_DRAW);
@@ -73,12 +71,12 @@ public class QuadMesh {
         glEnableVertexArrayAttrib(meshVAO.getHandle(), 0);
         glEnableVertexArrayAttrib(meshVAO.getHandle(), 1);
 
-        IndexBufferObject indicesVBO = new IndexBufferObject();
-        meshVBOs.add(indicesVBO);
+        GLBuffer indexBuffer = new GLBuffer();
+        meshVBOs.add(indexBuffer);
         IntBuffer indicesBuffer = MemoryUtil.memCallocInt(indices.length).put(indices).flip();
-        indicesVBO.bufferData(indicesBuffer, Usage.STATIC_DRAW);
+        indexBuffer.bufferData(indicesBuffer, Usage.STATIC_DRAW);
 
-        glVertexArrayElementBuffer(meshVAO.getHandle(), indicesVBO.getHandle());
+        glVertexArrayElementBuffer(meshVAO.getHandle(), indexBuffer.getHandle());
 
         glBindVertexArray(0);
 
