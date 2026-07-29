@@ -6,32 +6,32 @@ import net.ice.curio.Curio;
 import net.ice.curio.input.Input;
 import net.ice.curio.window.Window;
 import net.ice.heirloom.ApplicationProperties;
+import net.ice.heirloom.Version;
 import net.ice.heirloom.register.RegistrationManager;
 import net.ice.relic.EngineState;
+import net.ice.relic.common.console.Console;
+import net.ice.relic.common.console.ConsoleItem;
 import net.ice.relic.common.console.register.Command;
 import net.ice.relic.common.console.register.CommandRegistry;
-import org.joml.Vector2f;
-import org.tinylog.Logger;
-import net.ice.relic.core.Timer;
 import net.ice.relic.core.Stats;
-import net.ice.heirloom.Version;
+import net.ice.relic.core.Timer;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.rendering.backend.Renderer;
 import net.ice.relic.core.scene.Scene;
+import org.joml.Vector2f;
 import org.lwjgl.system.Configuration;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static net.ice.relic.EngineState.*;
-import static net.ice.curio.system.SystemInfo.logSystemInfo;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
@@ -61,15 +61,15 @@ public abstract class RelicApplication implements ApplicationContext {
     protected abstract void cleanup(RelicApplication application);
 
     protected RelicApplication(ApplicationProperties info) {
-        changeState(INITIALIZING);
-
         checkApplicationProperties(info);
+        changeState(INITIALIZING);
 
         this.applicationProperties = info;
 
         this.clock = new Timer();
-        this.registrationManager = new RegistrationManager();
         this.stats = new Stats(this);
+        this.registrationManager = new RegistrationManager();
+
         this.curio = new Curio(info);
         this.renderer = Renderer.getRendererType(this);
 
@@ -83,23 +83,7 @@ public abstract class RelicApplication implements ApplicationContext {
             init();
             loop();
         } catch (Exception exception) {
-            Logger.error("[Relic]: Error while initializing application: ", exception);
-            changeState(ERROR);
-            File file;
-            try {
-                if((file = new File(System.currentTimeMillis() + "-crash.log")).createNewFile()) {
-                    try(FileWriter writer = new FileWriter(file)) {
-                        writer.append(exception.toString()).append("\n");
-                        for(StackTraceElement element : exception.getStackTrace()) {
-                            writer.append(element.toString()).append("\n");
-                        }
-                    }
-                    throw exception;
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
+            crashReport(exception);
         }
     }
 
@@ -119,7 +103,6 @@ public abstract class RelicApplication implements ApplicationContext {
         curio.init();
         renderer.init();
         textureCache.init();
-        logSystemInfo();
         clock.init();
         changeState(LOADING);
 
@@ -155,7 +138,7 @@ public abstract class RelicApplication implements ApplicationContext {
         this.currentScene = scene;
         currentScene.setApplication(this);
         currentScene.init();
-        renderer.setupData();
+        //renderer.setupData();
         resume();
     }
 
@@ -185,19 +168,45 @@ public abstract class RelicApplication implements ApplicationContext {
         imGuiIO.addMouseButtonEvent(1, Input.getInstance().getMouseButtonsDown().contains(GLFW_MOUSE_BUTTON_RIGHT));
     }
 
+    private void crashReport(Exception exception) {
+        Logger.error("[Relic]: Error while running application: ", exception);
+        File file;
+        try {
+            if((file = new File(System.currentTimeMillis() + "-crash.log")).createNewFile()) {
+                try(FileWriter writer = new FileWriter(file)) {
+                    writer.append("---- Relic Crash Report ----\n");
+                    writer.append(exception.toString()).append("\n");
+                    for(StackTraceElement element : exception.getStackTrace()) {
+                        writer.append(element.toString()).append("\n");
+                    }
+                    writer.append("\n");
+
+                    writer.append("===TERMINAL LOG===").append("\n");
+                    for(ConsoleItem consoleItem : Console.consoleItems) {
+                        writer.append(consoleItem.getData());
+                    }
+                    writer.append("============================");
+                }
+                throw exception;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void checkApplicationProperties(ApplicationProperties properties) {
         Logger.info("[Relic]: Loading application: '{}'", properties.applicationName());
 
         if(properties.targetRelicVersion().isNewer(RELIC_VERSION)) {
-            Logger.info("[Relic]: Application {} is expecting a newer engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
+            Logger.info("[Relic]: Application '{}' is expecting a newer engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
         }
 
         if(properties.targetRelicVersion().isOlder(RELIC_VERSION)) {
-            Logger.info("[Relic]: Application {} is expecting an older engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
+            Logger.info("[Relic]: Application '{}' is expecting an older engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
         }
 
         if(properties.debugMode()) {
-            Logger.info("[Relic]: Application debugging enabled");
+            Logger.info("[Relic]: Debugging for application '{}' enabled", properties.applicationName());
         }
     }
 

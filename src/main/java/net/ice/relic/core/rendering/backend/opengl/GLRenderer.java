@@ -5,15 +5,15 @@ import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.model.mesh.MeshData;
+import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
+import net.ice.relic.core.ecs.entity.Entity;
+import net.ice.relic.core.model.Mesh;
+import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.Renderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.GeometryBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
 import net.ice.relic.core.rendering.backend.opengl.renderers.*;
-import net.ice.curio.system.SystemInfo;
-import net.ice.relic.core.scene.SceneObject;
 import org.joml.Vector2i;
 import org.lwjgl.system.MemoryUtil;
 
@@ -23,11 +23,11 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS;
 import static org.lwjgl.opengl.GL45.*;
-import static org.lwjgl.opengl.GL45.glVertexArrayAttribFormat;
 
 public class GLRenderer extends Renderer implements Lifecycle {
 
@@ -100,7 +100,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
         //setupDebugMessageCallback();
-        SystemInfo.logGLInfo();
+        //SystemInfo.logGLInfo();
 
         this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.lightBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
@@ -128,13 +128,13 @@ public class GLRenderer extends Renderer implements Lifecycle {
         sceneRenderer.render();
         shadowRenderer.render();
 
-        lightBuffer.bind();
+        //lightBuffer.bind();
         lightRenderer.render();
-        lightBuffer.unbind();
+        //lightBuffer.unbind();
 
-        bloomRenderer.render();
+        //bloomRenderer.render();
 
-        postRenderer.render();
+        //postRenderer.render();
 
         glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
 
@@ -144,7 +144,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
 
     public void loadStaticModels() {
-        List<Model> modelList = application.getCurrentScene().getModels().values().stream().filter(m -> !m.isAnimated()).toList();
+        List<Model> modelList = StaticModelComponent.getAllModels();
         staticArrayObject = new VertexArrayObject();
         staticArrayObject.bind();
         int positionsSize = 0;
@@ -154,15 +154,14 @@ public class GLRenderer extends Renderer implements Lifecycle {
         int offset = 0;
         for (Model model : modelList) {
             List<MeshDrawData> meshDrawDataList = model.getMeshDrawData();
-            for (MeshData meshData : model.getMeshData()) {
+            for (Mesh meshData : model.getMeshData()) {
                 positionsSize += meshData.getVertices().length;
                 normalsSize += meshData.getNormals().length;
                 textureCoordsSize += meshData.getTextureCoords().length;
                 indicesSize += meshData.getIndices().length;
 
                 int meshSizeInBytes = meshData.getVertices().length * 14 * 4;
-                meshDrawDataList.add(new MeshDrawData(meshSizeInBytes, meshData.getMaterialIndex(), offset,
-                        meshData.getIndices().length));
+                meshDrawDataList.add(new MeshDrawData(meshSizeInBytes, meshData.getMaterialIndex(), offset, meshData.getIndices().length));
                 offset = positionsSize / 3;
             }
         }
@@ -170,11 +169,17 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.vertexBuffer = new GLBuffer();
         FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
         for (Model model : modelList) {
-            for (MeshData meshData : model.getMeshData()) {
+            for (Mesh meshData : model.getMeshData()) {
                 populateMeshBuffer(meshesBuffer, meshData);
             }
         }
+        System.out.println(meshesBuffer.position());
+        System.out.println(meshesBuffer.limit());
+        System.out.println(meshesBuffer.capacity());
         meshesBuffer.flip();
+        System.out.println(meshesBuffer.position());
+        System.out.println(meshesBuffer.limit());
+        System.out.println(meshesBuffer.capacity());
         vertexBuffer.bufferData(meshesBuffer, Usage.STATIC_DRAW);
         MemoryUtil.memFree(meshesBuffer);
 
@@ -201,7 +206,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.indexBuffer = new GLBuffer();
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : modelList) {
-            for (MeshData meshData : model.getMeshData()) {
+            for (Mesh meshData : model.getMeshData()) {
                 indicesBuffer.put(meshData.getIndices());
             }
         }
@@ -214,7 +219,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
     }
 
 
-    private void populateMeshBuffer(FloatBuffer meshesBuffer, MeshData meshData) {
+    private void populateMeshBuffer(FloatBuffer meshesBuffer, Mesh meshData) {
         float[] positions = meshData.getVertices();
         float[] normals = meshData.getNormals();
         float[] tangents = meshData.getTangents();
@@ -274,9 +279,9 @@ public class GLRenderer extends Renderer implements Lifecycle {
         return postRenderer;
     }
 
-    public record AnimMeshDrawData(SceneObject entity, int bindingPoseOffset, int weightsOffset) { }
+    public record AnimMeshDrawData(Entity entity, int bindingPoseOffset, int weightsOffset) { }
 
-    public record MeshDrawData(int sizeInBytes, int materialIdx, int offset, int vertices, AnimMeshDrawData animMeshDrawData) {
+    public record MeshDrawData(int sizeInBytes, int materialIdx, int offset, int vertexCount, AnimMeshDrawData animMeshDrawData) {
         public MeshDrawData(int sizeInBytes, int materialIdx, int offset, int vertices) {
             this(sizeInBytes, materialIdx, offset, vertices, null);
         }

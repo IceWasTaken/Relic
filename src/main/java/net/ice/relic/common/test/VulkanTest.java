@@ -2,9 +2,9 @@ package net.ice.relic.common.test;
 
 import net.ice.curio.input.Input;
 import net.ice.heirloom.ApplicationProperties;
+import net.ice.heirloom.Version;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.test.scene.TestingScene;
-import net.ice.heirloom.Version;
 import net.ice.relic.core.scene.Camera;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;

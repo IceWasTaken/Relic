@@ -1,14 +1,13 @@
 package net.ice.curio.graphics.context;
 
 import net.ice.curio.Curio;
-import net.ice.curio.config.enums.BackendType;
+import net.ice.curio.config.RendererConfig;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.OpenGLContext;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.heirloom.Lifecycle;
-import net.ice.curio.config.RendererConfig;
 
 public abstract class GraphicsContext implements Lifecycle {
 

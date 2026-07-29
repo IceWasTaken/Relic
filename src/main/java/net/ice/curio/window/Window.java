@@ -1,10 +1,10 @@
 package net.ice.curio.window;
 
+import net.ice.curio.config.RendererConfig;
 import net.ice.curio.library.glfw.GLFWWindow;
 import net.ice.curio.window.backend.opengl.GLWindow;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
 import net.ice.heirloom.Lifecycle;
-import net.ice.curio.config.RendererConfig;
 import org.joml.Vector2i;
 
 public abstract class Window implements Lifecycle {

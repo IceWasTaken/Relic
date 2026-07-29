@@ -2,23 +2,22 @@ package net.ice.curio.library.glfw;
 
 import imgui.ImGui;
 import imgui.ImGuiIO;
-
 import net.ice.curio.config.RendererConfig;
 import net.ice.curio.config.enums.BackendType;
-import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.enums.GLFWInitHint;
 import net.ice.curio.library.glfw.enums.GLFWPlatform;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
+import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.events.*;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.event.EventManager;
-
+import org.joml.Vector2i;
 import org.lwjgl.glfw.*;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.VkInstance;
 import org.tinylog.Logger;
-import org.joml.Vector2i;
-import org.lwjgl.system.MemoryUtil;
 
+import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 import static net.ice.curio.library.glfw.enums.GLFWInitHint.PLATFORM;
@@ -48,6 +47,7 @@ public final class GLFWWindow implements Lifecycle {
 
         initHint(windowProperties.getGlfwPlatform());
 
+
         EventManager.execute(new InitHintEvent());
 
         if(!glfwInit()) {
@@ -57,6 +57,7 @@ public final class GLFWWindow implements Lifecycle {
         this.monitor = glfwGetPrimaryMonitor();
 
         glfwDefaultWindowHints();
+        glfwWindowHintString(GLFW_WAYLAND_APP_ID, "net.ice.curio.library.glfw.GLFWWindow");
         EventManager.execute(new WindowHintEvent(this));
 
         this.windowHandle = glfwCreateWindow(width, height, windowProperties.getTitle(), 0, 0);
@@ -66,7 +67,12 @@ public final class GLFWWindow implements Lifecycle {
             throw new RuntimeException("GLFW: Failed to create window.");
         }
 
-        setWindowPosition(glfwGetVideoMode(monitor).width() / 3, glfwGetVideoMode(monitor).height() / 5);
+        IntBuffer widthBuffer = MemoryUtil.memCallocInt(1);
+        IntBuffer heightBuffer = MemoryUtil.memCallocInt(1);
+        glfwGetMonitorPos(monitor, widthBuffer, heightBuffer);
+        int w = glfwGetVideoMode(monitor).width() / 2 + widthBuffer.get() - width / 2;
+        int h = (glfwGetVideoMode(monitor).height() / 2) + heightBuffer.get() - height / 2;
+        setWindowPosition(w, h);
 
         setupCallbacks();
     }

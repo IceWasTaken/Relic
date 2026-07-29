@@ -1,11 +1,10 @@
 package net.ice.curio.system;
 
 import net.ice.curio.system.enums.JavaLTSVersion;
-import org.tinylog.Logger;
 import net.ice.curio.system.enums.OSArchitecture;
 import net.ice.curio.system.enums.OSType;
-import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import org.tinylog.Logger;
 
 import java.time.ZoneId;
 import java.util.Locale;

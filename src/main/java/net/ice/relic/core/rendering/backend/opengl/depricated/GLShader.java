@@ -5,7 +5,7 @@ import net.ice.relic.core.rendering.shader.ShaderType;
 import org.tinylog.Logger;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -41,19 +41,15 @@ public class GLShader implements Lifecycle {
 
     public GLShader load(String fileName, ShaderType type) {
         StringBuilder shaderSource = new StringBuilder();
-        fileName = "/relic/data/rendering/gl/shaders/" + fileName;
+        fileName = "resources/relic/data/rendering/gl/shaders/" + fileName;
 
         Logger.info("[GLShader]: Loading shader: {}", fileName);
-        try(InputStream stream = GLShader.class.getResourceAsStream(fileName)) {
-            if(stream != null) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        shaderSource.append(line).append("\n");
+        try(InputStream stream = new FileInputStream(fileName)) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    shaderSource.append(line).append("\n");
                     }
-                }
-            } else {
-                throw new IOException("Failed to get InputStream from resource");
             }
         } catch (Exception exception) {
             Logger.error("[GLShader]: Error while loading shader: {}", exception);

@@ -1,8 +1,9 @@
 package net.ice.curio.library.vulkan.utils;
 
- import org.tinylog.Logger;import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkExtensionProperties;
 import org.lwjgl.vulkan.VkLayerProperties;
+import org.tinylog.Logger;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;

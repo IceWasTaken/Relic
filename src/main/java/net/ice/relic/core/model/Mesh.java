@@ -1,7 +1,6 @@
-package net.ice.relic.core.model.mesh;
+package net.ice.relic.core.model;
 
-public class MeshData {
-
+public class Mesh {
 
     private final float[] vertices;
     private final float[] normals;
@@ -15,7 +14,7 @@ public class MeshData {
 
     private int materialIndex;
 
-    public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
+    public Mesh(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
         this.vertices = vertices;
         this.normals = normals;
         this.tangents = tangents;
@@ -27,7 +26,7 @@ public class MeshData {
         this.materialIndex = 0;
     }
 
-    public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights) {
+    public Mesh(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights) {
         this(vertices, normals, tangents, bitangents, textureCoords, indices, boneIndices, weights, 0);
     }
 

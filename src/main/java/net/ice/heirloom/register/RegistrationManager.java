@@ -30,17 +30,23 @@ public class RegistrationManager {
                     Class<?> targetInterface = findRegisterableInterface(loadedClass);
 
                     if(targetInterface == null) {
-                        Logger.error("Class [{}] annotated by @AutoRegister but does not implement known Registerable subinterface.", loadedClass.getCanonicalName());
+                        Logger.error("[RegistrationManager]:Class [{}] annotated by @AutoRegister but does not implement known Registerable subinterface.", loadedClass.getCanonicalName());
+                        return;
                     }
 
                     Registry registry = registries.get(targetInterface);
                     if (registry == null) {
-                        Logger.error("No active registry found for [{}]", targetInterface.getName());
+                        Logger.error("[RegistrationManager]:No active registry found for [{}]", targetInterface.getName());
+                        return;
                     }
 
                     registerable.register(registry);
+                    Logger.info("[RegistrationManager]: Registered new class: '{}'", registerable.getClass().getCanonicalName());
+
+
                 } catch (ClassCastException e) {
-                    Logger.error("Class [{}] annotated by @AutoRegister but does not implement known Registerable subinterface.", loadedClass.getCanonicalName());
+                    Logger.error("[RegistrationManager]: Class [{}] annotated by @AutoRegister but does not implement known Registerable subinterface.", loadedClass.getCanonicalName());
+                    return;
                 }
             }
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
@@ -49,17 +55,9 @@ public class RegistrationManager {
     }
 
     private Class<?> findRegisterableInterface(Class<?> clazz) {
-        for(Class<?> iface : clazz.getInterfaces()) {
-            if (Registerable.class.isAssignableFrom(iface) && iface != Registerable.class) {
-                //iFace - the new product from apple
-                //ugly as fuck?
-                //no job?
-                //no bitches?
-                //fucking loser?
-                //parents disappointed in you?
-                //the iFace will NOT fix any of that
-                //starting at $4,000,000
-                return iface;
+        for(Class<?> interfaceClass : clazz.getInterfaces()) {
+            if (Registerable.class.isAssignableFrom(interfaceClass) && interfaceClass != Registerable.class) {
+                return interfaceClass;
             }
         }
         if(clazz.getSuperclass() != null) {

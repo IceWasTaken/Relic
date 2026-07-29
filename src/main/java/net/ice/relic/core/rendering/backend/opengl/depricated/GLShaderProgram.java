@@ -1,16 +1,9 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
-import net.ice.curio.system.SystemInfo;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
-import net.ice.relic.core.rendering.shader.IShader;
-import net.ice.relic.core.rendering.shader.IShaderProgram;
 import net.ice.relic.core.rendering.shader.ShaderType;
 import org.tinylog.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,14 +27,13 @@ public class GLShaderProgram {
             throw new RuntimeException("Error while creating new shader shaderProgram. \nMost recent OpenGL error: " + glGetError());
         }
 
-        URL dir = GLShaderProgram.class.getClassLoader().getResource("relic/data/rendering/gl/shaders/" + programDirPath + "/");
+        Path dir = Paths.get("resources/relic/data/rendering/gl/shaders/" + programDirPath + "/");
         List<GLShader> shaders = new ArrayList<>();
-        try(Stream<Path> stream = Files.list((Paths.get(dir.toURI())))) {
+        try(Stream<Path> stream = Files.list(dir)) {
             stream.forEach((path -> {
-                File file = new File(path.toUri());
-                ShaderType type = getShaderTypeFromFileExtension(fileExtension(file.getName()));
+                ShaderType type = getShaderTypeFromFileExtension(path.toFile().getName());
                 shaders.add(new GLShader(type).load(
-                        programDirPath + "/" + file.getName(),
+                        programDirPath + "/" + path.toFile().getName(),
                         type
                 ));
             }));
@@ -80,13 +72,17 @@ public class GLShaderProgram {
     }
 
     private ShaderType getShaderTypeFromFileExtension(String fileName) {
-        return switch(fileName) {
-            case "vert" -> ShaderType.VERTEX;
-            case "geom" -> ShaderType.GEOMETRY;
-            case "frag" -> ShaderType.FRAGMENT;
-            case "comp" -> ShaderType.COMPUTE;
-	        default -> throw new IllegalStateException("Unexpected value: " + fileName);
-        };
+        if(fileName.endsWith("vert")) {
+            return ShaderType.VERTEX;
+        } else if(fileName.endsWith("geom")) {
+            return ShaderType.GEOMETRY;
+        } else if(fileName.endsWith("frag")) {
+            return ShaderType.FRAGMENT;
+        } else if(fileName.endsWith("comp")) {
+            return ShaderType.COMPUTE;
+        }
+
+        throw new RuntimeException("gfdghfdshsdfg");
     }
 
     private String fileExtension(String fileName) {

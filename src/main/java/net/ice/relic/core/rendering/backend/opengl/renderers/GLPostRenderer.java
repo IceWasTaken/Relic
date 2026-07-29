@@ -3,14 +3,10 @@ package net.ice.relic.core.rendering.backend.opengl.renderers;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
+import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.QuadMesh;
-import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
-
-import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 

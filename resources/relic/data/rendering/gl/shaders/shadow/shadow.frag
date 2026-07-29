@@ -38,8 +38,6 @@ void main() {
     vec4 albedo;
 
     uint64_t albedoMap = maps[materialIndex].albedoMap;
-    uint64_t normalMap = maps[materialIndex].normalMap;
-    uint64_t pbrMap = maps[materialIndex].pbrMap;
 
     if(albedoMap != 0) {
         albedo = texture(sampler2D(albedoMap), textureCoords);

@@ -29,6 +29,14 @@ public abstract class Struct {
 			entries.add(StructEntry.fromRecordComponent(component));
 		}
 
+		if(structType == StructType.RAW) {
+			this.fields = entries;
+			this.size = calculateSize();
+			this.stride = calculateStride();
+			this.offsets = generateOffsets();
+			return;
+		}
+
 		//sort by largest to smallest alignment size
 		SortingUtil.reverseInsertionSort(entries);
 

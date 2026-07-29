@@ -1,8 +1,8 @@
 package net.ice.relic.common.test;
 
 import net.ice.heirloom.ApplicationProperties;
-import net.ice.relic.application.RelicApplication;
 import net.ice.heirloom.Version;
+import net.ice.relic.application.RelicApplication;
 
 public class RelicTest extends RelicApplication {
 

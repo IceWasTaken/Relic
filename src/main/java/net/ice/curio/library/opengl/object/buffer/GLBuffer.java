@@ -10,7 +10,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.*;
 
-import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL45.*;
 

@@ -6,8 +6,8 @@ import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.RGBColor;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
+import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
 import net.ice.relic.core.scene.primitives.threed.LineCube;
@@ -19,7 +19,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.system.MemoryUtil.memFree;

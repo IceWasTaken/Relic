@@ -3,35 +3,35 @@ package net.ice.relic.core.scene;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.Colors;
 import net.ice.relic.application.RelicApplication;
- import org.tinylog.Logger;
 import net.ice.relic.core.ProjectionMatrix;
+import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.gui.Gui;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
+import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
-import net.ice.relic.core.scene.light.*;
+import net.ice.relic.core.scene.light.AmbientLight;
+import net.ice.relic.core.scene.light.Light;
 import org.joml.Vector3f;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Deprecated
 public abstract class Scene implements Lifecycle {
 
-    private final String name;
+    protected final Entity sceneRoot;
 
-    private AmbientLight ambientLight;
+    protected final String name;
 
-    private final List<Light> lights;
+    protected final List<Light> lights;
+    protected final AmbientLight ambientLight;
 
-    private Map<String, SceneObject> objects;
+    private final List<Entity> entities;
 
-    private ProjectionMatrix matrix;
-    protected Camera camera;
+    protected final Camera camera;
+    protected final ProjectionMatrix matrix;
 
-    private Skybox skybox;
-    private Fog fog;
     private Gui GUI;
 
     private boolean initialized;
@@ -44,14 +44,15 @@ public abstract class Scene implements Lifecycle {
     protected abstract void sceneDestroy();
 
     public Scene(String name, RelicApplication application) {
+        this.sceneRoot = Entity.newEntity("sceneroot");
+
         this.name = name;
         this.application = application;
         this.modelLoader = new ModelLoader(application.getTextureCache(), application.getMaterialCache(), application.getModelCache());
         this.camera = new Camera();
         this.matrix = new ProjectionMatrix(application);
-        this.objects = new HashMap<>();
-        this.fog = new Fog(false, Colors.WHITE.getRGBColor(), 0.2f);
-        this.ambientLight = new AmbientLight().setIntensity(0.2f).setColor(Colors.WHITE.getRGBColor());
+        this.entities = new ArrayList<>();
+        this.ambientLight = new AmbientLight().setIntensity(0.1f).setColor(Colors.WHITE.getRGBColor());
         this.lights = new ArrayList<>();
 
         lights.add(new Light(new Vector3f(0, -1.0f,0), true, 8, Colors.WHITE.getRGBColor()));
@@ -68,6 +69,8 @@ public abstract class Scene implements Lifecycle {
 
         Logger.info("[Scene] Loaded scene: {}", name);
         initialized = true;
+
+        application.getRenderer().setupData();
     }
 
     @Override
@@ -77,7 +80,7 @@ public abstract class Scene implements Lifecycle {
             return;
         }
 
-        objects.clear();
+        entities.clear();
     }
 
     @Override
@@ -86,28 +89,27 @@ public abstract class Scene implements Lifecycle {
         sceneUpdate(deltaTime);
     }
 
-    public Map<String, Model> getModels() {
-        Map<String, Model> models = new HashMap<>();
-        for (SceneObject object : objects.values()) {
-            models.put(object.getName(), object.getModel());
-        }
-        return models;
+    public void removeEntity(Entity entity) {
+        entities.remove(entity);
     }
 
-    public void addSceneObject(String id, SceneObject object) {
-        objects.put(id, object);
-        object.getModel().getSceneObjects().add(object);
-
-        if(initialized) {
-            application.getRenderer().setupData();
-        }
+    public void removeEntity(int i) {
+        entities.remove(i);
     }
 
-    public void removeObject(String id) {
-        SceneObject object = objects.remove(id);
-        if (object != null) {
-            object.getModel().getSceneObjects().remove(object);
+    public Entity createEntity(String name) {
+        Entity entity = sceneRoot.newChild(name);
+        entities.add(entity);
+        return entity;
+    }
+
+    public Entity getEntity(String name) {
+        for(Entity entity : entities) {
+            if(entity.getName().equals(name)) {
+                return entity;
+            }
         }
+        return null;
     }
 
     public List<Light> getLights() {
@@ -130,20 +132,8 @@ public abstract class Scene implements Lifecycle {
         return camera;
     }
 
-    public Skybox getSkybox() {
-        return skybox;
-    }
-
     public int getLightCount() {
         return lights.size();
-    }
-
-    public void setSkybox(Skybox skybox) {
-        this.skybox = skybox;
-    }
-
-    public Fog getFog() {
-        return fog;
     }
 
     public Gui getGUI() {
@@ -154,17 +144,20 @@ public abstract class Scene implements Lifecycle {
         this.GUI = GUI;
     }
 
+    public List<Entity> getEntities() {
+        return entities;
+    }
+
+    public Entity getEntityRoot() {
+        return sceneRoot;
+    }
 
     public void setApplication(RelicApplication application) {
         this.application = application;
     }
 
-    public Map<String, SceneObject> getObjects() {
-        return objects;
-    }
-
-    public SceneObject getObject(String id) {
-        return objects.get(id);
+    public RelicApplication getApplication() {
+        return application;
     }
 }
 

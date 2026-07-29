@@ -28,7 +28,7 @@ public final class GLShader extends Shader {
 
 	@Override
 	public String getFilePrefix() {
-		return "/relic/data/rendering/gl/shaders/";
+		return "/resources/relic/data/rendering/gl/shaders/";
 	}
 
 	private void validateShader(int shaderId) {

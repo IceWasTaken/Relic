@@ -1,9 +1,8 @@
-package net.ice.relic.core.rendering.backend.opengl.depricated.model;
+package net.ice.relic.core.model;
 
-import net.ice.relic.core.model.mesh.MeshData;
+import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLManager;
-import net.ice.relic.core.scene.SceneObject;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +11,13 @@ public class Model {
 
     private final String id;
     private List<Animation> animations;
-    private List<SceneObject> sceneObjects;
-    private List<MeshData> meshData;
+    private List<Entity> entities;
+    private List<Mesh> meshData;
     private List<GLRenderer.MeshDrawData> meshDrawData;
 
-    public Model(String id, List<MeshData> meshData, List<Animation> animations) {
+    public Model(String id, List<Mesh> meshData, List<Animation> animations) {
         this.id = id;
-        this.sceneObjects = new ArrayList<>();
+        this.entities = new ArrayList<>();
         this.meshData = meshData;
         this.animations = animations;
         this.meshDrawData = new ArrayList<>();
@@ -34,15 +33,15 @@ public class Model {
         return animations;
     }
 
-    public List<SceneObject> getSceneObjects() {
-        return sceneObjects;
+    public List<Entity> getSceneObjects() {
+        return entities;
     }
 
     public String getId() {
         return id;
     }
 
-    public List<MeshData> getMeshData() {
+    public List<Mesh> getMeshData() {
         return meshData;
     }
 

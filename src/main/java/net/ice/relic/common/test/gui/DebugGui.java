@@ -25,8 +25,8 @@ public class DebugGui implements Gui {
     private ConsoleGui consoleGui;
     private ImageViewer imageViewer;
     private SceneInfoGui sceneInfoGui;
+    private ECSGui ecsGui;
 
-    private boolean viewerOpen = false;
     private boolean infoOpen = false;
 
     private ImBoolean fileViewerOpen = new ImBoolean(false);
@@ -41,6 +41,7 @@ public class DebugGui implements Gui {
         this.consoleGui = new ConsoleGui(application);
         this.imageViewer = new ImageViewer(application);
         this.sceneInfoGui = new SceneInfoGui();
+        this.ecsGui = new ECSGui(application);
 
         if(application.getRenderer() instanceof GLRenderer glRenderer) {
             this.glRenderer = glRenderer;
@@ -57,14 +58,13 @@ public class DebugGui implements Gui {
         debugMenu();
 
         consoleGui.draw();
+        imageViewer.draw();
 
-        if(viewerOpen) {
-            imageViewer.draw();
-        }
 
         if(infoOpen) {
             sceneInfoGui.draw(application.getCurrentScene());
         }
+        ecsGui.draw();
 
         endFrame();
         render();
@@ -79,17 +79,20 @@ public class DebugGui implements Gui {
             if(button("Console")) {
                 consoleGui.toggle();
             }
-            if(button("Image Viewer")) {
-                viewerOpen = !viewerOpen;
-            }
+            imageViewer.drawToggleButton();
             if(button("File Viewer")) {
                 fileViewerOpen.set(!fileViewerOpen.get());
                 FileBrowse.show(new ImBoolean(fileViewerOpen));
             }
             if(button("Scene Info")) {
                 infoOpen = !infoOpen;
-
             }
+            if(button("Crash")) {
+                end();
+                endFrame();
+                throw new RuntimeException("[DebugGui]: Pressed the red button");
+            }
+            ecsGui.drawToggleButton();
             if(checkbox("Post Rendering", glRenderer.getPostRenderer().shouldRender())) {
                 glRenderer.getPostRenderer().toggleRendering();
             }

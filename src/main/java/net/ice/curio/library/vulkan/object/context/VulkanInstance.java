@@ -1,15 +1,15 @@
 package net.ice.curio.library.vulkan.object.context;
 
 import net.ice.curio.library.vulkan.enums.PhysicalDeviceType;
-import net.ice.curio.library.vulkan.utils.ValidationExtensionUtils;
 import net.ice.curio.library.vulkan.utils.DebugUtils;
+import net.ice.curio.library.vulkan.utils.ValidationExtensionUtils;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
-import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.ApplicationProperties;
-import org.tinylog.Logger;
+import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
+import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
-import static org.lwjgl.glfw.GLFWVulkan.glfwCreateWindowSurface;
-import static org.lwjgl.vulkan.EXTDebugUtils.*;
+import static org.lwjgl.vulkan.EXTDebugUtils.vkCreateDebugUtilsMessengerEXT;
+import static org.lwjgl.vulkan.EXTDebugUtils.vkDestroyDebugUtilsMessengerEXT;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK13.VK_API_VERSION_1_3;
 

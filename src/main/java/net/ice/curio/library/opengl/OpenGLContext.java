@@ -6,9 +6,9 @@ import net.ice.curio.graphics.exception.UnsupportedGraphicsContextException;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 

@@ -5,12 +5,13 @@ import net.ice.curio.library.opengl.object.buffer.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
+import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
+import net.ice.relic.core.ecs.entity.Entity;
+import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
-import net.ice.relic.core.rendering.backend.opengl.Uniforms;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
-import net.ice.relic.core.scene.SceneObject;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
@@ -100,8 +101,8 @@ public class GLShadowRenderer implements Lifecycle {
     private void setupObjectData() {
         objectIndexMap.clear();
         int objectIndex = 0;
-        for (Model model : glRenderer.getApplication().getCurrentScene().getModels().values()) {
-            for (SceneObject object : model.getSceneObjects()) {
+        for (Model model : StaticModelComponent.getAllModels()) {
+            for (Entity object : model.getSceneObjects()) {
                 objectIndexMap.put(object.getName(), objectIndex);
                 objectIndex++;
             }
@@ -109,7 +110,7 @@ public class GLShadowRenderer implements Lifecycle {
     }
 
     private void setupStaticCommandBuffer() {
-        List<Model> models = glRenderer.getApplication().getCurrentScene().getModels().values().stream().filter(m -> !m.isAnimated()).toList();
+        List<Model> models = StaticModelComponent.getAllModels();
 
         int numMeshes = 0;
         int firstIndex = 0;
@@ -121,11 +122,11 @@ public class GLShadowRenderer implements Lifecycle {
 
         ByteBuffer commandBuffer = MemoryUtil.memAlloc(numMeshes * 5 * 4);
         for (Model model : models) {
-            List<SceneObject> entities = model.getSceneObjects();
+            List<Entity> entities = model.getSceneObjects();
             int numEntities = entities.size();
             for (GLRenderer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 // count
-                commandBuffer.putInt(meshDrawData.vertices());
+                commandBuffer.putInt(meshDrawData.vertexCount());
 
                 // instanceCount
                 commandBuffer.putInt(numEntities);
@@ -134,7 +135,7 @@ public class GLShadowRenderer implements Lifecycle {
                 commandBuffer.putInt(meshDrawData.offset());
                 commandBuffer.putInt(baseInstance);
 
-                firstIndex += meshDrawData.vertices();
+                firstIndex += meshDrawData.vertexCount();
                 baseInstance += entities.size();
             }
         }
