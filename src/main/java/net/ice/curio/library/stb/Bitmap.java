@@ -24,6 +24,7 @@ public class Bitmap implements Lifecycle {
         this.resource = resource;
 
         try(MemoryStack stack = MemoryStack.stackPush()) {
+            Logger.info("[Bitmap] Loading bitmap: {}", resource.getAsPath());
 
             IntBuffer widthBuffer = stack.mallocInt(1);
             IntBuffer heightBuffer = stack.mallocInt(1);
