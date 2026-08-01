@@ -22,26 +22,17 @@ public class TestingScene extends Scene {
     protected void sceneInit() {
 
         Model sponzaModel = getModelLoader().loadModel(Resource.getResource("relic", "resources/assets/models/sponza/Sponza.gltf"), false);
-        Model footModel = getModelLoader().loadModel(Resource.getResource("relic", "resources/assets/models/foot/foot2.glb"), false);
         Model scarabModel = getModelLoader().loadModel(Resource.getResource("relic", "resources/assets/models/scarab/scarab.dae"), false);
 
-
-//
-//        Entity entity1 = createEntity("foot");
-//        entity1.addComponent(new TransformComponent().setScale(10, 10, 10));
-//        entity1.addComponent(new StaticModelComponent(footModel));
-//        footModel.getSceneObjects().add(entity1);
-
-
-//        Entity scarabEntity = createEntity("scarab");
-//        scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
-//        scarabEntity.addComponent(new StaticModelComponent(scarabModel));
-//        scarabModel.getSceneObjects().add(scarabEntity);
+        Entity scarabEntity = createEntity("scarab");
+        scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
+        scarabEntity.addComponent(new StaticModelComponent(scarabModel));
+        scarabModel.getEntities().add(scarabEntity);
 
         Entity sponzaEntity = createEntity("sponza");
         sponzaEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
         sponzaEntity.addComponent(new StaticModelComponent(sponzaModel));
-        sponzaModel.getSceneObjects().add(sponzaEntity);
+        sponzaModel.getEntities().add(sponzaEntity);
 
         getLights().add(new Light(new Vector3f(1, -1, 2), false, 2, Colors.GRAY.getRGBColor()));
         setGUI(new DebugGui(application));

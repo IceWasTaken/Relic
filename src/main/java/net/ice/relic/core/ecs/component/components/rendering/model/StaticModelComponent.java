@@ -1,6 +1,5 @@
 package net.ice.relic.core.ecs.component.components.rendering.model;
 
-import net.ice.relic.core.ecs.component.Component;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.model.Model;
 

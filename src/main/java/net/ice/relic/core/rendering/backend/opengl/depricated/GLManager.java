@@ -19,7 +19,6 @@ import java.util.List;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
 public class GLManager implements Lifecycle {
 
@@ -75,7 +74,7 @@ public class GLManager implements Lifecycle {
         int weightsOffset = 0;
 
         for(Model model : models) {
-            List<Entity> entities = model.getSceneObjects();
+            List<Entity> entities = model.getEntities();
             for(Entity entity : entities) {
                 List<GLRenderer.MeshDrawData> meshDrawData = model.getMeshDrawData();
                 bindingPoseOffset = chunkBindingPoseOffset;
@@ -120,7 +119,7 @@ public class GLManager implements Lifecycle {
 //        vertexBufferObjects.add(vertexBufferObject);
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : models) {
-            model.getSceneObjects().forEach(e -> {
+            model.getEntities().forEach(e -> {
                 for (Mesh meshData : model.getMeshData()) {
                     indicesBuffer.put(meshData.getIndices());
                 }

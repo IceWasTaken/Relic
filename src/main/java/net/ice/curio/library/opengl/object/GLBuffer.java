@@ -14,7 +14,10 @@ public final class GLBuffer {
 
     private final int handle;
     private final long size;
+
     private ByteBuffer mapping;
+
+    private int boundPosition;
 
     /// [GL Wiki Reference](https://wikis.khronos.org/opengl/Buffer_Object)
     public GLBuffer(long size, int flags) {
@@ -49,6 +52,9 @@ public final class GLBuffer {
     }
 
     public void destroy() {
+        if(mapping != null) {
+            unmap();
+        }
         glDeleteBuffers(handle);
     }
 

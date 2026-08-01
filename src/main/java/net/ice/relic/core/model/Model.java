@@ -33,7 +33,7 @@ public class Model {
         return animations;
     }
 
-    public List<Entity> getSceneObjects() {
+    public List<Entity> getEntities() {
         return entities;
     }
 

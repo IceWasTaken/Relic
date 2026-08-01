@@ -1,10 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
-import net.ice.curio.graphics.enums.BufferAccess;
-import net.ice.curio.graphics.enums.BufferFlags;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
@@ -12,22 +9,18 @@ import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Mesh;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.Renderer;
+import net.ice.relic.core.rendering.backend.opengl.buffer.InstanceBuffer;
+import net.ice.relic.core.rendering.backend.opengl.buffer.MaterialMapBuffer;
+import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.GeometryBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
 import net.ice.relic.core.rendering.backend.opengl.renderers.*;
 import org.joml.Vector2i;
-import org.lwjgl.system.MemoryUtil;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.EnumSet;
 import java.util.List;
 
-import static net.ice.curio.graphics.enums.BufferAccess.WRITE_ONLY;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
@@ -43,14 +36,15 @@ public class GLRenderer extends Renderer implements Lifecycle {
     private VertexArrayObject staticArrayObject;
     private GLBuffer vertexBuffer;
     private GLBuffer indexBuffer;
-    private GLBuffer commandBuffer;
 
     private GeometryBuffer geometryBuffer;
     private ShadowBuffer shadowBuffer;
     private SwapBuffer lightBuffer;
     private SwapBuffer swapBuffer;
 
-    private final GlobalBuffers globalBuffers;
+    private final InstanceBuffer instanceBuffer;
+    private final StaticCommandBuffer staticCommandBuffer;
+    private final MaterialMapBuffer materialMapBuffer;
 
     private final GLSceneRenderer sceneRenderer;
     private final GLShadowRenderer shadowRenderer;
@@ -80,14 +74,14 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public void setupData() {
         loadStaticModels();
 
-        sceneRenderer.setupBuffers();
-        shadowRenderer.setupBuffers();
-        guiRenderer.setupBuffers();
+        this.staticCommandBuffer.createStaticCommandBuffer();
     }
 
     public GLRenderer(RelicApplication relicApplication) {
         super(relicApplication);
-        this.globalBuffers = new GlobalBuffers();
+        this.instanceBuffer = new InstanceBuffer();
+        this.staticCommandBuffer = new StaticCommandBuffer();
+        this.materialMapBuffer = new MaterialMapBuffer();
 
         this.sceneRenderer = new GLSceneRenderer(this);
         this.shadowRenderer = new GLShadowRenderer(this);
@@ -113,7 +107,8 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.lightBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.shadowBuffer = new ShadowBuffer();
-        this.globalBuffers.createInstanceBuffer();
+        this.instanceBuffer.createInstanceBuffer();
+        this.materialMapBuffer.createMaterialMapBuffer();
 
         sceneRenderer.init();
         shadowRenderer.init();
@@ -128,7 +123,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void render() {
-        globalBuffers.updateInstanceBuffer(this);
+        updateBuffers();
 
         glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
 
@@ -148,7 +143,19 @@ public class GLRenderer extends Renderer implements Lifecycle {
         visualizeRenderer.render();
         guiRenderer.render();
 
-        globalBuffers.sync();
+        syncBuffers();
+    }
+
+    private void syncBuffers() {
+        instanceBuffer.sync();
+        staticCommandBuffer.sync();
+        materialMapBuffer.sync();
+    }
+
+    private void updateBuffers() {
+        instanceBuffer.updateInstanceBuffer(this);
+        staticCommandBuffer.updateStaticCommandBuffer(this);
+        materialMapBuffer.updateMaterialMapBuffer(this);
     }
 
 
@@ -183,6 +190,25 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
 
+        setupVAOAttributes(vertexBuffer);
+
+        this.indexBuffer = new GLBuffer(indicesSize * 4L, GL_MAP_WRITE_BIT);
+
+        for (Model model : modelList) {
+            for (Mesh meshData : model.getMeshData()) {
+                indexBuffer.putInt(meshData.getIndices());
+            }
+        }
+
+        staticArrayObject.elementBuffer(indexBuffer);
+
+        this.vertexBuffer.unmap();
+        this.indexBuffer.unmap();
+
+        glBindVertexArray(0);
+    }
+
+    private void setupVAOAttributes(GLBuffer vertexBuffer) {
         staticArrayObject.vertexBuffer(0, vertexBuffer, 0, 56);
 
         staticArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
@@ -202,23 +228,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         staticArrayObject.enableAttribute(2);
         staticArrayObject.enableAttribute(3);
         staticArrayObject.enableAttribute(4);
-
-        this.indexBuffer = new GLBuffer(indicesSize * 4L, GL_MAP_WRITE_BIT);
-
-        for (Model model : modelList) {
-            for (Mesh meshData : model.getMeshData()) {
-                indexBuffer.putInt(meshData.getIndices());
-            }
-        }
-
-        staticArrayObject.elementBuffer(indexBuffer);
-
-        this.vertexBuffer.unmap();
-        this.indexBuffer.unmap();
-
-        glBindVertexArray(0);
     }
-
 
     private void populateMeshBuffer(GLBuffer meshesBuffer, Mesh meshData) {
         float[] positions = meshData.getVertices();
@@ -280,9 +290,13 @@ public class GLRenderer extends Renderer implements Lifecycle {
         return postRenderer;
     }
 
+    public StaticCommandBuffer getStaticCommandBuffer() {
+        return staticCommandBuffer;
+    }
+
     public record AnimMeshDrawData(Entity entity, int bindingPoseOffset, int weightsOffset) { }
 
-    public record MeshDrawData(int sizeInBytes, int materialIdx, int offset, int vertexCount, AnimMeshDrawData animMeshDrawData) {
+    public record MeshDrawData(int sizeInBytes, int materialIdx, int offset, int count, AnimMeshDrawData animMeshDrawData) {
         public MeshDrawData(int sizeInBytes, int materialIdx, int offset, int vertices) {
             this(sizeInBytes, materialIdx, offset, vertices, null);
         }
