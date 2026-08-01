@@ -14,7 +14,7 @@ public class DrawElementsIndirectCommand extends Struct {
 		return DrawElementsIndirectCommandStruct.class;
 	}
 
-	record DrawElementsIndirectCommandStruct(
+	public record DrawElementsIndirectCommandStruct(
 			int indexCount,
 			int instanceCount,
 			int firstIndex,

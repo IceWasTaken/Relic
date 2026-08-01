@@ -1,7 +1,9 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
+import net.ice.curio.graphics.enums.BufferAccess;
+import net.ice.curio.graphics.enums.BufferFlags;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.GLBuffer;
+import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
@@ -17,10 +19,13 @@ import net.ice.relic.core.rendering.backend.opengl.renderers.*;
 import org.joml.Vector2i;
 import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.EnumSet;
 import java.util.List;
 
+import static net.ice.curio.graphics.enums.BufferAccess.WRITE_ONLY;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
@@ -28,6 +33,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT;
 import static org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS;
 import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public class GLRenderer extends Renderer implements Lifecycle {
 
@@ -37,6 +43,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
     private VertexArrayObject staticArrayObject;
     private GLBuffer vertexBuffer;
     private GLBuffer indexBuffer;
+    private GLBuffer commandBuffer;
 
     private GeometryBuffer geometryBuffer;
     private ShadowBuffer shadowBuffer;
@@ -99,7 +106,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
-        //setupDebugMessageCallback();
+        setupDebugMessageCallback();
         //SystemInfo.logGLInfo();
 
         this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
@@ -140,6 +147,8 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
         visualizeRenderer.render();
         guiRenderer.render();
+
+        globalBuffers.sync();
     }
 
 
@@ -166,60 +175,52 @@ public class GLRenderer extends Renderer implements Lifecycle {
             }
         }
 
-        this.vertexBuffer = new GLBuffer();
-        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
+        this.vertexBuffer = new GLBuffer((positionsSize + normalsSize * 3L + textureCoordsSize) * 4, GL_MAP_WRITE_BIT);
+
         for (Model model : modelList) {
             for (Mesh meshData : model.getMeshData()) {
-                populateMeshBuffer(meshesBuffer, meshData);
+                populateMeshBuffer(vertexBuffer, meshData);
             }
         }
-        System.out.println(meshesBuffer.position());
-        System.out.println(meshesBuffer.limit());
-        System.out.println(meshesBuffer.capacity());
-        meshesBuffer.flip();
-        System.out.println(meshesBuffer.position());
-        System.out.println(meshesBuffer.limit());
-        System.out.println(meshesBuffer.capacity());
-        vertexBuffer.bufferData(meshesBuffer, Usage.STATIC_DRAW);
-        MemoryUtil.memFree(meshesBuffer);
 
-        glVertexArrayVertexBuffer(staticArrayObject.getHandle(), 0, vertexBuffer.getHandle(), 0, 56);
+        staticArrayObject.vertexBuffer(0, vertexBuffer, 0, 56);
 
-        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 0, 3, GL_FLOAT, false, 0);
-        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 1, 3, GL_FLOAT, false, 12);
-        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 2, 3, GL_FLOAT, false, 24);
-        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 3, 3, GL_FLOAT, false, 36);
-        glVertexArrayAttribFormat(staticArrayObject.getHandle(), 4, 2, GL_FLOAT, false, 48);
+        staticArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
+        staticArrayObject.attributeFormat(1, 3, GL_FLOAT, false, 12);
+        staticArrayObject.attributeFormat(2, 3, GL_FLOAT, false, 24);
+        staticArrayObject.attributeFormat(3, 3, GL_FLOAT, false, 36);
+        staticArrayObject.attributeFormat(4, 2, GL_FLOAT, false, 48);
 
-        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 0, 0);
-        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 1, 0);
-        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 2, 0);
-        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 3, 0);
-        glVertexArrayAttribBinding(staticArrayObject.getHandle(), 4, 0);
+        staticArrayObject.attributeBinding(0, 0);
+        staticArrayObject.attributeBinding(1, 0);
+        staticArrayObject.attributeBinding(2, 0);
+        staticArrayObject.attributeBinding(3, 0);
+        staticArrayObject.attributeBinding(4, 0);
 
-        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 0);
-        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 1);
-        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 2);
-        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 3);
-        glEnableVertexArrayAttrib(staticArrayObject.getHandle(), 4);
+        staticArrayObject.enableAttribute(0);
+        staticArrayObject.enableAttribute(1);
+        staticArrayObject.enableAttribute(2);
+        staticArrayObject.enableAttribute(3);
+        staticArrayObject.enableAttribute(4);
 
-        this.indexBuffer = new GLBuffer();
-        IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
+        this.indexBuffer = new GLBuffer(indicesSize * 4L, GL_MAP_WRITE_BIT);
+
         for (Model model : modelList) {
             for (Mesh meshData : model.getMeshData()) {
-                indicesBuffer.put(meshData.getIndices());
+                indexBuffer.putInt(meshData.getIndices());
             }
         }
-        indicesBuffer.flip();
-        glNamedBufferData(indexBuffer.getHandle(), indicesBuffer, GL_STATIC_DRAW);
-        MemoryUtil.memFree(indicesBuffer);
-        glVertexArrayElementBuffer(staticArrayObject.getHandle(), indexBuffer.getHandle());
+
+        staticArrayObject.elementBuffer(indexBuffer);
+
+        this.vertexBuffer.unmap();
+        this.indexBuffer.unmap();
 
         glBindVertexArray(0);
     }
 
 
-    private void populateMeshBuffer(FloatBuffer meshesBuffer, Mesh meshData) {
+    private void populateMeshBuffer(GLBuffer meshesBuffer, Mesh meshData) {
         float[] positions = meshData.getVertices();
         float[] normals = meshData.getNormals();
         float[] tangents = meshData.getTangents();
@@ -230,20 +231,20 @@ public class GLRenderer extends Renderer implements Lifecycle {
         for (int row = 0; row < rows; row++) {
             int startPos = row * 3;
             int startTextCoord = row * 2;
-            meshesBuffer.put(positions[startPos]);
-            meshesBuffer.put(positions[startPos + 1]);
-            meshesBuffer.put(positions[startPos + 2]);
-            meshesBuffer.put(normals[startPos]);
-            meshesBuffer.put(normals[startPos + 1]);
-            meshesBuffer.put(normals[startPos + 2]);
-            meshesBuffer.put(tangents[startPos]);
-            meshesBuffer.put(tangents[startPos + 1]);
-            meshesBuffer.put(tangents[startPos + 2]);
-            meshesBuffer.put(bitangents[startPos]);
-            meshesBuffer.put(bitangents[startPos + 1]);
-            meshesBuffer.put(bitangents[startPos + 2]);
-            meshesBuffer.put(textCoords[startTextCoord]);
-            meshesBuffer.put(textCoords[startTextCoord + 1]);
+            meshesBuffer.putFloat(positions[startPos]);
+            meshesBuffer.putFloat(positions[startPos + 1]);
+            meshesBuffer.putFloat(positions[startPos + 2]);
+            meshesBuffer.putFloat(normals[startPos]);
+            meshesBuffer.putFloat(normals[startPos + 1]);
+            meshesBuffer.putFloat(normals[startPos + 2]);
+            meshesBuffer.putFloat(tangents[startPos]);
+            meshesBuffer.putFloat(tangents[startPos + 1]);
+            meshesBuffer.putFloat(tangents[startPos + 2]);
+            meshesBuffer.putFloat(bitangents[startPos]);
+            meshesBuffer.putFloat(bitangents[startPos + 1]);
+            meshesBuffer.putFloat(bitangents[startPos + 2]);
+            meshesBuffer.putFloat(textCoords[startTextCoord]);
+            meshesBuffer.putFloat(textCoords[startTextCoord + 1]);
         }
     }
 

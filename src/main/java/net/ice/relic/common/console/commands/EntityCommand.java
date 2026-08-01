@@ -42,7 +42,7 @@ public class EntityCommand implements Command {
 					Entity entity = ctx.getCurrentScene().getEntity((String) args.get("name"));
 					for (Component component : entity.getComponents()) {
 						if(component.getName().equals((String) args.get("componentName"))) {
-							entity.getComponents().remove(component);
+							entity.removeComponent(component.getClass());
 							return;
 						}
 					}

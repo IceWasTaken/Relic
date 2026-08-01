@@ -1,8 +1,5 @@
 #version 460
 
-const int MAX_DRAW_ELEMENTS = 500;
-const int MAX_ENTITIES = 100;
-
 layout(location=0) in vec3 position;
 layout(location=1) in vec3 normal;
 layout(location=2) in vec3 tangent;
@@ -19,7 +16,7 @@ struct Instance {
 
 
 layout(std430, binding = 9) buffer InstanceBuffer {
-    Instance instances[MAX_DRAW_ELEMENTS];
+    Instance instances[];
 };
 
 void main()

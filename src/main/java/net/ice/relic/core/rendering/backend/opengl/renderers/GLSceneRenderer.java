@@ -1,10 +1,12 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.enums.BufferAccess;
+import net.ice.curio.graphics.enums.BufferFlags;
 import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.object.GLViewport;
-import net.ice.curio.library.opengl.object.buffer.GLBuffer;
+import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.cache.MaterialCache;
@@ -15,24 +17,29 @@ import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
+import net.ice.relic.core.rendering.backend.opengl.struct.DrawElementsIndirectCommand;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
+import static org.lwjgl.opengl.GL44.*;
 
 public class GLSceneRenderer implements Lifecycle {
 
     private GLBuffer staticCommandBuffer;
+    private DrawElementsIndirectCommand commandBufferStruct;
 
     private GLShaderProgram shaderProgram;
 
@@ -80,9 +87,9 @@ public class GLSceneRenderer implements Lifecycle {
         uniforms.setUniform("projectionMatrix", glRenderer.getApplication().getCurrentScene().getMatrix().getProjMatrix());
         uniforms.setUniform("viewMatrix", glRenderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
 
-
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, staticCommandBuffer.getHandle());
+        staticCommandBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
         glRenderer.getStaticArrayObject().bind();
+
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0);
         glBindVertexArray(0);
 
@@ -115,43 +122,38 @@ public class GLSceneRenderer implements Lifecycle {
 
     private void setupStaticCommandBuffer() {
         List<Model> models = StaticModelComponent.getAllModels();
-        staticDrawCount = 0;
 
-        int numMeshes = 0;
+        int meshCount = 0;
         int firstIndex = 0;
         int baseInstance = 0;
 
         for (Model model : models) {
-            numMeshes += model.getMeshDrawData().size();
+            meshCount += model.getMeshDrawData().size();
         }
 
-        ByteBuffer commandBuffer = MemoryUtil.memAlloc(numMeshes * 5 * 4);
+        this.commandBufferStruct = new DrawElementsIndirectCommand();
+        this.staticCommandBuffer = new GLBuffer((long) meshCount * commandBufferStruct.getStride(), GL_MAP_WRITE_BIT);
+        this.staticDrawCount = staticCommandBuffer.remaining() / 20;
+
         for (Model model : models) {
             List<Entity> entities = model.getSceneObjects();
             int numEntities = entities.size();
             for (GLRenderer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 // count
-                commandBuffer.putInt(meshDrawData.vertexCount());
+                staticCommandBuffer.putInt(meshDrawData.vertexCount());
 
                 // instanceCount
-                commandBuffer.putInt(numEntities);
-                commandBuffer.putInt(firstIndex);
+                staticCommandBuffer.putInt(numEntities);
+                staticCommandBuffer.putInt(firstIndex);
                 // baseVertex
-                commandBuffer.putInt(meshDrawData.offset());
-                commandBuffer.putInt(baseInstance);
+                staticCommandBuffer.putInt(meshDrawData.offset());
+                staticCommandBuffer.putInt(baseInstance);
 
                 firstIndex += meshDrawData.vertexCount();
                 baseInstance += entities.size();
             }
         }
-
-        commandBuffer.flip();
-        staticDrawCount = commandBuffer.remaining() / 20;
-
-        staticCommandBuffer = new GLBuffer();
-        staticCommandBuffer.bufferData(commandBuffer, Usage.DYNAMIC_DRAW);
-
-        MemoryUtil.memFree(commandBuffer);
+        staticCommandBuffer.unmap();
     }
 
     public void setupMaterialUniforms(MaterialCache materialCache) {
@@ -166,44 +168,43 @@ public class GLSceneRenderer implements Lifecycle {
             }
         };
 
-        this.materialBuffer = new GLBuffer();
-        this.mapBuffer = new GLBuffer();
+        this.materialBuffer = new GLBuffer(44 * 200, GL_MAP_WRITE_BIT);
+        this.mapBuffer = new GLBuffer(8 * 3 * 200, GL_MAP_WRITE_BIT);
 
-        ByteBuffer dummy = MemoryUtil.memAlloc(44 * 200);
-        materialBuffer.bufferData(dummy, Usage.STREAM_DRAW);
-        MemoryUtil.memFree(dummy);
+        int index = 0;
+        for (Material material : materialList) {
+            int base = materialBufferStruct.getStride() * index;
 
-        dummy = MemoryUtil.memAlloc(8 * 3 * 200);
-        mapBuffer.bufferData(dummy, Usage.STREAM_DRAW);
-        MemoryUtil.memFree(dummy);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(0) + base, material.getDiffuseColor().div().vec4f().x);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(0) + base + 4, material.getDiffuseColor().div().vec4f().y);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(0) + base + 8, material.getDiffuseColor().div().vec4f().z);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(0) + base + 12, material.getDiffuseColor().div().vec4f().w);
 
-        try(MemoryStack stack = MemoryStack.stackPush()) {
-            int index = 0;
-            for (Material material : materialList) {
-                int base = materialBufferStruct.getStride() * index;
+            materialBuffer.putFloat(materialBufferStruct.getOffset(1) + base, material.getSpecularColor().div().vec4f().x);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(1) + base + 4, material.getSpecularColor().div().vec4f().y);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(1) + base + 8, material.getSpecularColor().div().vec4f().z);
+            materialBuffer.putFloat(materialBufferStruct.getOffset(1) + base + 12, material.getSpecularColor().div().vec4f().w);
 
+            materialBuffer.putFloat(materialBufferStruct.getOffset(2) + base, material.getReflectance());
+            materialBuffer.putFloat(materialBufferStruct.getOffset(3) + base, material.getRoughnessFactor());
+            materialBuffer.putFloat(materialBufferStruct.getOffset(4) + base, material.getMetallicFactor());
 
-                materialBuffer
-                        .bufferSubData(materialBufferStruct.getOffset(0) + base, material.getDiffuseColor().div().vec4f())
-                        .bufferSubData(materialBufferStruct.getOffset(1) + base, material.getSpecularColor().div().vec4f())
-                        .bufferSubData(materialBufferStruct.getOffset(2) + base, material.getReflectance())
-                        .bufferSubData(materialBufferStruct.getOffset(3) + base, material.getRoughnessFactor())
-                        .bufferSubData(materialBufferStruct.getOffset(4) + base, material.getMetallicFactor());
+            base = mapBufferStruct.getStride() * index;
 
-                base = mapBufferStruct.getStride() * index;
+            mapBuffer.putLong(mapBufferStruct.getOffset(0) + base, material.getTextureHandle());
+            mapBuffer.putLong(mapBufferStruct.getOffset(1) + base, material.getNormalHandle());
+            mapBuffer.putLong(mapBufferStruct.getOffset(2) + base, material.getRoughnessHandle());
 
-                mapBuffer
-                        .bufferSubData(mapBufferStruct.getOffset(0) + base, material.getTextureHandle())
-                        .bufferSubData(mapBufferStruct.getOffset(1) + base, material.getNormalHandle())
-                        .bufferSubData(mapBufferStruct.getOffset(2) + base, material.getRoughnessHandle());
-
-                index++;
-            }
+            index++;
         }
+
 
 
         materialBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 7);
         mapBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 8);
+
+        materialBuffer.unmap();
+        mapBuffer.unmap();
     }
 
     public record MapRecord(

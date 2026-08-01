@@ -33,10 +33,10 @@ public class TestingScene extends Scene {
 //        footModel.getSceneObjects().add(entity1);
 
 
-        Entity scarabEntity = createEntity("scarab");
-        scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
-        scarabEntity.addComponent(new StaticModelComponent(scarabModel));
-        scarabModel.getSceneObjects().add(scarabEntity);
+//        Entity scarabEntity = createEntity("scarab");
+//        scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
+//        scarabEntity.addComponent(new StaticModelComponent(scarabModel));
+//        scarabModel.getSceneObjects().add(scarabEntity);
 
         Entity sponzaEntity = createEntity("sponza");
         sponzaEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));

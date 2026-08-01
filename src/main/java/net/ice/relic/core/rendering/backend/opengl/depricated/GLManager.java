@@ -243,7 +243,7 @@ public class GLManager implements Lifecycle {
 //        bonesIndicesWeightsBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, DrawType.STATIC);
 //        MemoryUtil.memFree(dataBuffer);
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
 
 //    public VertexArrayObject getAnimationArrayObject() {

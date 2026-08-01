@@ -1,7 +1,9 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.enums.BufferAccess;
+import net.ice.curio.graphics.enums.BufferFlags;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.GLBuffer;
+import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.RGBColor;
@@ -15,8 +17,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.EnumSet;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -28,7 +32,8 @@ public class GLDebugRenderer implements Lifecycle {
 	private GLShaderProgram shaderProgram;
 	private Uniforms uniforms;
 
-	private VertexArrayObject vao;
+	private VertexArrayObject vertexArrayObject;
+
 	private GLBuffer vertexBuffer;
 	private GLBuffer indexBuffer;
 
@@ -45,26 +50,22 @@ public class GLDebugRenderer implements Lifecycle {
 
 	@Override
 	public void init() {
-		this.vao = new VertexArrayObject();
-		this.vertexBuffer = new GLBuffer();
-		this.indexBuffer = new GLBuffer();
+		this.vertexArrayObject = new VertexArrayObject();
+		this.vertexBuffer = new GLBuffer(lineCube.getVertices().length * 4L, GL_MAP_WRITE_BIT);
+		this.indexBuffer = new GLBuffer(lineCube.getIndices().length * 4L, GL_MAP_WRITE_BIT);
 
-		vao.bind();
+		vertexArrayObject.bind();
 
-		FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(lineCube.getVertices().length);
-		floatBuffer.put(lineCube.getVertices()).flip();
-		vertexBuffer.bufferData(floatBuffer, Usage.STATIC_DRAW);
+		vertexBuffer.putFloat(0, lineCube.getVertices());
 
-		glVertexArrayVertexBuffer(vao.getHandle(), 0, vertexBuffer.getHandle(), 0, 12);
-		glVertexArrayAttribFormat(vao.getHandle(), 0, 3, GL_FLOAT, false, 0);
-		glVertexArrayAttribBinding(vao.getHandle(), 0, 0);
-		glEnableVertexArrayAttrib(vao.getHandle(), 0);
+		vertexArrayObject.vertexBuffer(0, vertexBuffer, 0, 12);
+		vertexArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
+		vertexArrayObject.attributeBinding(0, 0);
+		vertexArrayObject.enableAttribute(0);
 
-		IntBuffer indicesBuffer = MemoryUtil.memCallocInt(lineCube.getIndices().length);
-		indicesBuffer.put(lineCube.getIndices()).flip();
-		indexBuffer.bufferData(indicesBuffer, Usage.STATIC_DRAW);
+		indexBuffer.putInt(0, lineCube.getIndices());
 
-		glVertexArrayElementBuffer(vao.getHandle(), indexBuffer.getHandle());
+		vertexArrayObject.elementBuffer(indexBuffer);
 
 		glBindVertexArray(0);
 
@@ -78,9 +79,8 @@ public class GLDebugRenderer implements Lifecycle {
 		uniforms.createUniform("viewMatrix");
 		uniforms.createUniform("projectionMatrix");
 
-		memFree(floatBuffer);
-		memFree(indicesBuffer);
-
+		vertexBuffer.unmap();
+		indexBuffer.unmap();
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class GLDebugRenderer implements Lifecycle {
 		uniforms.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 		uniforms.setUniform("projectionMatrix", scene.getMatrix().getProjMatrix());
 
-		vao.bind();
+		vertexArrayObject.bind();
 
 		glDisable(GL_DEPTH_TEST);
 		uniforms.setUniform("color", notVisibleColor.div().vec3f());

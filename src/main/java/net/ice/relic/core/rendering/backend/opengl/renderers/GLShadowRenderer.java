@@ -1,7 +1,9 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.enums.BufferAccess;
+import net.ice.curio.graphics.enums.BufferFlags;
 import net.ice.curio.graphics.object.Viewport;
-import net.ice.curio.library.opengl.object.buffer.GLBuffer;
+import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.wrapper.enums.Usage;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
@@ -12,10 +14,12 @@ import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
+import net.ice.relic.core.rendering.backend.opengl.struct.DrawElementsIndirectCommand;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +38,8 @@ public class GLShadowRenderer implements Lifecycle {
 
     private int staticDrawCount;
     private GLBuffer staticCommandBuffer;
+    private DrawElementsIndirectCommand commandBufferStruct;
+    private ByteBuffer mappedCommandBuffer;
 
     private Shadows shadows;
 
@@ -79,7 +85,7 @@ public class GLShadowRenderer implements Lifecycle {
             uniforms.setUniform("projViewMatrices[" + i + "]", shadowData);
         }
 
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, staticCommandBuffer.getHandle());
+        staticCommandBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
         glRenderer.getStaticArrayObject().bind();
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticDrawCount, 0);
 
@@ -111,42 +117,39 @@ public class GLShadowRenderer implements Lifecycle {
 
     private void setupStaticCommandBuffer() {
         List<Model> models = StaticModelComponent.getAllModels();
+        staticDrawCount = 0;
 
-        int numMeshes = 0;
+        int meshCount = 0;
         int firstIndex = 0;
         int baseInstance = 0;
 
         for (Model model : models) {
-            numMeshes += model.getMeshDrawData().size();
+            meshCount += model.getMeshDrawData().size();
         }
 
-        ByteBuffer commandBuffer = MemoryUtil.memAlloc(numMeshes * 5 * 4);
+        this.commandBufferStruct = new DrawElementsIndirectCommand();
+        this.staticCommandBuffer = new GLBuffer((long) meshCount * commandBufferStruct.getStride(), GL_MAP_WRITE_BIT);
+        this.staticDrawCount = staticCommandBuffer.remaining() / 20;
         for (Model model : models) {
             List<Entity> entities = model.getSceneObjects();
             int numEntities = entities.size();
             for (GLRenderer.MeshDrawData meshDrawData : model.getMeshDrawData()) {
                 // count
-                commandBuffer.putInt(meshDrawData.vertexCount());
+                staticCommandBuffer.putInt(meshDrawData.vertexCount());
 
                 // instanceCount
-                commandBuffer.putInt(numEntities);
-                commandBuffer.putInt(firstIndex);
+                staticCommandBuffer.putInt(numEntities);
+                staticCommandBuffer.putInt(firstIndex);
                 // baseVertex
-                commandBuffer.putInt(meshDrawData.offset());
-                commandBuffer.putInt(baseInstance);
+                staticCommandBuffer.putInt(meshDrawData.offset());
+                staticCommandBuffer.putInt(baseInstance);
 
                 firstIndex += meshDrawData.vertexCount();
                 baseInstance += entities.size();
             }
         }
-
-        commandBuffer.flip();
-        staticDrawCount = commandBuffer.remaining() / 20;
-
-        staticCommandBuffer = new GLBuffer();
-        staticCommandBuffer.bufferData(commandBuffer, Usage.DYNAMIC_DRAW);
-
-        MemoryUtil.memFree(commandBuffer);
+        staticCommandBuffer.resetPos();
+        staticCommandBuffer.unmap();
     }
 
     public Shadows getShadows() {

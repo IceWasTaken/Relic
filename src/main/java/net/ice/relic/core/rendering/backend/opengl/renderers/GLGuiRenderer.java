@@ -106,6 +106,7 @@ public class GLGuiRenderer implements Lifecycle {
                 uniforms.setUniform("imageSampler", 0);
                 glDrawElements(GL_TRIANGLES, elemCount, GL_UNSIGNED_SHORT, indices);
             }
+            guiMesh.getFence().sync();
         }
 
         glEnable(GL_DEPTH_TEST);
