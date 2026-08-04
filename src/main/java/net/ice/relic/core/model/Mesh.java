@@ -1,7 +1,6 @@
 package net.ice.relic.core.model;
 
 import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
 
 public class Mesh {
 

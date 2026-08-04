@@ -99,13 +99,13 @@ public class GLManager implements Lifecycle {
 //        destinationAnimationBuffer = new VertexBufferObject();
 //        vertexBufferObjects.add(destinationAnimationBuffer);
         FloatBuffer meshBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
-        for (Model model : models) {
-            model.getMeshDrawData().forEach(meshDrawData -> {
-                for(Mesh meshData : model.getMeshes()) {
-                    //populateMeshBuffer(meshBuffer, meshData);
-                }
-            });
-        }
+//        for (Model model : models) {
+//            mode.getMeshDrawData().forEach(meshDrawData -> {
+//                for(Mesh meshData : model.getMeshes()) {
+//                    //populateMeshBuffer(meshBuffer, meshData);
+//                }
+//            });
+//        }
         meshBuffer.flip();
 //        destinationAnimationBuffer.bind(GL_ARRAY_BUFFER);
 //        destinationAnimationBuffer.bufferDataFloat(GL_ARRAY_BUFFER, meshBuffer, DrawType.STATIC);

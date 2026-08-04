@@ -11,17 +11,18 @@ public class BindlessTexture extends GLTexture implements Lifecycle {
     public BindlessTexture(GLTexture glTexture) {
         super(glTexture);
 
-        this.bindlessHandle = glGetTextureHandleARB(textureHandle);
-        if (bindlessHandle == 0L) {
-            Logger.error("Failed to get bindless handle for texture.");
-            return;
-        }
-
-        glMakeTextureHandleResidentARB(bindlessHandle);
-
-        if(!glIsTextureHandleResidentARB(bindlessHandle)) {
-            Logger.error("Texture handle not resident: {}");
-        }
+        this.bindlessHandle = 0;
+//        this.bindlessHandle = glGetTextureHandleARB(textureHandle);
+//        if (bindlessHandle == 0L) {
+//            Logger.error("Failed to get bindless handle for texture.");
+//            return;
+//        }
+//
+//        glMakeTextureHandleResidentARB(bindlessHandle);
+//
+//        if(!glIsTextureHandleResidentARB(bindlessHandle)) {
+//            Logger.error("Texture handle not resident: {}");
+//        }
     }
 
     @Override

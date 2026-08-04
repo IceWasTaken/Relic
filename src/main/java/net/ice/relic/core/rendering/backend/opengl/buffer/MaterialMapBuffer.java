@@ -65,9 +65,9 @@ public class MaterialMapBuffer implements Lifecycle {
 
 			base = mapBufferStruct.getStride() * index;
 
-			mapBuffer.putLong(mapBufferStruct.getOffset(0) + base, material.getTextureHandle());
-			mapBuffer.putLong(mapBufferStruct.getOffset(1) + base, material.getNormalHandle());
-			mapBuffer.putLong(mapBufferStruct.getOffset(2) + base, material.getRoughnessHandle());
+//			mapBuffer.putLong(mapBufferStruct.getOffset(0) + base, material.getTextureHandle());
+//			mapBuffer.putLong(mapBufferStruct.getOffset(1) + base, material.getNormalHandle());
+//			mapBuffer.putLong(mapBufferStruct.getOffset(2) + base, material.getRoughnessHandle());
 
 			index++;
 		}

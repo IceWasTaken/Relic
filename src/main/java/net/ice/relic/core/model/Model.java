@@ -1,6 +1,7 @@
 package net.ice.relic.core.model;
 
 import net.ice.relic.core.ecs.entity.Entity;
+import net.ice.relic.core.model.render.ModelRenderInfo;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 
@@ -13,7 +14,6 @@ public class Model {
     private List<Animation> animations;
     private List<Entity> entities;
     private List<Mesh> meshes;
-    private List<GLRenderer.MeshDrawData> meshDrawData;
     private ModelInfo modelInfo;
 
     private int instanceCount;
@@ -23,7 +23,6 @@ public class Model {
         this.entities = new ArrayList<>();
         this.meshes = meshes;
         this.animations = animations;
-        this.meshDrawData = new ArrayList<>();
 
         int modelSize = 0;
         int indicesSize = 0;
@@ -68,12 +67,25 @@ public class Model {
         return meshes;
     }
 
-    public List<GLRenderer.MeshDrawData> getMeshDrawData() {
-        return meshDrawData;
-    }
-
     public ModelInfo getModelInfo() {
         return modelInfo;
+    }
+
+    public boolean renderInfoCheck(List<ModelRenderInfo> infos) {
+        for (ModelRenderInfo info : infos) {
+            if(info.getAssociatedModel().equals(this)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Model model) {
+			return model.getId().equals(this.id);
+        }
+        return false;
     }
 
     public record ModelInfo(

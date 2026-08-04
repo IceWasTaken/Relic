@@ -5,6 +5,8 @@ import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelCo
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Mesh;
 import net.ice.relic.core.model.Model;
+import net.ice.relic.core.model.render.MeshRenderInfo;
+import net.ice.relic.core.model.render.ModelRenderInfo;
 import net.ice.relic.core.rendering.backend.opengl.buffer.*;
 
 import java.util.*;
@@ -13,6 +15,9 @@ public class BufferManager implements Lifecycle {
 
 	private int baseInstance = 0;
 
+	private int vertexPos = 0;
+	private int indexPos = 0;
+
 	private final InstanceBuffer instanceBuffer;
 	private final StaticCommandBuffer staticCommandBuffer;
 	private final AnimatedCommandBuffer animatedCommandBuffer;
@@ -20,6 +25,8 @@ public class BufferManager implements Lifecycle {
 	private final VertexIndexArrayBuffer vertexIndexArrayBuffer;
 
 	public static final Deque<Entity> entityLoadingQueue = new ArrayDeque<>();
+
+	private final List<ModelRenderInfo> loadedModels = new ArrayList<>();
 
 	private final GLRenderer glRenderer;
 
@@ -57,7 +64,10 @@ public class BufferManager implements Lifecycle {
 			Model model;
 			if((model = entity.getComponent(StaticModelComponent.class).getModel()) != null) {
 				vertexIndexArrayBuffer.resizeIfNeeded(model);
-				loadModel(entity, model);
+				if(!model.renderInfoCheck(loadedModels)) {
+					loadModel(entity, model);
+				}
+
 			}
 
 		}
@@ -71,34 +81,49 @@ public class BufferManager implements Lifecycle {
 	}
 
 	private void loadModel(Entity entity, Model model) {
-		int i = 0;
-		if(!entityLoadingQueue.isEmpty()) {
-			for(Mesh mesh : model.getMeshes()) {
-				VertexBufferInstanceInfo meshInfo = vertexIndexArrayBuffer.loadMesh(mesh);
+		ModelRenderInfo renderInfo = new ModelRenderInfo(model);
+		InstanceInfo instanceInfo = new InstanceInfo(
+				entity,
+				renderInfo
+		);
 
-				InstanceInfo instanceInfo = new InstanceInfo(
-						entity,
-						mesh,
-						meshInfo,
-						baseInstance,
-						i
-				);
+		int index = 0;
+		for (StaticCommandBuffer.DrawCommand drawCommand : instanceInfo.modelRenderInfo.generateDrawCommands()) {
+			staticCommandBuffer.newCommand(
+					new StaticCommandBuffer.DrawCommand(
+							drawCommand.indexCount(),
+							drawCommand.instanceCount(),
+							drawCommand.firstIndex(),
+							drawCommand.baseVertex(),
+							baseInstance
+					)
+			);
+			baseInstance += drawCommand.instanceCount();
 
-				staticCommandBuffer.newCommand(
-						instanceInfo,
-						model
-				);
-
-				instanceBuffer.newInstance(
-						new InstanceBuffer.Instance(
-								entity,
-								mesh
-						)
-				);
-				baseInstance += model.getInstanceCount();
-				i++;
-			}
+			instanceBuffer.newInstance(
+					new InstanceBuffer.Instance(
+							entity,
+							instanceInfo.modelRenderInfo.getMeshes().get(index).getAssociatedMesh()
+					)
+			);
+			index++;
 		}
+		loadedModels.add(renderInfo);
+	}
+
+	private ModelRenderInfo generateModelRenderInfo(Model model) {
+		ModelRenderInfo modelRenderInfo = new ModelRenderInfo(model);
+		for(Mesh mesh : model.getMeshes()) {
+			modelRenderInfo.addMesh(new MeshRenderInfo(
+					mesh,
+					vertexPos,
+					indexPos,
+					mesh.getIndices().length
+			));
+			vertexPos += mesh.getVertexPositions().length / 3;
+			indexPos += mesh.getIndices().length;
+		}
+		return modelRenderInfo;
 	}
 
 	public StaticCommandBuffer getStaticCommandBuffer() {
@@ -111,15 +136,6 @@ public class BufferManager implements Lifecycle {
 
 	public record InstanceInfo(
 		Entity associatedEntity,
-		Mesh mesh,
-		VertexBufferInstanceInfo vertexBufferInstanceInfo,
-		int baseInstance,
-		int drawCommandIndex
+		ModelRenderInfo modelRenderInfo
 	){}
-
-	public record VertexBufferInstanceInfo(
-			int indexCount,
-			int firstIndexIndex, //lmao
-			int vertexOffset
-	) {}
 }

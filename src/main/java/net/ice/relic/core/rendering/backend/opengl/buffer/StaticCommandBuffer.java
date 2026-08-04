@@ -10,6 +10,7 @@ import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelCo
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Mesh;
 import net.ice.relic.core.model.Model;
+import net.ice.relic.core.model.render.MeshRenderInfo;
 import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 
@@ -31,6 +32,12 @@ public class StaticCommandBuffer implements Lifecycle {
 
 	private int staticDrawCount = 0;
 
+	private final List<MeshRenderInfo> instances;
+
+	public StaticCommandBuffer() {
+		this.instances = new ArrayList<>();
+	}
+
 	@Override
 	public void init() {
 		if(staticCommandBuffer != null) {
@@ -49,19 +56,23 @@ public class StaticCommandBuffer implements Lifecycle {
 		this.staticCommandBuffer = new GLBuffer((long) 10000 * staticCommandBufferStruct.getStride(), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 	}
 
-	public void newCommand(BufferManager.InstanceInfo meshInfo, Model model) {
-		int count = meshInfo.vertexBufferInstanceInfo().indexCount();
-		int instanceCount = model.getInstanceCount();
-		int firstIndex = meshInfo.vertexBufferInstanceInfo().firstIndexIndex();
-		int baseVertex = meshInfo.vertexBufferInstanceInfo().vertexOffset();
+//	public void newCommand(BufferManager.InstanceInfo meshInfo, Model model) {
+//		int count = meshInfo.vertexBufferInstanceInfo().indexCount();
+//		int instanceCount = model.getInstanceCount();
+//		int firstIndex = meshInfo.vertexBufferInstanceInfo().firstIndexIndex();
+//		int baseVertex = meshInfo.vertexBufferInstanceInfo().vertexOffset();
+//		putCommand(new DrawCommand(
+//				count,
+//				instanceCount,
+//				firstIndex,
+//				baseVertex,
+//				meshInfo.baseInstance()
+//		));
+//
+//	}
 
-		putCommand(new DrawCommand(
-				count,
-				instanceCount,
-				firstIndex,
-				baseVertex,
-				meshInfo.baseInstance()
-		));
+	public void newCommand(DrawCommand drawCommand) {
+		putCommand(drawCommand);
 		staticDrawCount++;
 	}
 

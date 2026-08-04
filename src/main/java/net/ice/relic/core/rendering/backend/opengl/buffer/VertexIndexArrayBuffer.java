@@ -26,10 +26,6 @@ public class VertexIndexArrayBuffer implements Lifecycle {
 
 	private Fence fence;
 
-	private int indexPos = 0;
-	private int vertexPos = 0;
-	private int offset = 0;
-
 	public VertexIndexArrayBuffer() {}
 
 	@Override
@@ -49,25 +45,11 @@ public class VertexIndexArrayBuffer implements Lifecycle {
 	}
 
 	//loads a mesh into both buffers
-	public BufferManager.VertexBufferInstanceInfo loadMesh(Mesh mesh) {
+	public void loadMesh(Mesh mesh) {
 		fence.waitSync();
-
-		int meshVertexCount = mesh.getVertexPositions().length / 3;
-
-		vertexPos += meshVertexCount;
-		indexPos += mesh.getIndices().length;
-		offset = vertexPos;
-
-		BufferManager.VertexBufferInstanceInfo meshInfo = new BufferManager.VertexBufferInstanceInfo(
-				mesh.getIndices().length,
-				indexPos,
-				offset
-		);
 
 		mesh.populateBufferWithMesh(vertexBuffer);
 		indexBuffer.putInt(mesh.getIndices());
-
-		return meshInfo;
 	}
 
 

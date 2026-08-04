@@ -165,16 +165,4 @@ public class GLRenderer extends Renderer implements Lifecycle {
     }
 
     public record AnimMeshDrawData(Entity entity, int bindingPoseOffset, int weightsOffset) { }
-
-    public record MeshDrawData(
-            int meshSize,
-            int materialIdx,
-            int offset,
-            int count,
-            AnimMeshDrawData animMeshDrawData
-    ) {
-        public MeshDrawData(int meshSize, int materialIdx, int offset, int count) {
-            this(meshSize, materialIdx, offset, count, null);
-        }
-    }
 }

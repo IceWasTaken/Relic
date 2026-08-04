@@ -55,6 +55,10 @@ public class InstanceBuffer implements Lifecycle {
 		drawInstances.add(meshDrawInstance);
 	}
 
+	public void newInstance(int index, Instance meshDrawInstance) {
+		drawInstances.add(index, meshDrawInstance);
+	}
+
 	@Override
 	public void update() {
 		int index = 0;
