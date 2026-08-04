@@ -8,6 +8,7 @@ import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.model.Material;
 import net.ice.relic.core.model.Mesh;
 import net.ice.relic.core.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIMaterial;
@@ -26,7 +27,6 @@ import static org.lwjgl.assimp.Assimp.*;
 public class ModelLoader {
 
     public static final int MAX_BONES = 150;
-    private static final Matrix4f IDENTITY_MATRIX = new Matrix4f();
 
     private TextureCache textureCache;
     private MaterialCache materialCache;
@@ -142,8 +142,9 @@ public class ModelLoader {
     }
 
     public Model loadModel(Resource resource, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
-        Logger.debug("[ModelLoader] Loading Model: {}", resource.getFromFileSystem().getName());
-        AIScene aiScene = aiImportFile(resource.getFromFileSystem().getPath(), flags);
+        Logger.debug("[ModelLoader] Loading Model: {}", resource.getAsPath());
+        AIScene aiScene = aiImportFile(resource.getAsPath(), flags);
+
         if (aiScene == null) {
             throw new AssetLoadException("[ModelLoader] Error loading model: " + aiGetErrorString());
         }
@@ -191,10 +192,12 @@ public class ModelLoader {
 
         aiReleaseImport(aiScene);
 
-        cache.addModel(new Model(resource.getFromFileSystem().getName(), meshDataList, animations));
+        Model model = new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+
+        cache.addModel(model);
 
         Logger.info("[ModelLoader] Loaded Model: {}", resource.getFromFileSystem().getName());
-        return new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+        return model;
     }
 
 

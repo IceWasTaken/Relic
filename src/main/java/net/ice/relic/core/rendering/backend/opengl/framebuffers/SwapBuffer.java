@@ -15,6 +15,13 @@ public class SwapBuffer {
 	private final int handle;
 
 	public SwapBuffer(int width, int height) {
+		if(width == 0 || height == 0) {
+			this.swapTexture = 0;
+			this.depthTexture = 0;
+			this.handle = 0;
+			return;
+		}
+
 		this.handle = glCreateFramebuffers();
 
 		this.swapTexture = glCreateTextures(GL_TEXTURE_2D);

@@ -2,10 +2,8 @@ package net.ice.relic.core.rendering.backend.opengl.depricated;
 
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Mesh;
 import net.ice.relic.core.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
@@ -73,37 +71,37 @@ public class GLManager implements Lifecycle {
         int chunkWeightsOffset = 0;
         int weightsOffset = 0;
 
-        for(Model model : models) {
-            List<Entity> entities = model.getEntities();
-            for(Entity entity : entities) {
-                List<GLRenderer.MeshDrawData> meshDrawData = model.getMeshDrawData();
-                bindingPoseOffset = chunkBindingPoseOffset;
-                weightsOffset = chunkWeightsOffset;
-                for (Mesh meshData : model.getMeshData()) {
-                    positionsSize += meshData.getVertices().length;
-                    normalsSize += meshData.getNormals().length;
-                    textureCoordsSize += meshData.getTextureCoords().length;
-                    indicesSize += meshData.getIndices().length;
-
-                    int meshSizeInBytes = (meshData.getVertices().length + meshData.getNormals().length * 3 + meshData.getTextureCoords().length) * 4;
-                    meshDrawData.add(new GLRenderer.MeshDrawData(meshSizeInBytes, meshData.getMaterialIndex(), offset,
-                            meshData.getIndices().length, new GLRenderer.AnimMeshDrawData(entity, bindingPoseOffset, weightsOffset)));
-                    bindingPoseOffset += meshSizeInBytes / 4;
-                    int groupSize = (int) Math.ceil((float) meshSizeInBytes / (14 * 4));
-                    weightsOffset += groupSize * 2 * 4;
-                    offset = positionsSize / 3;
-                }
-            }
-            chunkBindingPoseOffset += bindingPoseOffset;
-            chunkWeightsOffset += weightsOffset;
-        }
+//        for(Model model : models) {
+//            List<Entity> entities = model.getEntities();
+//            for(Entity entity : entities) {
+//                List<GLRenderer.MeshDrawData> meshDrawData = model.getMeshDrawData();
+//                bindingPoseOffset = chunkBindingPoseOffset;
+//                weightsOffset = chunkWeightsOffset;
+//                for (Mesh meshData : model.getMeshes()) {
+//                    positionsSize += meshData.getVertices().length;
+//                    normalsSize += meshData.getNormals().length;
+//                    textureCoordsSize += meshData.getTextureCoords().length;
+//                    indicesSize += meshData.getIndices().length;
+//
+//                    int meshSizeInBytes = (meshData.getVertices().length + meshData.getNormals().length * 3 + meshData.getTextureCoords().length) * 4;
+//                    meshDrawData.add(new GLRenderer.MeshDrawData(meshSizeInBytes, meshData.getMaterialIndex(), offset,
+//                            meshData.getIndices().length, new GLRenderer.AnimMeshDrawData(entity, bindingPoseOffset, weightsOffset)));
+//                    bindingPoseOffset += meshSizeInBytes / 4;
+//                    int groupSize = (int) Math.ceil((float) meshSizeInBytes / (14 * 4));
+//                    weightsOffset += groupSize * 2 * 4;
+//                    offset = positionsSize / 3;
+//                }
+//            }
+//            chunkBindingPoseOffset += bindingPoseOffset;
+//            chunkWeightsOffset += weightsOffset;
+//        }
 
 //        destinationAnimationBuffer = new VertexBufferObject();
 //        vertexBufferObjects.add(destinationAnimationBuffer);
         FloatBuffer meshBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
         for (Model model : models) {
             model.getMeshDrawData().forEach(meshDrawData -> {
-                for(Mesh meshData : model.getMeshData()) {
+                for(Mesh meshData : model.getMeshes()) {
                     //populateMeshBuffer(meshBuffer, meshData);
                 }
             });
@@ -120,7 +118,7 @@ public class GLManager implements Lifecycle {
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : models) {
             model.getEntities().forEach(e -> {
-                for (Mesh meshData : model.getMeshData()) {
+                for (Mesh meshData : model.getMeshes()) {
                     indicesBuffer.put(meshData.getIndices());
                 }
             });
@@ -137,29 +135,29 @@ public class GLManager implements Lifecycle {
 
 
     private void loadBindingPoses(List<Model> models) {
-        int totalVertices = 0;
-        for (Model model : models) {
-            for (Mesh meshData : model.getMeshData()) {
-                totalVertices += meshData.getVertices().length / 3; // 3 floats per vertex position
-            }
-        }
+//        int totalVertices = 0;
+//        for (Model model : models) {
+//            for (Mesh meshData : model.getMeshes()) {
+//                totalVertices += meshData.getVertices().length / 3; // 3 floats per vertex position
+//            }
+//        }
 
-        int bufferSize = totalVertices * 14; // 14 floats per vertex (pos, norm, tangent, bitangent, texcoord)
-        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(bufferSize);
+//        int bufferSize = totalVertices * 14; // 14 floats per vertex (pos, norm, tangent, bitangent, texcoord)
+//        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(bufferSize);
 
         for (Model model : models) {
-            for (Mesh meshData : model.getMeshData()) {
+            for (Mesh meshData : model.getMeshes()) {
                 //populateMeshBuffer(meshesBuffer, meshData);
             }
         }
-        meshesBuffer.flip();
+        //meshesBuffer.flip();
 
 //        bindingPoseBuffer = new VertexBufferObject();
 //        vertexBufferObjects.add(bindingPoseBuffer);
 //        bindingPoseBuffer.bind(GL_SHADER_STORAGE_BUFFER);
 //        bindingPoseBuffer.bufferDataFloat(GL_SHADER_STORAGE_BUFFER, meshesBuffer, DrawType.STATIC);
 
-        MemoryUtil.memFree(meshesBuffer);
+        //MemoryUtil.memFree(meshesBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -211,13 +209,13 @@ public class GLManager implements Lifecycle {
     private void loadBonesIndicesWeights(List<Model> models) {
         int bufferSize = 0;
         for (Model model : models) {
-            for (Mesh meshData : model.getMeshData()) {
+            for (Mesh meshData : model.getMeshes()) {
                 bufferSize += meshData.getBoneIndices().length * 4 + meshData.getWeights().length * 4;
             }
         }
         ByteBuffer dataBuffer = MemoryUtil.memAlloc(bufferSize);
         for (Model model : models) {
-            for (Mesh meshData : model.getMeshData()) {
+            for (Mesh meshData : model.getMeshes()) {
                 int[] bonesIndices = meshData.getBoneIndices();
                 float[] weights = meshData.getWeights();
                 int rows = bonesIndices.length / 4;

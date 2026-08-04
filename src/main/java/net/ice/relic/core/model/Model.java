@@ -12,22 +12,45 @@ public class Model {
     private final String id;
     private List<Animation> animations;
     private List<Entity> entities;
-    private List<Mesh> meshData;
+    private List<Mesh> meshes;
     private List<GLRenderer.MeshDrawData> meshDrawData;
+    private ModelInfo modelInfo;
 
-    public Model(String id, List<Mesh> meshData, List<Animation> animations) {
+    private int instanceCount;
+
+    public Model(String id, List<Mesh> meshes, List<Animation> animations) {
         this.id = id;
         this.entities = new ArrayList<>();
-        this.meshData = meshData;
+        this.meshes = meshes;
         this.animations = animations;
         this.meshDrawData = new ArrayList<>();
+
+        int modelSize = 0;
+        int indicesSize = 0;
+
+        for (Mesh mesh : meshes) {
+            modelSize += mesh.getMeshSize();
+            indicesSize += mesh.getIndicesSize();
+        }
+
+        this.modelInfo = new ModelInfo(modelSize, indicesSize);
     }
 
     public boolean isAnimated() {
         return animations != null && !animations.isEmpty();
     }
 
-    //setters/getters
+    public void newInstance() {
+        instanceCount++;
+    }
+
+    public void deleteInstance() {
+        instanceCount--;
+    }
+
+    public int getInstanceCount() {
+        return instanceCount;
+    }
 
     public List<Animation> getAnimations() {
         return animations;
@@ -41,11 +64,20 @@ public class Model {
         return id;
     }
 
-    public List<Mesh> getMeshData() {
-        return meshData;
+    public List<Mesh> getMeshes() {
+        return meshes;
     }
 
     public List<GLRenderer.MeshDrawData> getMeshDrawData() {
         return meshDrawData;
     }
+
+    public ModelInfo getModelInfo() {
+        return modelInfo;
+    }
+
+    public record ModelInfo(
+            int modelSize, //size of all meshes combined
+            int indicesSize
+    ) {}
 }

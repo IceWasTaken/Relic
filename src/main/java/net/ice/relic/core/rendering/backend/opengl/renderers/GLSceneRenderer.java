@@ -55,7 +55,7 @@ public class GLSceneRenderer implements Lifecycle {
 
     @Override
     public void render() {
-        StaticCommandBuffer staticCommandBuffer = glRenderer.getStaticCommandBuffer();
+        StaticCommandBuffer staticCommandBuffer = glRenderer.getBufferManager().getStaticCommandBuffer();
 
         shaderProgram.bind();
         viewport.bind();
@@ -68,11 +68,8 @@ public class GLSceneRenderer implements Lifecycle {
         uniforms.setUniform("viewMatrix", glRenderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
 
         staticCommandBuffer.bind();
-        glRenderer.getStaticArrayObject().bind();
-
+        glRenderer.getBufferManager().getVertexIndexArrayBuffer().bind();
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticCommandBuffer.getStaticDrawCount(), 0);
-        glBindVertexArray(0);
-
         glRenderer.getGeometryBuffer().unbind();
         shaderProgram.unbind();
     }

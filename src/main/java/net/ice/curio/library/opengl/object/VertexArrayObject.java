@@ -16,6 +16,10 @@ public class VertexArrayObject {
         glBindVertexArray(handle);
     }
 
+    public void unbind() {
+        glBindVertexArray(0);
+    }
+
     public void elementBuffer(GLBuffer indexBuffer) {
         glVertexArrayElementBuffer(handle, indexBuffer.getHandle());
     }

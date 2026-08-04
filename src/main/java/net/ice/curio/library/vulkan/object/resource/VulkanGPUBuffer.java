@@ -48,7 +48,7 @@ import static org.lwjgl.vulkan.VK10.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 //    }
 //
 //    @Override
-//    public void destroy() {
+//    public void cleanup() {
 //
 //    }
 //

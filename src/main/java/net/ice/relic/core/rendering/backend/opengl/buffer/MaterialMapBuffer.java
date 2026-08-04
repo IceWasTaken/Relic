@@ -5,18 +5,17 @@ import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
+import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.model.Material;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-
-import java.util.List;
 
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
-public class MaterialMapBuffer {
+public class MaterialMapBuffer implements Lifecycle {
 
 	private GLBuffer materialBuffer;
 	private Struct materialBufferStruct;
@@ -26,13 +25,14 @@ public class MaterialMapBuffer {
 
 	private Fence fence;
 
-	public void createMaterialMapBuffer() {
+	@Override
+	public void init() {
 		if(materialBuffer != null) {
-			materialBuffer.destroy();
+			materialBuffer.cleanup();
 		}
 
 		if(mapBuffer != null) {
-			mapBuffer.destroy();
+			mapBuffer.cleanup();
 		}
 
 		this.fence = new GLFence();
@@ -45,19 +45,16 @@ public class MaterialMapBuffer {
 			}
 		};
 
-		this.materialBuffer = new GLBuffer(44 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		this.mapBuffer = new GLBuffer(8 * 3 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-
-		materialBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 7);
-		mapBuffer.bindBase(GL_SHADER_STORAGE_BUFFER, 8);
+		this.materialBuffer = new GLBuffer(44 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT).bind(GL_SHADER_STORAGE_BUFFER, 7);
+		this.mapBuffer = new GLBuffer(8 * 3 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT).bind(GL_SHADER_STORAGE_BUFFER, 8);
 	}
 
-	public void updateMaterialMapBuffer(GLRenderer renderer) {
+	public void update(MaterialCache materialCache) {
 		int index = 0;
 
 		fence.waitSync();
 
-		for (Material material : renderer.getApplication().getMaterialCache().getMaterialsList()) {
+		for (Material material : materialCache.getMaterialsList()) {
 			int base = materialBufferStruct.getStride() * index;
 
 			materialBuffer.putVec4f(materialBufferStruct.getOffset(0) + base, material.getDiffuseColor().div().vec4f());

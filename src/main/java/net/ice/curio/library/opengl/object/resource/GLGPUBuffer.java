@@ -36,7 +36,7 @@ import static org.lwjgl.opengl.GL45.*;
 //    }
 //
 //    @Override
-//    public void destroy() {
+//    public void cleanup() {
 //        glDeleteBuffers(bufferID);
 //    }
 //}

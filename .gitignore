@@ -48,4 +48,5 @@ bin/
 /src/main/resources/relic/assets/models/sibenik/
 
 /src/main/resources/relic/assets/textures/
-/resources/assets/models/
+/resources/relic/assets/models/
+/resources/relic/assets/textures/

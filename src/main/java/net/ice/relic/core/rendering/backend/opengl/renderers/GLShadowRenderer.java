@@ -56,7 +56,7 @@ public class GLShadowRenderer implements Lifecycle {
 
     @Override
     public void render() {
-        StaticCommandBuffer staticCommandBuffer = glRenderer.getStaticCommandBuffer();
+        StaticCommandBuffer staticCommandBuffer = glRenderer.getBufferManager().getStaticCommandBuffer();
 
         shaderProgram.bind();
         shadows.update(glRenderer.getApplication().getCurrentScene());
@@ -76,7 +76,7 @@ public class GLShadowRenderer implements Lifecycle {
         }
 
         staticCommandBuffer.bind();
-        glRenderer.getStaticArrayObject().bind();
+        glRenderer.getBufferManager().getVertexIndexArrayBuffer().bind();
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticCommandBuffer.getStaticDrawCount(), 0);
 
 //      .bindVertexBufferObject(animatedVBO, BufferTarget.DRAW_INDIRECT)

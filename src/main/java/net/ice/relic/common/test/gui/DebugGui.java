@@ -26,6 +26,7 @@ public class DebugGui implements Gui {
     private ImageViewer imageViewer;
     private SceneInfoGui sceneInfoGui;
     private ECSGui ecsGui;
+    private CommandViewer commandViewer;
 
     private boolean infoOpen = false;
 
@@ -42,6 +43,7 @@ public class DebugGui implements Gui {
         this.imageViewer = new ImageViewer(application);
         this.sceneInfoGui = new SceneInfoGui();
         this.ecsGui = new ECSGui(application);
+        this.commandViewer = new CommandViewer(application);
 
         if(application.getRenderer() instanceof GLRenderer glRenderer) {
             this.glRenderer = glRenderer;
@@ -65,6 +67,7 @@ public class DebugGui implements Gui {
             sceneInfoGui.draw(application.getCurrentScene());
         }
         ecsGui.draw();
+        commandViewer.draw();
 
         endFrame();
         render();
@@ -93,6 +96,8 @@ public class DebugGui implements Gui {
                 throw new RuntimeException("[DebugGui]: Pressed the red button");
             }
             ecsGui.drawToggleButton();
+            commandViewer.drawToggleButton();
+
             if(checkbox("Post Rendering", glRenderer.getPostRenderer().shouldRender())) {
                 glRenderer.getPostRenderer().toggleRendering();
             }

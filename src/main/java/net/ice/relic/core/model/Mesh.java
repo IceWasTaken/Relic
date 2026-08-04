@@ -1,8 +1,11 @@
 package net.ice.relic.core.model;
 
+import net.ice.curio.library.opengl.object.GLBuffer;
+import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
+
 public class Mesh {
 
-    private final float[] vertices;
+    private final float[] vertexPositions;
     private final float[] normals;
     private final float[] tangents;
     private final float[] bitangents;
@@ -15,7 +18,7 @@ public class Mesh {
     private int materialIndex;
 
     public Mesh(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
-        this.vertices = vertices;
+        this.vertexPositions = vertices;
         this.normals = normals;
         this.tangents = tangents;
         this.bitangents = bitangents;
@@ -30,32 +33,50 @@ public class Mesh {
         this(vertices, normals, tangents, bitangents, textureCoords, indices, boneIndices, weights, 0);
     }
 
+    public int getMeshSize() {
+        int vertexSize = vertexPositions.length;
+        int normalsSize = normals.length * 3;
+        int textureCoordsSize = textureCoords.length;
+
+        return (vertexSize + normalsSize + textureCoordsSize) * 4;
+    }
+
+    public int getIndicesSize() {
+        return indices.length * 4;
+    }
+
+    public void populateBufferWithMesh(GLBuffer meshesBuffer) {
+        int rows = vertexPositions.length / 3;
+        for (int row = 0; row < rows; row++) {
+            int startPos = row * 3;
+            int startTextCoord = row * 2;
+            meshesBuffer.putFloat(vertexPositions[startPos]);
+            meshesBuffer.putFloat(vertexPositions[startPos + 1]);
+            meshesBuffer.putFloat(vertexPositions[startPos + 2]);
+            meshesBuffer.putFloat(normals[startPos]);
+            meshesBuffer.putFloat(normals[startPos + 1]);
+            meshesBuffer.putFloat(normals[startPos + 2]);
+            meshesBuffer.putFloat(tangents[startPos]);
+            meshesBuffer.putFloat(tangents[startPos + 1]);
+            meshesBuffer.putFloat(tangents[startPos + 2]);
+            meshesBuffer.putFloat(bitangents[startPos]);
+            meshesBuffer.putFloat(bitangents[startPos + 1]);
+            meshesBuffer.putFloat(bitangents[startPos + 2]);
+            meshesBuffer.putFloat(textureCoords[startTextCoord]);
+            meshesBuffer.putFloat(textureCoords[startTextCoord + 1]);
+        }
+    }
+
+    public float[] getVertexPositions() {
+        return vertexPositions;
+    }
+
     public void setMaterialIndex(int materialIndex) {
         this.materialIndex = materialIndex;
     }
 
     public int getMaterialIndex() {
         return materialIndex;
-    }
-
-    public float[] getVertices() {
-        return vertices;
-    }
-
-    public float[] getNormals() {
-        return normals;
-    }
-
-    public float[] getTangents() {
-        return tangents;
-    }
-
-    public float[] getBitangents() {
-        return bitangents;
-    }
-
-    public float[] getTextureCoords() {
-        return textureCoords;
     }
 
     public int[] getIndices() {
@@ -69,4 +90,6 @@ public class Mesh {
     public float[] getWeights() {
         return weights;
     }
+
+
 }

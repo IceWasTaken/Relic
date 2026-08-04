@@ -30,7 +30,7 @@ public class Bitmap implements Lifecycle {
             IntBuffer heightBuffer = stack.mallocInt(1);
             IntBuffer channelBuffer = stack.mallocInt(1);
 
-            this.data = stbi_load_from_memory(resource.load(), widthBuffer, heightBuffer, channelBuffer, 4);
+            this.data = stbi_load(resource.getAsPath(), widthBuffer, heightBuffer, channelBuffer, 4);
             this.width = widthBuffer.get(0);
             this.height = heightBuffer.get(0);
             this.channels = channelBuffer.get(0);

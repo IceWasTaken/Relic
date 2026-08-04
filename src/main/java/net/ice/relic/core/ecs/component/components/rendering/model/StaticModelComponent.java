@@ -14,6 +14,7 @@ public class StaticModelComponent extends ModelComponent {
 
 	public StaticModelComponent(Model model) {
 		this.model = model;
+		model.newInstance();
 
 		COMPONENTS.add(this);
 	}

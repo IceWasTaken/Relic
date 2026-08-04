@@ -61,8 +61,8 @@ public class GuiMesh {
     public void updateBuffers(int index) {
         ImDrawData drawData = ImGui.getDrawData();
         fence.waitSync();
-        vertexBuffer.resetPos();
-        indexBuffer.resetPos();
+        vertexBuffer.position(0);
+        indexBuffer.position(0);
         vertexBuffer.put(drawData.getCmdListVtxBufferData(index));
         indexBuffer.put(drawData.getCmdListIdxBufferData(index));
     }

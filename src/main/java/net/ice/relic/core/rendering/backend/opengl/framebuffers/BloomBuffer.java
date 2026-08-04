@@ -29,6 +29,12 @@ public class BloomBuffer {
 	private final int handle;
 
 	public BloomBuffer(int width, int height, int length) {
+		if(width == 0 || height == 0) {
+			this.mipTextures = new BloomMip[0];
+			this.handle = 0;
+			return;
+		}
+
 		this.mipTextures = new BloomMip[length];
 
 		this.handle = glCreateFramebuffers();

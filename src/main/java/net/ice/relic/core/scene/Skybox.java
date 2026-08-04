@@ -17,10 +17,10 @@ public class Skybox {
 
 //    public Skybox(String modelPath, ModelLoader loader) {
 //        model = loader.loadModel(Resource.getResource("relic", modelPath), false);
-//        Mesh meshData = model.getMeshData().getFirst();
+//        Mesh meshData = model.getMeshes().getFirst();
 //        material = loader.getMaterialCache().getMaterial(meshData.getMaterialIndex());
 //        //mesh = new Mesh(meshData);
-//        model.getMeshData().clear();
+//        model.getMeshes().clear();
 //        sceneObject = new SceneObject("skybox", model);
 //    }
 
