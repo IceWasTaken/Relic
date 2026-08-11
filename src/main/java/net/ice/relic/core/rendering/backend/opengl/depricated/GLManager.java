@@ -2,7 +2,7 @@ package net.ice.relic.core.rendering.backend.opengl.depricated;
 
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.relic.core.model.Mesh;
+import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 import org.joml.Matrix4f;
@@ -118,7 +118,7 @@ public class GLManager implements Lifecycle {
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : models) {
             model.getEntities().forEach(e -> {
-                for (Mesh meshData : model.getMeshes()) {
+                for (MeshData meshData : model.getMeshData()) {
                     indicesBuffer.put(meshData.getIndices());
                 }
             });
@@ -146,7 +146,7 @@ public class GLManager implements Lifecycle {
 //        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(bufferSize);
 
         for (Model model : models) {
-            for (Mesh meshData : model.getMeshes()) {
+            for (MeshData meshData : model.getMeshData()) {
                 //populateMeshBuffer(meshesBuffer, meshData);
             }
         }
@@ -209,13 +209,13 @@ public class GLManager implements Lifecycle {
     private void loadBonesIndicesWeights(List<Model> models) {
         int bufferSize = 0;
         for (Model model : models) {
-            for (Mesh meshData : model.getMeshes()) {
+            for (MeshData meshData : model.getMeshData()) {
                 bufferSize += meshData.getBoneIndices().length * 4 + meshData.getWeights().length * 4;
             }
         }
         ByteBuffer dataBuffer = MemoryUtil.memAlloc(bufferSize);
         for (Model model : models) {
-            for (Mesh meshData : model.getMeshes()) {
+            for (MeshData meshData : model.getMeshData()) {
                 int[] bonesIndices = meshData.getBoneIndices();
                 float[] weights = meshData.getWeights();
                 int rows = bonesIndices.length / 4;

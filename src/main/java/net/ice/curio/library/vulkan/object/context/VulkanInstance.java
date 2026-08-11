@@ -4,7 +4,7 @@ import net.ice.curio.library.vulkan.enums.PhysicalDeviceType;
 import net.ice.curio.library.vulkan.utils.DebugUtils;
 import net.ice.curio.library.vulkan.utils.ValidationExtensionUtils;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
-import net.ice.heirloom.ApplicationProperties;
+import net.ice.relic.application.ApplicationProperties;
 import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -46,9 +46,9 @@ public class VulkanInstance implements Lifecycle {
                     .apiVersion(VK_API_VERSION_1_3);
 
             List<String> validationLayers = ValidationExtensionUtils.getSupportedLayers();
-            boolean canValidate = applicationProperties.debugMode();
+            boolean canValidate = applicationProperties.debug();
 
-            if(applicationProperties.debugMode() && validationLayers.isEmpty()) {
+            if(applicationProperties.debug() && validationLayers.isEmpty()) {
                 canValidate = false;
                 Logger.warn("VulkanInstance: Validation requested but not supported.");
             }

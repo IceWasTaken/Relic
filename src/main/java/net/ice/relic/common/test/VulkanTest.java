@@ -1,7 +1,7 @@
 package net.ice.relic.common.test;
 
 import net.ice.curio.input.Input;
-import net.ice.heirloom.ApplicationProperties;
+import net.ice.relic.application.ApplicationProperties;
 import net.ice.heirloom.Version;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.test.scene.TestingScene;
@@ -18,17 +18,17 @@ public class VulkanTest extends RelicApplication {
     private Light dirLight;
     private float angleInc;
     private float lightAngle = 270;
-    protected VulkanTest() {
+    protected VulkanTest(String[] arguments) {
         super(new ApplicationProperties(
                 "Relic Application Test",
                 new Version(0, 0, 1),
                 new Version(0, 5, 0),
-                true
+                arguments
         ));
     }
 
     public static void main(String[] args) {
-        new VulkanTest().run();
+        new VulkanTest(args).run();
     }
 
     @Override

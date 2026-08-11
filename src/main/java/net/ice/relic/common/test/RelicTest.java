@@ -1,17 +1,17 @@
 package net.ice.relic.common.test;
 
-import net.ice.heirloom.ApplicationProperties;
+import net.ice.relic.application.ApplicationProperties;
 import net.ice.heirloom.Version;
 import net.ice.relic.application.RelicApplication;
 
 public class RelicTest extends RelicApplication {
 
-    protected RelicTest() {
+    protected RelicTest(String [] arguments) {
         super(new ApplicationProperties(
                 "Relic Application Test",
                 new Version(0, 0, 1),
                 new Version(0, 5, 0),
-                true
+                arguments
         ));
     }
 
@@ -33,7 +33,8 @@ public class RelicTest extends RelicApplication {
 
     }
     public static void main(String[] args) {
-        new RelicTest().run();
+        new RelicTest(args).run();
+
     }
 
 

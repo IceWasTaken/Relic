@@ -5,37 +5,40 @@ import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.core.model.Mesh;
+import net.ice.relic.core.model.mesh.Mesh;
+import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.BufferManager;
-import org.tinylog.Logger;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
-public class VertexIndexArrayBuffer implements Lifecycle {
+public class MeshBuffer implements Lifecycle {
+
+	private int vertexPos = 0;
+	private int indexPos = 0;
 
 	private VertexArrayObject staticArrayObject;
-	private GLBuffer vertexBuffer;
-	private GLBuffer indexBuffer;
+	private GLBuffer staticVertexBuffer;
+	private GLBuffer staticIndexBuffer;
+
+	private VertexArrayObject animatedArrayObject;
+	private GLBuffer animatedVertexBuffer;
+	private GLBuffer animatedIndexBuffer;
 
 	private Fence fence;
 
-	public VertexIndexArrayBuffer() {}
+	public MeshBuffer() {}
 
 	@Override
 	public void init() {
 		this.staticArrayObject = new VertexArrayObject();
 		//1,000,000 vertices to start (56mb)
-		this.vertexBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-		this.indexBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		this.staticVertexBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		this.staticIndexBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
-		setupVAOAttributes();
+		setupAttributes();
 
 		this.fence = new GLFence();
 	}
@@ -45,11 +48,20 @@ public class VertexIndexArrayBuffer implements Lifecycle {
 	}
 
 	//loads a mesh into both buffers
-	public void loadMesh(Mesh mesh) {
+	public Mesh loadMesh(MeshData mesh) {
 		fence.waitSync();
 
-		mesh.populateBufferWithMesh(vertexBuffer);
-		indexBuffer.putInt(mesh.getIndices());
+		int count = mesh.getIndices().length;
+		int currVertexPos = vertexPos;
+		int currIndexPos = indexPos;
+
+		mesh.populateBufferWithMesh(staticVertexBuffer);
+		staticIndexBuffer.putInt(mesh.getIndices());
+
+		vertexPos += mesh.getVertexPositions().length;
+		indexPos += mesh.getIndices().length;
+
+		return new Mesh(mesh, currVertexPos, currIndexPos, count);
 	}
 
 
@@ -58,16 +70,16 @@ public class VertexIndexArrayBuffer implements Lifecycle {
 	}
 
 	public void resizeIfNeeded(Model model) {
-		long remaining = vertexBuffer.getSize() - vertexBuffer.getUsed();
+		long remaining = staticVertexBuffer.getSize() - staticVertexBuffer.getUsed();
 		if(model.getModelInfo().modelSize() > remaining) {
-			vertexBuffer.resize();
-			indexBuffer.resize();
+			staticVertexBuffer.resize();
+			staticIndexBuffer.resize();
 		}
 	}
 
 
-	private void setupVAOAttributes() {
-		staticArrayObject.vertexBuffer(0, vertexBuffer, 0, 56);
+	private void setupAttributes() {
+		staticArrayObject.vertexBuffer(0, staticVertexBuffer, 0, 56);
 
 		staticArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
 		staticArrayObject.attributeFormat(1, 3, GL_FLOAT, false, 12);
@@ -87,8 +99,6 @@ public class VertexIndexArrayBuffer implements Lifecycle {
 		staticArrayObject.enableAttribute(3);
 		staticArrayObject.enableAttribute(4);
 
-		staticArrayObject.elementBuffer(indexBuffer);
+		staticArrayObject.elementBuffer(staticIndexBuffer);
 	}
-
-
 }

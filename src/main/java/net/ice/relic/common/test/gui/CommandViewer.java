@@ -20,7 +20,7 @@ public class CommandViewer extends GuiWindow {
 	@Override
 	protected void draw(GuiContext ctx) {
 		int index = 0;
-//		for(StaticCommandBuffer.DrawCommand command : StaticCommandBuffer.COMMANDS) {
+//		for(StaticCommandBuffer.DrawCommandStruct command : StaticCommandBuffer.COMMANDS) {
 //			if(treeNode(String.valueOf(index), "Command " + index)) {
 //				drawCommandInfo(command);
 //				treePop();
@@ -29,13 +29,13 @@ public class CommandViewer extends GuiWindow {
 //		}
 	}
 
-	private void drawCommandInfo(StaticCommandBuffer.DrawCommand command) {
-		text("Count: " + command.indexCount());
-		text("InstanceCount: " + command.instanceCount());
-		text("FirstIndex: " + command.firstIndex());
-		text("BaseVertex: " + command.baseVertex());
-		text("BaseInstance: " + command.baseInstance());
-	}
+//	private void drawCommandInfo(StaticCommandBuffer.DrawCommandStruct command) {
+//		text("Count: " + command.indexCount());
+//		text("InstanceCount: " + command.instanceCount());
+//		text("FirstIndex: " + command.firstIndex());
+//		text("BaseVertex: " + command.baseVertex());
+//		text("BaseInstance: " + command.baseInstance());
+//	}
 
 
 }

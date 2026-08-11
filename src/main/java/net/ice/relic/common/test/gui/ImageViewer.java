@@ -47,7 +47,7 @@ public class ImageViewer extends GuiWindow {
 
         List<Texture> textures = new ArrayList<>(ctx.getApplication().getTextureCache().getTextureMaps());
 
-        if(beginCombo("Textures", String.valueOf(textures.get(selectedIndex).getImage().getResource().getAsPath()))) {
+        if(beginCombo("Textures", selectedIndex + ":" + textures.get(selectedIndex).getImage().getResource().getAsPath())) {
             ImGuiTextFilter filter = new ImGuiTextFilter();
             if(isWindowAppearing()) {
                 setKeyboardFocusHere();

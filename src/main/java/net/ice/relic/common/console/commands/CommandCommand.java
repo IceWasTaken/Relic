@@ -24,8 +24,8 @@ public class CommandCommand implements Command {
 		modifyCommandNode.literal("instanceCount")
 				.addArgument(new ArgumentNode<>("count", new Argument.IntegerArgument()))
 				.setActivity((ctx, args) -> {
-//					List<StaticCommandBuffer.DrawCommand> commands = StaticCommandBuffer.COMMANDS;
-//					StaticCommandBuffer.DrawCommand command = commands.get((Integer) args.get("index"));
+//					List<StaticCommandBuffer.DrawCommandStruct> commands = StaticCommandBuffer.COMMANDS;
+//					StaticCommandBuffer.DrawCommandStruct command = commands.get((Integer) args.get("index"));
 
 				});
 

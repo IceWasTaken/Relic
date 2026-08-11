@@ -1,4 +1,4 @@
-package net.ice.relic;
+package net.ice.relic.common;
 
 public enum EngineState {
 

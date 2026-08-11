@@ -1,8 +1,7 @@
 package net.ice.relic.core.model;
 
 import net.ice.relic.core.ecs.entity.Entity;
-import net.ice.relic.core.model.render.ModelRenderInfo;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
 
 import java.util.ArrayList;
@@ -13,21 +12,19 @@ public class Model {
     private final String id;
     private List<Animation> animations;
     private List<Entity> entities;
-    private List<Mesh> meshes;
+    private List<MeshData> meshData;
     private ModelInfo modelInfo;
 
-    private int instanceCount;
-
-    public Model(String id, List<Mesh> meshes, List<Animation> animations) {
+    public Model(String id, List<MeshData> meshData, List<Animation> animations) {
         this.id = id;
         this.entities = new ArrayList<>();
-        this.meshes = meshes;
+        this.meshData = meshData;
         this.animations = animations;
 
         int modelSize = 0;
         int indicesSize = 0;
 
-        for (Mesh mesh : meshes) {
+        for (MeshData mesh : meshData) {
             modelSize += mesh.getMeshSize();
             indicesSize += mesh.getIndicesSize();
         }
@@ -37,18 +34,6 @@ public class Model {
 
     public boolean isAnimated() {
         return animations != null && !animations.isEmpty();
-    }
-
-    public void newInstance() {
-        instanceCount++;
-    }
-
-    public void deleteInstance() {
-        instanceCount--;
-    }
-
-    public int getInstanceCount() {
-        return instanceCount;
     }
 
     public List<Animation> getAnimations() {
@@ -63,21 +48,12 @@ public class Model {
         return id;
     }
 
-    public List<Mesh> getMeshes() {
-        return meshes;
+    public List<MeshData> getMeshData() {
+        return meshData;
     }
 
     public ModelInfo getModelInfo() {
         return modelInfo;
-    }
-
-    public boolean renderInfoCheck(List<ModelRenderInfo> infos) {
-        for (ModelRenderInfo info : infos) {
-            if(info.getAssociatedModel().equals(this)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

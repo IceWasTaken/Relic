@@ -10,13 +10,12 @@ out vec2 outFragColor;
 
 const int MAX_MATERIALS = 200;
 
-struct Material {
+struct Material{
     vec4 diffuse;
     vec4 specular;
     float reflectance;
     float roughnessFactor;
     float metallicFactor;
-    float std430Padding;
 };
 
 struct Map {

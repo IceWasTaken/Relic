@@ -1,30 +1,16 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
-import net.ice.curio.graphics.memory.Struct;
-import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.object.GLViewport;
-import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.core.cache.MaterialCache;
-import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
-import net.ice.relic.core.ecs.entity.Entity;
-import net.ice.relic.core.model.Material;
-import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
+import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
+import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
 public class GLSceneRenderer implements Lifecycle {
@@ -68,7 +54,8 @@ public class GLSceneRenderer implements Lifecycle {
         uniforms.setUniform("viewMatrix", glRenderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
 
         staticCommandBuffer.bind();
-        glRenderer.getBufferManager().getVertexIndexArrayBuffer().bind();
+        glRenderer.getBufferManager().getMeshBuffer().bind();
+        glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticCommandBuffer.getStaticDrawCount(), 0);
         glRenderer.getGeometryBuffer().unbind();
         shaderProgram.unbind();

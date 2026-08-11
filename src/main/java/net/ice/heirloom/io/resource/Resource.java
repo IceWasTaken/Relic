@@ -38,8 +38,8 @@ public class Resource {
         String[] split = str.split(":");
 
         if(split.length != 2) {
-            Logger.warn("Malformed string passed in resource constructor. Returning null.");
-            return null;
+            Logger.warn("Malformed string passed in resource constructor. Returning empty resource.");
+            return EMPTY;
         }
 
         return getResource(split[0], split[1]);

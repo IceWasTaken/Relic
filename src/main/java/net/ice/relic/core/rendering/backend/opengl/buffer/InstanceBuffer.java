@@ -7,11 +7,10 @@ import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.ecs.component.components.TransformComponent;
-import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
-import net.ice.relic.core.model.Mesh;
+import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -28,10 +27,11 @@ public class InstanceBuffer implements Lifecycle {
 	private Struct instanceBufferStruct;
 	private Fence fence;
 
-	private final List<Instance> drawInstances;
+	private final BufferManager bufferManager;
 
-	public InstanceBuffer() {
-		this.drawInstances = new ArrayList<>();
+	public InstanceBuffer(BufferManager bufferManager) {
+		this.bufferManager = bufferManager;
+
 	}
 
 	@Override
@@ -51,34 +51,28 @@ public class InstanceBuffer implements Lifecycle {
 		this.fence = new GLFence();
 	}
 
-	public void newInstance(Instance meshDrawInstance) {
-		drawInstances.add(meshDrawInstance);
-	}
-
-	public void newInstance(int index, Instance meshDrawInstance) {
-		drawInstances.add(index, meshDrawInstance);
-	}
-
 	@Override
 	public void update() {
 		int index = 0;
 
 		fence.waitSync();
 
-		for(Instance instance : drawInstances) {
-			int base = instanceBufferStruct.getStride() * index;
-			Entity entity = instance.associatedEntity;
-			Mesh mesh = instance.associatedMesh;
-			instanceBuffer.putMatrix4f(instanceBufferStruct.getOffset(0) + base, entity.getComponent(TransformComponent.class).getTransformationMatrix());
-			instanceBuffer.putInt(instanceBufferStruct.getOffset(1) + base, mesh.getMaterialIndex());
-			index++;
+		for(Model model : bufferManager.getLoadedModels()) {
+			for(MeshData mesh : model.getMeshData()) {
+				for(Entity entity : model.getEntities()) {
+					int base = instanceBufferStruct.getStride() * index;
+					instanceBuffer.putMatrix4f(instanceBufferStruct.getOffset(0) + base, entity.getComponent(TransformComponent.class).getTransformationMatrix());
+					instanceBuffer.putInt(instanceBufferStruct.getOffset(1) + base, mesh.getMaterialIndex());
+					index++;
+				}
+			}
 		}
 	}
+
 
 	public void sync() {
 		fence.sync();
 	}
 
-	public record Instance(Entity associatedEntity, Mesh associatedMesh) {}
 	public record InstanceStruct(Matrix4f transformIndex, int materialIndex) {}
 }

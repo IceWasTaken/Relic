@@ -1,23 +1,14 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.graphics.object.Viewport;
-import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
-import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
-import net.ice.relic.core.ecs.entity.Entity;
-import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import org.joml.Matrix4f;
-
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.GL_LOWER_LEFT;
@@ -76,7 +67,8 @@ public class GLShadowRenderer implements Lifecycle {
         }
 
         staticCommandBuffer.bind();
-        glRenderer.getBufferManager().getVertexIndexArrayBuffer().bind();
+        glRenderer.getBufferManager().getMeshBuffer().bind();
+        glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
         glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticCommandBuffer.getStaticDrawCount(), 0);
 
 //      .bindVertexBufferObject(animatedVBO, BufferTarget.DRAW_INDIRECT)

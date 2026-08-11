@@ -1,8 +1,8 @@
-package net.ice.relic.core.model;
+package net.ice.relic.core.model.mesh;
 
 import net.ice.curio.library.opengl.object.GLBuffer;
 
-public class Mesh {
+public class MeshData {
 
     private final float[] vertexPositions;
     private final float[] normals;
@@ -16,7 +16,7 @@ public class Mesh {
 
     private int materialIndex;
 
-    public Mesh(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
+    public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
         this.vertexPositions = vertices;
         this.normals = normals;
         this.tangents = tangents;
@@ -28,7 +28,7 @@ public class Mesh {
         this.materialIndex = 0;
     }
 
-    public Mesh(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights) {
+    public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights) {
         this(vertices, normals, tangents, bitangents, textureCoords, indices, boneIndices, weights, 0);
     }
 
