@@ -5,7 +5,7 @@ import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
-import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
+import net.ice.relic.core.rendering.backend.opengl.buffer.GLCommandBuffer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import org.joml.Matrix4f;
@@ -47,7 +47,7 @@ public class GLShadowRenderer implements Lifecycle {
 
     @Override
     public void render() {
-        StaticCommandBuffer staticCommandBuffer = glRenderer.getBufferManager().getStaticCommandBuffer();
+        GLCommandBuffer staticCommandBuffer = glRenderer.getBufferManager().getStaticCommandBuffer();
 
         shaderProgram.bind();
         shadows.update(glRenderer.getApplication().getCurrentScene());
@@ -69,7 +69,7 @@ public class GLShadowRenderer implements Lifecycle {
         staticCommandBuffer.bind();
         glRenderer.getBufferManager().getMeshBuffer().bind();
         glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
-        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticCommandBuffer.getStaticDrawCount(), 0);
+        glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0, staticCommandBuffer.getDrawCount(), 0);
 
 //      .bindVertexBufferObject(animatedVBO, BufferTarget.DRAW_INDIRECT)
 //      .bindVertexArrayObject(manager.getAnimationArrayObject())

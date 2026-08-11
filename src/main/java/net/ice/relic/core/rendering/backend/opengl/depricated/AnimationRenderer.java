@@ -5,29 +5,21 @@ import net.ice.relic.core.rendering.shader.ShaderType;
 import static org.lwjgl.opengl.GL43.*;
 
 @Deprecated
-public class AnimationRenderer extends AbstractGLRenderer {
+public class AnimationRenderer {
 
-    public AnimationRenderer(GLManager manager) {
-        super(manager);
-    }
-
-    @Override
-    protected void initShaders() {
-        loadShader("anim.comp", ShaderType.COMPUTE);
-    }
-
-    @Override
-    protected void initUniforms() {
-        uniforms.createUniform("drawParameters.srcOffset");
-        uniforms.createUniform("drawParameters.srcSize");
-        uniforms.createUniform("drawParameters.weightsOffset");
-        uniforms.createUniform("drawParameters.bonesMatricesOffset");
-        uniforms.createUniform("drawParameters.dstOffset");
-    }
-
-    @Override
-    public void render() {
-        shaderProgram.bind();
+//
+//    @Override
+//    protected void initUniforms() {
+//        uniforms.createUniform("drawParameters.srcOffset");
+//        uniforms.createUniform("drawParameters.srcSize");
+//        uniforms.createUniform("drawParameters.weightsOffset");
+//        uniforms.createUniform("drawParameters.bonesMatricesOffset");
+//        uniforms.createUniform("drawParameters.dstOffset");
+//    }
+//
+//    @Override
+//    public void render() {
+//        shaderProgram.bind();
 
 //        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, manager.getBindingPoseBuffer().getId());
 //        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, manager.getBonesIndicesWeightsBuffer().getId());
@@ -53,16 +45,16 @@ public class AnimationRenderer extends AbstractGLRenderer {
 //            }
 //        }
 
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        shaderProgram.unbind();
+//        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+//        shaderProgram.unbind();
+//
+//        //assertNoError();
+//    }
 
-        //assertNoError();
-    }
-
-    @Override
-    protected void setupData() {
-
-    }
+//    @Override
+//    protected void setupData() {
+//
+//    }
 
 
 }

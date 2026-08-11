@@ -6,10 +6,9 @@ import net.ice.relic.common.console.nodes.ArgumentNode;
 import net.ice.relic.common.console.nodes.CommandNode;
 import net.ice.relic.common.console.register.Command;
 import net.ice.relic.common.console.register.CommandRegistry;
-import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.ecs.component.Component;
 import net.ice.relic.core.ecs.component.components.TransformComponent;
-import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
+import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
@@ -95,7 +94,7 @@ public class EntityCommand implements Command {
 	private Component getComponentFromName(String name, Entity entity) {
 		return switch (name.toLowerCase()) {
 			case "transform", "transformcomponent", "transform_component" -> entity.getComponent(TransformComponent.class);
-			case "staticmodel", "static_model", "static" -> entity.getComponent(StaticModelComponent.class);
+			case "model" -> entity.getComponent(ModelComponent.class);
 			default -> throw new IllegalStateException("Unexpected value: " + name);
 		};
 	}
@@ -103,7 +102,7 @@ public class EntityCommand implements Command {
 	private Component getNewComponentFromName(String name) {
 		return switch (name.toLowerCase()) {
 			case "transform", "transformcomponent", "transform_component" -> new TransformComponent();
-			case "staticmodel", "static_model", "static" -> new StaticModelComponent(new Model("df", new ArrayList<>(), null));
+			case "model" -> new ModelComponent(new Model("df", new ArrayList<>(), null));
 			default -> throw new IllegalStateException("Unexpected value: " + name);
 		};
 	}

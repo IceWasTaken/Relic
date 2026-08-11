@@ -44,7 +44,7 @@ public class InstanceBuffer implements Lifecycle {
 		};
 
 		this.instanceBuffer = new GLBuffer(
-				instanceBufferStruct.getStride() * 500L,
+				instanceBufferStruct.getStride() * 5000L,
 				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT
 		).bind(GL_SHADER_STORAGE_BUFFER, 9);
 

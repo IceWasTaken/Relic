@@ -6,7 +6,7 @@ import net.ice.heirloom.io.resource.Resource;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.common.test.gui.DebugGui;
 import net.ice.relic.core.ecs.component.components.TransformComponent;
-import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
+import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
@@ -34,22 +34,22 @@ public class TestingScene extends Scene {
 
         Entity scarabEntity = createEntity("scarab");
         scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
-        scarabEntity.addComponent(new StaticModelComponent(scarabModel));
+        scarabEntity.addComponent(new ModelComponent(scarabModel));
         scarabModel.getEntities().add(scarabEntity);
 
         Entity sponzaEntity = createEntity("sponza");
         sponzaEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
-        sponzaEntity.addComponent(new StaticModelComponent(sponzaModel));
+        sponzaEntity.addComponent(new ModelComponent(sponzaModel));
         sponzaModel.getEntities().add(sponzaEntity);
 
         Entity sponzaEntity1 = createEntity("sponza1");
         sponzaEntity1.addComponent(new TransformComponent().setPosition(0, 0, 20));
-        sponzaEntity1.addComponent(new StaticModelComponent(sponzaModel));
+        sponzaEntity1.addComponent(new ModelComponent(sponzaModel));
         sponzaModel.getEntities().add(sponzaEntity1);
 
 //        Entity cube = createEntity("cube");
 //        cube.addComponent(new TransformComponent());
-//        cube.addComponent(new StaticModelComponent(companionCube));
+//        cube.addComponent(new ModelComponent(companionCube));
 //        companionCube.getEntities().add(cube);
 
         getLights().add(new Light(new Vector3f(1, -1, 2), false, 2, Colors.GRAY.getRGBColor()));
@@ -75,7 +75,7 @@ public class TestingScene extends Scene {
                                     random.nextInt(100)
                             )
             );
-            cube.addComponent(new StaticModelComponent(companionCube));
+            cube.addComponent(new ModelComponent(companionCube));
             companionCube.getEntities().add(cube);
 
             ((GLRenderer) getApplication().getRenderer()).getBufferManager().loadEntity(cube);

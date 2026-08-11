@@ -37,7 +37,7 @@ public class RegistrationManager {
 
                     Registry registry = registries.get(targetInterface);
                     if (registry == null) {
-                        Logger.error("[RegistrationManager]:No active registry found for [{}]", targetInterface.getName());
+                        Logger.error("[RegistrationManager]: No active registry found for [{}]", targetInterface.getName());
                         return;
                     }
 

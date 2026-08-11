@@ -3,9 +3,7 @@ package net.ice.relic.common.test.gui;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.gui.GuiContext;
 import net.ice.relic.core.gui.drawable.GuiWindow;
-import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
 
-import static imgui.ImGui.*;
 import static imgui.flag.ImGuiWindowFlags.*;
 
 public class CommandViewer extends GuiWindow {

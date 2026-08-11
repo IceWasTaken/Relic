@@ -16,16 +16,20 @@ import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
 public class MeshBuffer implements Lifecycle {
 
-	private int vertexPos = 0;
-	private int indexPos = 0;
+	private int staticVertexPos = 0;
+	private int staticIndexPos = 0;
+
+	private int totalBindingPosesVertices = 0;
 
 	private VertexArrayObject staticArrayObject;
 	private GLBuffer staticVertexBuffer;
 	private GLBuffer staticIndexBuffer;
 
 	private VertexArrayObject animatedArrayObject;
-	private GLBuffer animatedVertexBuffer;
-	private GLBuffer animatedIndexBuffer;
+	private GLBuffer bindingPoseBuffer;
+	private GLBuffer bonesMatricesBuffer;
+	private GLBuffer bonesIndicesWeightsBuffer;
+	private GLBuffer destinationAnimationBuffer;
 
 	private Fence fence;
 
@@ -34,11 +38,17 @@ public class MeshBuffer implements Lifecycle {
 	@Override
 	public void init() {
 		this.staticArrayObject = new VertexArrayObject();
+		this.animatedArrayObject = new VertexArrayObject();
 		//1,000,000 vertices to start (56mb)
 		this.staticVertexBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 		this.staticIndexBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
-		setupAttributes();
+		this.bindingPoseBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		this.bonesMatricesBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		this.bonesIndicesWeightsBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+		this.destinationAnimationBuffer = new GLBuffer(1_000_000 * 56, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+
+		setupAttributes(staticArrayObject, staticVertexBuffer, staticIndexBuffer);
 
 		this.fence = new GLFence();
 	}
@@ -48,21 +58,42 @@ public class MeshBuffer implements Lifecycle {
 	}
 
 	//loads a mesh into both buffers
-	public Mesh loadMesh(MeshData mesh) {
+	public Mesh loadMesh(MeshData mesh, boolean animated) {
+		if(animated) {
+			return loadAnimatedMesh(mesh);
+		}
+		return loadStaticMesh(mesh);
+	}
+
+	private Mesh loadStaticMesh(MeshData mesh) {
 		fence.waitSync();
 
 		int count = mesh.getIndices().length;
-		int currVertexPos = vertexPos;
-		int currIndexPos = indexPos;
+		int currVertexPos = staticVertexPos;
+		int currIndexPos = staticIndexPos;
 
 		mesh.populateBufferWithMesh(staticVertexBuffer);
 		staticIndexBuffer.putInt(mesh.getIndices());
 
-		vertexPos += mesh.getVertexPositions().length;
-		indexPos += mesh.getIndices().length;
+		staticVertexPos += mesh.getVertexPositions().length;
+		staticIndexPos += mesh.getIndices().length;
 
 		return new Mesh(mesh, currVertexPos, currIndexPos, count);
 	}
+
+	private Mesh loadAnimatedMesh(MeshData mesh) {
+		fence.waitSync();
+
+		mesh.populateBufferWithMesh(bindingPoseBuffer);
+
+		int count = mesh.getIndices().length;
+		int currVertexPos = staticVertexPos;
+		int currIndexPos = staticIndexPos;
+
+
+		return new Mesh(mesh, 0, 0, 0);
+	}
+
 
 
 	public void sync() {
@@ -78,27 +109,27 @@ public class MeshBuffer implements Lifecycle {
 	}
 
 
-	private void setupAttributes() {
-		staticArrayObject.vertexBuffer(0, staticVertexBuffer, 0, 56);
+	private void setupAttributes(VertexArrayObject vertexArrayObject, GLBuffer vertexBuffer, GLBuffer indexBuffer) {
+		vertexArrayObject.vertexBuffer(0, vertexBuffer, 0, 56);
 
-		staticArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
-		staticArrayObject.attributeFormat(1, 3, GL_FLOAT, false, 12);
-		staticArrayObject.attributeFormat(2, 3, GL_FLOAT, false, 24);
-		staticArrayObject.attributeFormat(3, 3, GL_FLOAT, false, 36);
-		staticArrayObject.attributeFormat(4, 2, GL_FLOAT, false, 48);
+		vertexArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
+		vertexArrayObject.attributeFormat(1, 3, GL_FLOAT, false, 12);
+		vertexArrayObject.attributeFormat(2, 3, GL_FLOAT, false, 24);
+		vertexArrayObject.attributeFormat(3, 3, GL_FLOAT, false, 36);
+		vertexArrayObject.attributeFormat(4, 2, GL_FLOAT, false, 48);
 
-		staticArrayObject.attributeBinding(0, 0);
-		staticArrayObject.attributeBinding(1, 0);
-		staticArrayObject.attributeBinding(2, 0);
-		staticArrayObject.attributeBinding(3, 0);
-		staticArrayObject.attributeBinding(4, 0);
+		vertexArrayObject.attributeBinding(0, 0);
+		vertexArrayObject.attributeBinding(1, 0);
+		vertexArrayObject.attributeBinding(2, 0);
+		vertexArrayObject.attributeBinding(3, 0);
+		vertexArrayObject.attributeBinding(4, 0);
 
-		staticArrayObject.enableAttribute(0);
-		staticArrayObject.enableAttribute(1);
-		staticArrayObject.enableAttribute(2);
-		staticArrayObject.enableAttribute(3);
-		staticArrayObject.enableAttribute(4);
+		vertexArrayObject.enableAttribute(0);
+		vertexArrayObject.enableAttribute(1);
+		vertexArrayObject.enableAttribute(2);
+		vertexArrayObject.enableAttribute(3);
+		vertexArrayObject.enableAttribute(4);
 
-		staticArrayObject.elementBuffer(staticIndexBuffer);
+		vertexArrayObject.elementBuffer(indexBuffer);
 	}
 }

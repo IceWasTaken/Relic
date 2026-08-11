@@ -28,28 +28,6 @@ public class GLManager implements Lifecycle {
 //    private VertexBufferObject bonesIndicesWeightsBuffer;
 //    private VertexBufferObject destinationAnimationBuffer;
 
-    //private ShadowBuffer shadowBuffer;
-    //private ReflectionBuffer reflectionBuffer;
-    //private RefractionRenderer refractionRenderer;
-
-//    private final List<VertexBufferObject> vertexBufferObjects;
-
-    public GLManager(RelicApplication relicApplication) {
-
-//        this.vertexBufferObjects = new ArrayList<>();
-    }
-
-    @Override
-    public void init() {
-        //this.shadowBuffer = new ShadowBuffer();
-    }
-
-    @Override
-    public void cleanup() {
-//        vertexBufferObjects.forEach(VertexBufferObject::delete);
-        //animationArrayObject.delete();
-        //staticArrayObject.delete();
-    }
 
     public void loadAnimatedModels() {
         //List<Model> models = application.getCurrentScene().getModels().values().stream().filter(Model::isAnimated).toList();
@@ -188,7 +166,6 @@ public class GLManager implements Lifecycle {
                     Matrix4f[] matrices = frame.getBonesMatrices();
                     for (Matrix4f matrix : matrices) {
                         matrix.get(dataBuffer);
-                        // Removed manual position advance because matrix.get() already advances buffer position
                     }
                     frame.clear();
                 }
@@ -242,34 +219,4 @@ public class GLManager implements Lifecycle {
 
         //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
-
-//    public VertexArrayObject getAnimationArrayObject() {
-//        return animationArrayObject;
-//    }
-//    public VertexArrayObject getStaticArrayObject() {
-//        return staticArrayObject;
-//    }
-//    public VertexBufferObject getBindingPoseBuffer() {
-//        return bindingPoseBuffer;
-//    }
-//    public VertexBufferObject getBonesIndicesWeightsBuffer() {
-//        return bonesIndicesWeightsBuffer;
-//    }
-//    public VertexBufferObject getBonesMatricesBuffer() {
-//        return bonesMatricesBuffer;
-//    }
-//    public VertexBufferObject getDestinationAnimationBuffer() {
-//        return destinationAnimationBuffer;
-//    }
-    //public ShadowBuffer getShadowBuffer() {
-        //return shadowBuffer;
-    //}
-
-
-    public RelicApplication getApplication() {
-        return null;
-    }
-
-
-
 }

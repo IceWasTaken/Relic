@@ -4,11 +4,7 @@ import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.ecs.entity.Entity;
 
-import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.Renderer;
-import net.ice.relic.core.rendering.backend.opengl.buffer.InstanceBuffer;
-import net.ice.relic.core.rendering.backend.opengl.buffer.MaterialMapBuffer;
-import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.GeometryBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
@@ -23,7 +19,6 @@ import static org.lwjgl.opengl.GLUtil.setupDebugMessageCallback;
 
 public class GLRenderer extends Renderer implements Lifecycle {
 
-    public static int COMMAND_SIZE = 5;
     public static final Vector2i SHADOW_MAP_SIZE = new Vector2i(4096);
 
     private GeometryBuffer geometryBuffer;
@@ -60,9 +55,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void setupData() {
-        //modelManager.loadStaticModels();
 
-        //this.staticCommandBuffer.createStaticCommandBuffer();
     }
 
     public GLRenderer(RelicApplication relicApplication) {

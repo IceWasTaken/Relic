@@ -6,9 +6,6 @@ import net.ice.relic.common.console.nodes.ArgumentNode;
 import net.ice.relic.common.console.nodes.CommandNode;
 import net.ice.relic.common.console.register.Command;
 import net.ice.relic.common.console.register.CommandRegistry;
-import net.ice.relic.core.rendering.backend.opengl.buffer.StaticCommandBuffer;
-
-import java.util.List;
 
 @AutoRegister
 public class CommandCommand implements Command {

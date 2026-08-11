@@ -1,7 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.core.ecs.component.components.rendering.model.StaticModelComponent;
+import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.mesh.Mesh;
 import net.ice.relic.core.model.mesh.MeshData;
@@ -14,8 +14,8 @@ import java.util.*;
 public class BufferManager implements Lifecycle {
 
 	private final InstanceBuffer instanceBuffer;
-	private final StaticCommandBuffer staticCommandBuffer;
-	private final AnimatedCommandBuffer animatedCommandBuffer;
+	private final GLCommandBuffer staticCommandBuffer;
+	private final GLCommandBuffer animatedCommandBuffer;
 	private final MaterialMapBuffer materialMapBuffer;
 	private final MeshBuffer meshBuffer;
 
@@ -29,8 +29,8 @@ public class BufferManager implements Lifecycle {
 	public BufferManager(GLRenderer glRenderer) {
 		this.glRenderer = glRenderer;
 		this.instanceBuffer = new InstanceBuffer(this);
-		this.staticCommandBuffer = new StaticCommandBuffer();
-		this.animatedCommandBuffer = new AnimatedCommandBuffer();
+		this.staticCommandBuffer = new GLCommandBuffer();
+		this.animatedCommandBuffer = new GLCommandBuffer();
 		this.materialMapBuffer = new MaterialMapBuffer();
 		this.meshBuffer = new MeshBuffer();
 	}
@@ -60,7 +60,7 @@ public class BufferManager implements Lifecycle {
 			Logger.debug("[BufferManager]: Loading entity {}", entity.getName());
 
 			Model model;
-			if((model = entity.getComponent(StaticModelComponent.class).getModel()) != null) {
+			if((model = entity.getComponent(ModelComponent.class).getModel()) != null) {
 				meshBuffer.resizeIfNeeded(model);
 				if (!loadedModels.contains(model)) {
 					loadedModelInfos.put(model, loadModel(model));
@@ -79,7 +79,7 @@ public class BufferManager implements Lifecycle {
 		List<Mesh> bufferedMeshes = new ArrayList<>();
 
 		for (MeshData mesh : meshes) {
-			bufferedMeshes.add(meshBuffer.loadMesh(mesh));
+			bufferedMeshes.add(meshBuffer.loadMesh(mesh, model.isAnimated()));
 		}
 
 		loadedModels.add(model);
@@ -91,7 +91,7 @@ public class BufferManager implements Lifecycle {
 		entityLoadingQueue.add(entity);
 	}
 
-	public StaticCommandBuffer getStaticCommandBuffer() {
+	public GLCommandBuffer getStaticCommandBuffer() {
 		return staticCommandBuffer;
 	}
 
@@ -104,18 +104,18 @@ public class BufferManager implements Lifecycle {
 	}
 
 	public static class LoadedModelInfo {
-		private final List<StaticCommandBuffer.DrawCommand> drawCommands;
+		private final List<GLCommandBuffer.DrawCommand> drawCommands;
 
-		public LoadedModelInfo(StaticCommandBuffer commandBuffer, List<Mesh> meshes) {
+		public LoadedModelInfo(GLCommandBuffer commandBuffer, List<Mesh> meshes) {
 			this.drawCommands = new ArrayList<>();
 
 			for (Mesh meshInfo : meshes) {
-				drawCommands.add(new StaticCommandBuffer.DrawCommand(commandBuffer, meshInfo));
+				drawCommands.add(new GLCommandBuffer.DrawCommand(commandBuffer, meshInfo));
 			}
 		}
 
 		public void newInstance() {
-			for(StaticCommandBuffer.DrawCommand drawCommand : drawCommands) {
+			for(GLCommandBuffer.DrawCommand drawCommand : drawCommands) {
 				drawCommand.newInstance();
 			}
 		}

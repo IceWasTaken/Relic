@@ -7,7 +7,6 @@ import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.model.mesh.Mesh;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,17 +16,17 @@ import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
 import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
 import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
-public class StaticCommandBuffer implements Lifecycle {
+public class GLCommandBuffer implements Lifecycle {
 
 	private final List<DrawCommand> commands = new ArrayList<>();
 
-	private final Struct staticCommandBufferStruct;
+	private final Struct commandBufferStruct;
 
-	private GLBuffer staticCommandBuffer;
+	private GLBuffer commandBuffer;
 	private Fence fence;
 
-	public StaticCommandBuffer() {
-		this.staticCommandBufferStruct = new Struct(StructType.RAW) {
+	public GLCommandBuffer() {
+		this.commandBufferStruct = new Struct(StructType.RAW) {
 			@Override
 			public Class<?> getRecord() {
 				return DrawCommandStruct.class;
@@ -37,44 +36,45 @@ public class StaticCommandBuffer implements Lifecycle {
 
 	@Override
 	public void init() {
-		if(staticCommandBuffer != null) {
-			staticCommandBuffer.cleanup();
+		if(commandBuffer != null) {
+			commandBuffer.cleanup();
 		}
 
 		this.fence = new GLFence();
 
 		//10,000 commands to start
-		this.staticCommandBuffer = new GLBuffer(
-				(long) 10000 * staticCommandBufferStruct.getStride(),
+		this.commandBuffer = new GLBuffer(
+				(long) 10000 * commandBufferStruct.getStride(),
 				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT
 		);
 	}
 
+	@Override
 	public void update() {
 		fence.waitSync();
 
 		int baseInstance = 0;
-		staticCommandBuffer.position(0);
+		commandBuffer.position(0);
 		for(DrawCommand drawCommand : commands) {
-			staticCommandBuffer.putInt(drawCommand.getMesh().getCount());
-			staticCommandBuffer.putInt(drawCommand.instanceCount);
-			staticCommandBuffer.putInt(drawCommand.getMesh().getIndexStartPos());
-			staticCommandBuffer.putInt(drawCommand.getMesh().getVertexStartPos() / 3);
-			staticCommandBuffer.putInt(baseInstance);
+			commandBuffer.putInt(drawCommand.getMesh().getCount());
+			commandBuffer.putInt(drawCommand.instanceCount);
+			commandBuffer.putInt(drawCommand.getMesh().getIndexStartPos());
+			commandBuffer.putInt(drawCommand.getMesh().getVertexStartPos() / 3);
+			commandBuffer.putInt(baseInstance);
 
 			baseInstance += drawCommand.instanceCount;
 		}
 	}
 
 	public void bind() {
-		staticCommandBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
+		commandBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
 	}
 
 	public void sync() {
 		fence.sync();
 	}
 
-	public int getStaticDrawCount() {
+	public int getDrawCount() {
 		return commands.size();
 	}
 
@@ -82,7 +82,7 @@ public class StaticCommandBuffer implements Lifecycle {
 		private final Mesh mesh;
 		private int instanceCount = 0;
 
-		public DrawCommand(StaticCommandBuffer commandBuffer, Mesh mesh) {
+		public DrawCommand(GLCommandBuffer commandBuffer, Mesh mesh) {
 			this.mesh = mesh;
 
 			commandBuffer.commands.add(this);
@@ -108,4 +108,5 @@ public class StaticCommandBuffer implements Lifecycle {
 			int baseVertex, //value added to each index before reading to array
 			int baseInstance //base instance id
 	) {}
+
 }
