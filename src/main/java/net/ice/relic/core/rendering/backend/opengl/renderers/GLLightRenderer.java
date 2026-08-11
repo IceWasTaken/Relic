@@ -101,7 +101,8 @@ public class GLLightRenderer implements Lifecycle {
 
         uniformBufferObject.setUniform("shadowSampler", 4);
 
-        quadMesh.getMeshVAO().bind();glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
+        quadMesh.getMeshVAO().bind();
+        glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glEnable(GL_FRAMEBUFFER_SRGB);
         shaderProgram.unbind();

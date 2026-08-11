@@ -16,6 +16,7 @@ public class RegistrationManager {
     private final Map<Class<?>, Registry<?>> registries = new HashMap<>();
 
     public <T extends Registerable<T, R>, R extends Registry<T>> void openRegistry(Class<T> type, R registry) {
+        Logger.debug("[RegistrationManager]: Opened new registry for '{}'", type.getCanonicalName());
         registries.put(type, registry);
     }
 
@@ -30,18 +31,18 @@ public class RegistrationManager {
                     Class<?> targetInterface = findRegisterableInterface(loadedClass);
 
                     if(targetInterface == null) {
-                        Logger.error("[RegistrationManager]:Class [{}] annotated by @AutoRegister but does not implement known Registerable subinterface.", loadedClass.getCanonicalName());
+                        Logger.error("[RegistrationManager]: Class [{}] annotated by @AutoRegister but does not implement known Registerable subinterface.", loadedClass.getCanonicalName());
                         return;
                     }
 
                     Registry registry = registries.get(targetInterface);
                     if (registry == null) {
-                        Logger.error("[RegistrationManager]:No active registry found for [{}]", targetInterface.getName());
+                        Logger.error("[RegistrationManager]: No active registry found for [{}]", targetInterface.getName());
                         return;
                     }
 
                     registerable.register(registry);
-                    Logger.info("[RegistrationManager]: Registered new class: '{}'", registerable.getClass().getCanonicalName());
+                    Logger.debug("[RegistrationManager]: Registered new class: '{}'", registerable.getClass().getCanonicalName());
 
 
                 } catch (ClassCastException e) {

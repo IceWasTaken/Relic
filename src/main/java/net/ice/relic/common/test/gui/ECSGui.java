@@ -44,7 +44,9 @@ public class ECSGui extends GuiWindow {
 				drawEntity(child);
 			}
 			for(Component component : entity.getComponents()) {
-				drawComponent(entity, component);
+				if(component != null) {
+					drawComponent(entity, component);
+				}
 			}
 			treePop();
 		}

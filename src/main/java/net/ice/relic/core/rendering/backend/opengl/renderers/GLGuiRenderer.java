@@ -58,6 +58,22 @@ public class GLGuiRenderer implements Lifecycle {
         uniforms.createUniform("imageSampler");
 
         EventManager.addListener(this);
+
+        ImGui.createContext();
+
+        ImGuiIO imGuiIO = ImGui.getIO();
+
+        imGuiIO.setIniFilename(null);
+        imGuiIO.setConfigFlags(NavEnableKeyboard);
+        imGuiIO.setBackendFlags(HasMouseCursors);
+        imGuiIO.setBackendPlatformName("imgui_java_impl_glfw");
+        imGuiIO.setConfigWindowsMoveFromTitleBarOnly(true);
+
+        imGuiIO.setDisplaySize(glRenderer.getApplication().getWindow().getWidth(), glRenderer.getApplication().getWindow().getHeight());
+
+        buildFontAtlas();
+
+        imGuiGl3.init("version 330 core");
     }
 
     @Override
@@ -106,6 +122,7 @@ public class GLGuiRenderer implements Lifecycle {
                 uniforms.setUniform("imageSampler", 0);
                 glDrawElements(GL_TRIANGLES, elemCount, GL_UNSIGNED_SHORT, indices);
             }
+            guiMesh.getFence().sync();
         }
 
         glEnable(GL_DEPTH_TEST);
@@ -114,28 +131,6 @@ public class GLGuiRenderer implements Lifecycle {
         glDisable(GL_BLEND);
 
         shaderProgram.unbind();
-    }
-
-    public void setupBuffers() {
-        createUIResources();
-    }
-
-    private void createUIResources() {
-        ImGui.createContext();
-
-        ImGuiIO imGuiIO = ImGui.getIO();
-
-        imGuiIO.setIniFilename(null);
-        imGuiIO.setConfigFlags(NavEnableKeyboard);
-        imGuiIO.setBackendFlags(HasMouseCursors);
-        imGuiIO.setBackendPlatformName("imgui_java_impl_glfw");
-        imGuiIO.setConfigWindowsMoveFromTitleBarOnly(true);
-
-        imGuiIO.setDisplaySize(glRenderer.getApplication().getWindow().getWidth(), glRenderer.getApplication().getWindow().getHeight());
-
-        buildFontAtlas();
-
-        imGuiGl3.init("version 330 core");
     }
 
     private void buildFontAtlas() {

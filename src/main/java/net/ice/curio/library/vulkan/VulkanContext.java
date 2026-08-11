@@ -2,6 +2,7 @@ package net.ice.curio.library.vulkan;
 
 import net.ice.curio.Curio;
 import net.ice.curio.graphics.context.GraphicsContext;
+import net.ice.curio.graphics.context.GraphicsContextLogger;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
@@ -27,6 +28,11 @@ public class VulkanContext extends GraphicsContext {
         this.physicalDevice = instance.createPhysicalDevice(null);
         this.device = new Device(physicalDevice);
         this.surface = new Surface(this, (VulkanWindow) curio.getWindow());
+    }
+
+    @Override
+    protected GraphicsContextLogger createContextLogger() {
+        return null;
     }
 
     @Override

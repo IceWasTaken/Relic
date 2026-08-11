@@ -24,13 +24,13 @@ public class Bitmap implements Lifecycle {
         this.resource = resource;
 
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            Logger.info("[Bitmap] Loading bitmap: {}", resource.getAsPath());
+            Logger.debug("[Bitmap] Loading bitmap: {}", resource.getAsPath());
 
             IntBuffer widthBuffer = stack.mallocInt(1);
             IntBuffer heightBuffer = stack.mallocInt(1);
             IntBuffer channelBuffer = stack.mallocInt(1);
 
-            this.data = stbi_load_from_memory(resource.load(), widthBuffer, heightBuffer, channelBuffer, 4);
+            this.data = stbi_load(resource.getAsPath(), widthBuffer, heightBuffer, channelBuffer, 4);
             this.width = widthBuffer.get(0);
             this.height = heightBuffer.get(0);
             this.channels = channelBuffer.get(0);

@@ -7,6 +7,8 @@ import net.ice.relic.core.ProjectionMatrix;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.gui.Gui;
 import net.ice.relic.core.model.Model;
+import net.ice.relic.core.rendering.backend.opengl.BufferManager;
+import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
 import net.ice.relic.core.scene.light.AmbientLight;
 import net.ice.relic.core.scene.light.Light;
@@ -70,7 +72,9 @@ public abstract class Scene implements Lifecycle {
         Logger.info("[Scene] Loaded scene: {}", name);
         initialized = true;
 
-        application.getRenderer().setupData();
+        for(Entity entity : entities) {
+            ((GLRenderer) application.getRenderer()).getBufferManager().loadEntity(entity);
+        }
     }
 
     @Override

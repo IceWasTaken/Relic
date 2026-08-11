@@ -3,8 +3,6 @@
 #extension GL_ARB_bindless_texture : require
 #extension GL_ARB_gpu_shader_int64 : require
 
-const int MAX_MATERIALS = 200;
-
 layout (location = 0) in vec4 pos;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 tangent;
@@ -32,11 +30,11 @@ struct Map {
 };
 
 layout(std430, binding = 7) buffer MaterialBuffer {
-    Material materials[MAX_MATERIALS];
+    Material materials[];
 };
 
 layout(std430, binding = 8) buffer MapBuffer {
-    Map maps[MAX_MATERIALS];
+    Map maps[];
 };
 
 

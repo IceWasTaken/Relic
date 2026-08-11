@@ -13,7 +13,7 @@ public class Entity {
     private final Optional<Entity> parent;
     private final List<Entity> children;
 
-    private final Set<Component> components;
+    private Component[] components = new Component[32];
 
     public static Entity newEntity(String name) {
         return new Entity(name);
@@ -32,7 +32,6 @@ public class Entity {
         this.name = name;
         this.parent = Optional.ofNullable(parent);
         this.children = new ArrayList<>();
-        this.components = new HashSet<>();
     }
 
     protected Entity(String name) {
@@ -57,26 +56,42 @@ public class Entity {
         return id;
     }
 
-    public Entity addComponent(Component component) {
-        components.add(component);
+    public <T extends Component> Entity addComponent(T component) {
+        int id = Component.getType(component.getClass());
+        if(id >= components.length) {
+            resizeArray(id);
+        }
+        components[id] = component;
         return this;
     }
 
-    public Component getComponent(Class<?> type) {
-        Component outComponent = null;
-        for(Component component : components) {
-            if(component.getClass() == type) {
-                outComponent = component;
-            }
+    public <T extends Component> Entity removeComponent(Class<T> type) {
+        int id = Component.getType(type);
+        if(components[id] != null) {
+            components[id] = null;
         }
-        return outComponent;
+        return this;
+    }
+
+    public <T extends Component> T getComponent(Class<T> type) {
+        int id = Component.getType(type);
+        if (id >= components.length) {
+            return null;
+        }
+        return (T) components[id];
+    }
+
+    private void resizeArray(int targetID) {
+        Component[] newArray = new Component[Math.max(components.length * 2, targetID + 1)];
+        System.arraycopy(components, 0, newArray, 0, components.length);
+        components = newArray;
     }
 
     public List<Entity> getChildren() {
         return children;
     }
 
-    public Set<Component> getComponents() {
+    public Component[] getComponents() {
         return components;
     }
 
@@ -84,3 +99,4 @@ public class Entity {
         return name;
     }
 }
+

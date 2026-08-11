@@ -12,12 +12,15 @@ import net.ice.heirloom.Lifecycle;
 public abstract class GraphicsContext implements Lifecycle {
 
     protected Curio curio;
+    protected GraphicsContextLogger graphicsContextLogger;
 
     protected static GraphicsContext INSTANCE;
 
     protected GraphicsContext(Curio curio) {
         this.curio = curio;
     }
+
+    protected abstract GraphicsContextLogger createContextLogger();
 
     public abstract Texture createTexture(Bitmap bitmap);
     public abstract Viewport createViewport(int width, int height);
@@ -35,4 +38,6 @@ public abstract class GraphicsContext implements Lifecycle {
     public Curio getCurio() {
         return curio;
     }
+
+
 }

@@ -28,11 +28,6 @@ public class Resource {
     private Resource(String namespace, String path) {
         this.namespace = namespace;
         this.path = path;
-
-
-        if(Resource.class.getClassLoader().getResource(getAsPath()) == null) {
-            Logger.warn("Could not find resource {} in namespace {}", path, namespace);
-        }
     }
 
     public static Resource getResource(String namespace, String path) {
@@ -43,8 +38,8 @@ public class Resource {
         String[] split = str.split(":");
 
         if(split.length != 2) {
-            Logger.warn("Malformed string passed in resource constructor. Returning null.");
-            return null;
+            Logger.warn("Malformed string passed in resource constructor. Returning empty resource.");
+            return EMPTY;
         }
 
         return getResource(split[0], split[1]);
@@ -56,7 +51,7 @@ public class Resource {
     }
 
     public String getAsPath() {
-        return namespace + "/" + path;
+        return "resources/" +  namespace + "/" + path;
     }
 
     public String getNamespace() {

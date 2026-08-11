@@ -6,7 +6,7 @@ import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.model.Material;
-import net.ice.relic.core.model.Mesh;
+import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
@@ -26,7 +26,6 @@ import static org.lwjgl.assimp.Assimp.*;
 public class ModelLoader {
 
     public static final int MAX_BONES = 150;
-    private static final Matrix4f IDENTITY_MATRIX = new Matrix4f();
 
     private TextureCache textureCache;
     private MaterialCache materialCache;
@@ -142,8 +141,9 @@ public class ModelLoader {
     }
 
     public Model loadModel(Resource resource, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
-        Logger.debug("[ModelLoader] Loading Model: {}", resource.getFromFileSystem().getName());
-        AIScene aiScene = aiImportFile(resource.getFromFileSystem().getPath(), flags);
+        Logger.debug("[ModelLoader] Loading Model: {}", resource.getAsPath());
+        AIScene aiScene = aiImportFile(resource.getAsPath(), flags);
+
         if (aiScene == null) {
             throw new AssetLoadException("[ModelLoader] Error loading model: " + aiGetErrorString());
         }
@@ -158,7 +158,7 @@ public class ModelLoader {
         PointerBuffer aiMeshes = aiScene.mMeshes();
 
         List<Material> materialList = new ArrayList<>();
-        List<Mesh> meshDataList = new ArrayList<>();
+        List<MeshData> meshDataList = new ArrayList<>();
         List<Bone> boneList = new ArrayList<>();
 
         for (int i = 0; i < numMaterials; i++) {
@@ -171,7 +171,7 @@ public class ModelLoader {
 
         for (int i = 0; i < numMeshes; i++) {
             AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
-            Mesh meshData = processMesh(aiMesh, boneList);
+            MeshData meshData = processMesh(aiMesh, boneList);
             int materialIdx = aiMesh.mMaterialIndex();
             if (materialIdx >= 0 && materialIdx < materialList.size()) {
                 meshData.setMaterialIndex(materialList.get(materialIdx).getMaterialIndex());
@@ -191,10 +191,12 @@ public class ModelLoader {
 
         aiReleaseImport(aiScene);
 
-        cache.addModel(new Model(resource.getFromFileSystem().getName(), meshDataList, animations));
+        Model model = new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+
+        cache.addModel(model);
 
         Logger.info("[ModelLoader] Loaded Model: {}", resource.getFromFileSystem().getName());
-        return new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+        return model;
     }
 
 
@@ -274,7 +276,7 @@ public class ModelLoader {
 
 
 
-    private static Mesh processMesh(AIMesh aiMesh, List<Bone> boneList) {
+    private static MeshData processMesh(AIMesh aiMesh, List<Bone> boneList) {
         float[] vertices = processAIVectorBuffer(aiMesh.mVertices());
         float[] normals = processAIVectorBuffer(aiMesh.mNormals());
         float[] tangents = processAIVectorBufferBackup(aiMesh.mTangents(), normals);
@@ -290,7 +292,7 @@ public class ModelLoader {
             textCoords = new float[numElements];
         }
 
-        return new Mesh(vertices, normals, tangents, bitangents, textCoords, indices, animMeshData.boneIds,
+        return new MeshData(vertices, normals, tangents, bitangents, textCoords, indices, animMeshData.boneIds,
                 animMeshData.weights);
     }
 

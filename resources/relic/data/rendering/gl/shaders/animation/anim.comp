@@ -1,21 +1,5 @@
 #version 460
 
-layout (std430, binding=0) readonly buffer srcBuf {
-    float data[];
-} srcVector;
-
-layout (std430, binding=1) readonly buffer weightsBuf {
-    float data[];
-} weightsVector;
-
-layout (std430, binding=2) readonly buffer bonesBuf {
-    mat4 data[];
-} bonesMatrices;
-
-layout (std430, binding=3) buffer dstBuf {
-    float data[];
-} dstVector;
-
 struct DrawParameters
 {
     int srcOffset;
@@ -24,7 +8,26 @@ struct DrawParameters
     int bonesMatricesOffset;
     int dstOffset;
 };
-uniform DrawParameters drawParameters;
+
+
+layout(std430, binding=0) readonly buffer srcBuf {
+    float data[];
+} srcVector;
+
+layout(std430, binding=1) readonly buffer weightsBuf {
+    float data[];
+} weightsVector;
+
+layout(std430, binding=2) readonly buffer bonesBuf {
+    mat4 data[];
+} bonesMatrices;
+
+layout(std430, binding=3) buffer dstBuf {
+    float data[];
+} dstVector;
+layout(std430, binding=4) buffer drawParametersBuffer {
+    DrawParameters drawParameters;
+};
 
 layout (local_size_x=1, local_size_y=1, local_size_z=1) in;
 

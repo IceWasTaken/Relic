@@ -5,10 +5,9 @@ import imgui.ImGuiIO;
 import net.ice.curio.Curio;
 import net.ice.curio.input.Input;
 import net.ice.curio.window.Window;
-import net.ice.heirloom.ApplicationProperties;
-import net.ice.heirloom.Version;
 import net.ice.heirloom.register.RegistrationManager;
-import net.ice.relic.EngineState;
+import net.ice.relic.Relic;
+import net.ice.relic.common.EngineState;
 import net.ice.relic.common.console.Console;
 import net.ice.relic.common.console.ConsoleItem;
 import net.ice.relic.common.console.register.Command;
@@ -31,13 +30,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static net.ice.relic.EngineState.*;
+import static net.ice.relic.common.EngineState.*;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public abstract class RelicApplication implements ApplicationContext {
-
-    private static final Version RELIC_VERSION = new Version(0, 5, 1);
 
     protected final ApplicationProperties applicationProperties;
 
@@ -144,12 +141,10 @@ public abstract class RelicApplication implements ApplicationContext {
 
     public void pause() {
         clock.setScale(0);
-        changeState(PAUSED);
     }
 
     public void resume() {
         clock.setScale(1);
-        changeState(RUNNING);
     }
 
     private void changeState(EngineState state) {
@@ -197,15 +192,15 @@ public abstract class RelicApplication implements ApplicationContext {
     private void checkApplicationProperties(ApplicationProperties properties) {
         Logger.info("[Relic]: Loading application: '{}'", properties.applicationName());
 
-        if(properties.targetRelicVersion().isNewer(RELIC_VERSION)) {
-            Logger.info("[Relic]: Application '{}' is expecting a newer engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
+        if(properties.targetRelicVersion().isNewer(Relic.getVersion())) {
+            Logger.info("[Relic]: Application '{}' is expecting a newer engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), Relic.getVersion());
         }
 
-        if(properties.targetRelicVersion().isOlder(RELIC_VERSION)) {
-            Logger.info("[Relic]: Application '{}' is expecting an older engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), RELIC_VERSION.toString());
+        if(properties.targetRelicVersion().isOlder(Relic.getVersion())) {
+            Logger.info("[Relic]: Application '{}' is expecting an older engine version than current version. Expected: {} - Current: {}", properties.applicationName(), properties.targetRelicVersion().toString(), Relic.getVersion());
         }
 
-        if(properties.debugMode()) {
+        if(properties.debug()) {
             Logger.info("[Relic]: Debugging for application '{}' enabled", properties.applicationName());
         }
     }
@@ -260,10 +255,6 @@ public abstract class RelicApplication implements ApplicationContext {
 
     public ApplicationProperties getApplicationInfo() {
         return applicationProperties;
-    }
-
-    public static Version getRelicVersion() {
-        return RELIC_VERSION;
     }
 
     public TextureCache getTextureCache() {
