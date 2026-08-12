@@ -10,6 +10,7 @@ gradle.properties
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -47,3 +48,5 @@ bin/
 /src/main/resources/relic/assets/models/sibenik/
 
 /src/main/resources/relic/assets/textures/
+/resources/relic/assets/models/
+/resources/relic/assets/textures/

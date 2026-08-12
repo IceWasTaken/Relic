@@ -1,8 +1,14 @@
 package net.ice.relic.common.test.gui;
 
-import imgui.*;
+import imgui.ImGui;
+import imgui.ImGuiInputTextCallbackData;
+import imgui.ImVec2;
+import imgui.ImVec4;
 import imgui.callback.ImGuiInputTextCallback;
-import imgui.flag.*;
+import imgui.flag.ImGuiColorEditFlags;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiKey;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import net.ice.relic.application.RelicApplication;
@@ -12,20 +18,11 @@ import net.ice.relic.common.console.ConsoleItem;
 import net.ice.relic.common.console.nodes.CommandNode;
 
 import static imgui.ImGui.*;
-import static imgui.ImGui.endChild;
-import static imgui.ImGui.getColumnWidth;
-import static imgui.ImGui.getScrollMaxY;
-import static imgui.ImGui.getScrollY;
-import static imgui.ImGui.popStyleColor;
-import static imgui.ImGui.pushStyleColor;
-import static imgui.ImGui.sameLine;
-import static imgui.ImGui.setScrollHereY;
-import static imgui.ImGui.text;
-import static imgui.ImGui.textUnformatted;
 import static imgui.flag.ImGuiCol.Text;
 import static imgui.flag.ImGuiInputTextFlags.CallbackHistory;
 import static imgui.flag.ImGuiStyleVar.Alpha;
-import static net.ice.relic.common.console.Console.*;
+import static net.ice.relic.common.console.Console.findViaPrefix;
+import static net.ice.relic.common.console.Console.root;
 import static net.ice.relic.common.test.gui.ConsoleGui.palette.*;
 
 public class ConsoleGui {

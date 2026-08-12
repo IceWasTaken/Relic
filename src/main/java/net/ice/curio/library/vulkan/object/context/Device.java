@@ -1,6 +1,5 @@
 package net.ice.curio.library.vulkan.object.context;
 
-import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.library.vulkan.object.sync.Fence;
 import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;

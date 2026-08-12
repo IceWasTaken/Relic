@@ -2,12 +2,12 @@ package net.ice.curio.window.backend.vulkan;
 
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.heirloom.Lifecycle;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.KHRSurface;
 import org.lwjgl.vulkan.VkPhysicalDevice;
-import org.tinylog.Logger;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkSurfaceCapabilitiesKHR;
 import org.lwjgl.vulkan.VkSurfaceFormatKHR;
+import org.tinylog.Logger;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;

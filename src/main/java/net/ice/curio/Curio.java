@@ -2,8 +2,8 @@ package net.ice.curio;
 
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.window.Window;
+import net.ice.relic.application.ApplicationProperties;
 import net.ice.heirloom.Lifecycle;
-import net.ice.heirloom.ApplicationProperties;
 
 public class Curio implements Lifecycle {
 

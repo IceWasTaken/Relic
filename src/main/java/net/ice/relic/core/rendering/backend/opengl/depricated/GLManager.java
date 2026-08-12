@@ -3,26 +3,22 @@ package net.ice.relic.core.rendering.backend.opengl.depricated;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.model.mesh.MeshData;
-import net.ice.relic.core.rendering.backend.BackendManager;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
-import net.ice.relic.core.scene.SceneObject;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL.createCapabilities;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
 
-public class GLManager extends BackendManager implements Lifecycle {
+public class GLManager implements Lifecycle {
 
     //private VertexArrayObject staticArrayObject;
     //private VertexArrayObject animationArrayObject;
@@ -32,32 +28,10 @@ public class GLManager extends BackendManager implements Lifecycle {
 //    private VertexBufferObject bonesIndicesWeightsBuffer;
 //    private VertexBufferObject destinationAnimationBuffer;
 
-    //private ShadowBuffer shadowBuffer;
-    //private ReflectionBuffer reflectionBuffer;
-    //private RefractionRenderer refractionRenderer;
-
-//    private final List<VertexBufferObject> vertexBufferObjects;
-
-    public GLManager(RelicApplication relicApplication) {
-        super(relicApplication);
-
-//        this.vertexBufferObjects = new ArrayList<>();
-    }
-
-    @Override
-    public void init() {
-        //this.shadowBuffer = new ShadowBuffer();
-    }
-
-    @Override
-    public void cleanup() {
-//        vertexBufferObjects.forEach(VertexBufferObject::delete);
-        //animationArrayObject.delete();
-        //staticArrayObject.delete();
-    }
 
     public void loadAnimatedModels() {
-        List<Model> models = application.getCurrentScene().getModels().values().stream().filter(Model::isAnimated).toList();
+        //List<Model> models = application.getCurrentScene().getModels().values().stream().filter(Model::isAnimated).toList();
+        List<Model> models = new ArrayList<>();
         loadBindingPoses(models);
         loadBonesMatricesBuffer(models);
         loadBonesIndicesWeights(models);
@@ -75,41 +49,41 @@ public class GLManager extends BackendManager implements Lifecycle {
         int chunkWeightsOffset = 0;
         int weightsOffset = 0;
 
-        for(Model model : models) {
-            List<SceneObject> entities = model.getSceneObjects();
-            for(SceneObject entity : entities) {
-                List<GLRenderer.MeshDrawData> meshDrawData = model.getMeshDrawData();
-                bindingPoseOffset = chunkBindingPoseOffset;
-                weightsOffset = chunkWeightsOffset;
-                for (MeshData meshData : model.getMeshData()) {
-                    positionsSize += meshData.getVertices().length;
-                    normalsSize += meshData.getNormals().length;
-                    textureCoordsSize += meshData.getTextureCoords().length;
-                    indicesSize += meshData.getIndices().length;
-
-                    int meshSizeInBytes = (meshData.getVertices().length + meshData.getNormals().length * 3 + meshData.getTextureCoords().length) * 4;
-                    meshDrawData.add(new GLRenderer.MeshDrawData(meshSizeInBytes, meshData.getMaterialIndex(), offset,
-                            meshData.getIndices().length, new GLRenderer.AnimMeshDrawData(entity, bindingPoseOffset, weightsOffset)));
-                    bindingPoseOffset += meshSizeInBytes / 4;
-                    int groupSize = (int) Math.ceil((float) meshSizeInBytes / (14 * 4));
-                    weightsOffset += groupSize * 2 * 4;
-                    offset = positionsSize / 3;
-                }
-            }
-            chunkBindingPoseOffset += bindingPoseOffset;
-            chunkWeightsOffset += weightsOffset;
-        }
+//        for(Model model : models) {
+//            List<Entity> entities = model.getEntities();
+//            for(Entity entity : entities) {
+//                List<GLRenderer.MeshDrawData> meshDrawData = model.getMeshDrawData();
+//                bindingPoseOffset = chunkBindingPoseOffset;
+//                weightsOffset = chunkWeightsOffset;
+//                for (Mesh meshData : model.getMeshes()) {
+//                    positionsSize += meshData.getVertices().length;
+//                    normalsSize += meshData.getNormals().length;
+//                    textureCoordsSize += meshData.getTextureCoords().length;
+//                    indicesSize += meshData.getIndices().length;
+//
+//                    int meshSizeInBytes = (meshData.getVertices().length + meshData.getNormals().length * 3 + meshData.getTextureCoords().length) * 4;
+//                    meshDrawData.add(new GLRenderer.MeshDrawData(meshSizeInBytes, meshData.getMaterialIndex(), offset,
+//                            meshData.getIndices().length, new GLRenderer.AnimMeshDrawData(entity, bindingPoseOffset, weightsOffset)));
+//                    bindingPoseOffset += meshSizeInBytes / 4;
+//                    int groupSize = (int) Math.ceil((float) meshSizeInBytes / (14 * 4));
+//                    weightsOffset += groupSize * 2 * 4;
+//                    offset = positionsSize / 3;
+//                }
+//            }
+//            chunkBindingPoseOffset += bindingPoseOffset;
+//            chunkWeightsOffset += weightsOffset;
+//        }
 
 //        destinationAnimationBuffer = new VertexBufferObject();
 //        vertexBufferObjects.add(destinationAnimationBuffer);
         FloatBuffer meshBuffer = MemoryUtil.memAllocFloat(positionsSize + normalsSize * 3 + textureCoordsSize);
-        for (Model model : models) {
-            model.getMeshDrawData().forEach(meshDrawData -> {
-                for(MeshData meshData : model.getMeshData()) {
-                    //populateMeshBuffer(meshBuffer, meshData);
-                }
-            });
-        }
+//        for (Model model : models) {
+//            mode.getMeshDrawData().forEach(meshDrawData -> {
+//                for(Mesh meshData : model.getMeshes()) {
+//                    //populateMeshBuffer(meshBuffer, meshData);
+//                }
+//            });
+//        }
         meshBuffer.flip();
 //        destinationAnimationBuffer.bind(GL_ARRAY_BUFFER);
 //        destinationAnimationBuffer.bufferDataFloat(GL_ARRAY_BUFFER, meshBuffer, DrawType.STATIC);
@@ -121,7 +95,7 @@ public class GLManager extends BackendManager implements Lifecycle {
 //        vertexBufferObjects.add(vertexBufferObject);
         IntBuffer indicesBuffer = MemoryUtil.memAllocInt(indicesSize);
         for (Model model : models) {
-            model.getSceneObjects().forEach(e -> {
+            model.getEntities().forEach(e -> {
                 for (MeshData meshData : model.getMeshData()) {
                     indicesBuffer.put(meshData.getIndices());
                 }
@@ -139,29 +113,29 @@ public class GLManager extends BackendManager implements Lifecycle {
 
 
     private void loadBindingPoses(List<Model> models) {
-        int totalVertices = 0;
-        for (Model model : models) {
-            for (MeshData meshData : model.getMeshData()) {
-                totalVertices += meshData.getVertices().length / 3; // 3 floats per vertex position
-            }
-        }
+//        int totalVertices = 0;
+//        for (Model model : models) {
+//            for (Mesh meshData : model.getMeshes()) {
+//                totalVertices += meshData.getVertices().length / 3; // 3 floats per vertex position
+//            }
+//        }
 
-        int bufferSize = totalVertices * 14; // 14 floats per vertex (pos, norm, tangent, bitangent, texcoord)
-        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(bufferSize);
+//        int bufferSize = totalVertices * 14; // 14 floats per vertex (pos, norm, tangent, bitangent, texcoord)
+//        FloatBuffer meshesBuffer = MemoryUtil.memAllocFloat(bufferSize);
 
         for (Model model : models) {
             for (MeshData meshData : model.getMeshData()) {
                 //populateMeshBuffer(meshesBuffer, meshData);
             }
         }
-        meshesBuffer.flip();
+        //meshesBuffer.flip();
 
 //        bindingPoseBuffer = new VertexBufferObject();
 //        vertexBufferObjects.add(bindingPoseBuffer);
 //        bindingPoseBuffer.bind(GL_SHADER_STORAGE_BUFFER);
 //        bindingPoseBuffer.bufferDataFloat(GL_SHADER_STORAGE_BUFFER, meshesBuffer, DrawType.STATIC);
 
-        MemoryUtil.memFree(meshesBuffer);
+        //MemoryUtil.memFree(meshesBuffer);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -192,7 +166,6 @@ public class GLManager extends BackendManager implements Lifecycle {
                     Matrix4f[] matrices = frame.getBonesMatrices();
                     for (Matrix4f matrix : matrices) {
                         matrix.get(dataBuffer);
-                        // Removed manual position advance because matrix.get() already advances buffer position
                     }
                     frame.clear();
                 }
@@ -244,36 +217,6 @@ public class GLManager extends BackendManager implements Lifecycle {
 //        bonesIndicesWeightsBuffer.bufferData(GL_SHADER_STORAGE_BUFFER, dataBuffer, DrawType.STATIC);
 //        MemoryUtil.memFree(dataBuffer);
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+        //glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     }
-
-//    public VertexArrayObject getAnimationArrayObject() {
-//        return animationArrayObject;
-//    }
-//    public VertexArrayObject getStaticArrayObject() {
-//        return staticArrayObject;
-//    }
-//    public VertexBufferObject getBindingPoseBuffer() {
-//        return bindingPoseBuffer;
-//    }
-//    public VertexBufferObject getBonesIndicesWeightsBuffer() {
-//        return bonesIndicesWeightsBuffer;
-//    }
-//    public VertexBufferObject getBonesMatricesBuffer() {
-//        return bonesMatricesBuffer;
-//    }
-//    public VertexBufferObject getDestinationAnimationBuffer() {
-//        return destinationAnimationBuffer;
-//    }
-    //public ShadowBuffer getShadowBuffer() {
-        //return shadowBuffer;
-    //}
-
-    @Override
-    public RelicApplication getApplication() {
-        return super.getApplication();
-    }
-
-
-
 }

@@ -1,15 +1,19 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated.model;
 
- import net.ice.heirloom.io.exception.AssetLoadException;
- import org.tinylog.Logger;import net.ice.relic.core.cache.MaterialCache;
+import net.ice.heirloom.io.exception.AssetLoadException;
+import net.ice.heirloom.io.resource.Resource;
+import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.model.Material;
 import net.ice.relic.core.model.mesh.MeshData;
-import net.ice.heirloom.io.resource.Resource;
+import net.ice.relic.core.model.Model;
 import org.joml.Matrix4f;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.assimp.*;
+import org.lwjgl.assimp.AIMaterial;
+import org.lwjgl.assimp.AIMesh;
+import org.lwjgl.assimp.AIScene;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +22,9 @@ import static net.ice.relic.common.util.AssimpUtil.*;
 import static net.ice.relic.core.model.Material.processMaterial;
 import static org.lwjgl.assimp.Assimp.*;
 
-@Deprecated
 public class ModelLoader {
 
     public static final int MAX_BONES = 150;
-    private static final Matrix4f IDENTITY_MATRIX = new Matrix4f();
 
     private TextureCache textureCache;
     private MaterialCache materialCache;
@@ -138,8 +140,9 @@ public class ModelLoader {
     }
 
     public Model loadModel(Resource resource, TextureCache textureCache, MaterialCache materialCache, ModelCache cache, int flags) {
-        Logger.debug("[ModelLoader] Loading Model: {}", resource.getFromFileSystem().getName());
-        AIScene aiScene = aiImportFile(resource.getFromFileSystem().getPath(), flags);
+        Logger.debug("[ModelLoader] Loading Model: {}", resource.getAsPath());
+        AIScene aiScene = aiImportFile(resource.getAsPath(), flags);
+
         if (aiScene == null) {
             throw new AssetLoadException("[ModelLoader] Error loading model: " + aiGetErrorString());
         }
@@ -187,10 +190,12 @@ public class ModelLoader {
 
         aiReleaseImport(aiScene);
 
-        cache.addModel(new Model(resource.getFromFileSystem().getName(), meshDataList, animations));
+        Model model = new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+
+        cache.addModel(model);
 
         Logger.info("[ModelLoader] Loaded Model: {}", resource.getFromFileSystem().getName());
-        return new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+        return model;
     }
 
 

@@ -3,9 +3,7 @@ package net.ice.curio.library.opengl.object.framebuffer;
 import net.ice.curio.library.opengl.wrapper.enums.FramebufferTarget;
 import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
-import org.tinylog.Logger;
 
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL30.*;

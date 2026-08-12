@@ -1,6 +1,7 @@
 package net.ice.curio.graphics.memory;
 
 import net.ice.heirloom.sort.SortingUtil;
+import org.joml.Matrix4f;
 
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
@@ -27,6 +28,14 @@ public abstract class Struct {
 
 		for(RecordComponent component : components) {
 			entries.add(StructEntry.fromRecordComponent(component));
+		}
+
+		if(structType == StructType.RAW) {
+			this.fields = entries;
+			this.size = calculateSize();
+			this.stride = calculateStride();
+			this.offsets = generateOffsets();
+			return;
 		}
 
 		//sort by largest to smallest alignment size
@@ -170,5 +179,33 @@ public abstract class Struct {
 
 	public int getStride() {
 		return stride;
+	}
+
+	public static class GenericFloatStruct extends Struct {
+
+		public GenericFloatStruct(StructType structType) {
+			super(structType);
+		}
+
+		@Override
+		public Class<?> getRecord() {
+			return FloatStruct.class;
+		}
+
+		public record FloatStruct(float val){}
+	}
+
+	public static class GenericMatrix4fStruct extends Struct {
+
+		public GenericMatrix4fStruct(StructType structType) {
+			super(structType);
+		}
+
+		@Override
+		public Class<?> getRecord() {
+			return Matrix4fStruct.class;
+		}
+
+		public record Matrix4fStruct(Matrix4f val){}
 	}
 }

@@ -43,10 +43,6 @@ dependencies {
     implementation 'org.tinylog:tinylog-api:2.7.0'
     implementation 'org.tinylog:tinylog-impl:2.7.0'
 
-
-    implementation 'net.bytebuddy:byte-buddy:1.18.11-jdk5'
-    implementation "net.bytebuddy:byte-buddy-agent:1.17.8"
-
     implementation "org.json:json:20250107"
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     //implementation "com.code-disaster.steamworks4j:steamworks4j:1.9.0"
@@ -93,6 +89,7 @@ tasks.named('jar') {
 }
 
 tasks.named('distZip') {
+    enabled = false
     entryCompression = ZipEntryCompression.STORED
 }
 

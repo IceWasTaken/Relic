@@ -3,7 +3,6 @@ package net.ice.curio.library.opengl.object.glsl;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glDeleteShader;
 
 public class GLShaderProgram {
 

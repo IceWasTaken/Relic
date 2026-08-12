@@ -1,11 +1,6 @@
 package net.ice.curio.window;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZE_ALL_CURSOR;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZE_NESW_CURSOR;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZE_NWSE_CURSOR;
-import static org.lwjgl.glfw.GLFW.GLFW_VRESIZE_CURSOR;
-import static org.lwjgl.glfw.GLFW.glfwCreateStandardCursor;
 
 //more of a cursor manager, but i don't care to change it
 public class WindowCursor {

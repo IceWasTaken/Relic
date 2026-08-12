@@ -19,6 +19,16 @@ public class GeometryBuffer {
 	private final int handle;
 
 	public GeometryBuffer(int width, int height) {
+		if(width == 0 || height == 0) {
+			this.posTexture = 0;
+			this.albedoTexture = 0;
+			this.normalTexture = 0;
+			this.pbrTexture = 0;
+			this.depthTexture = 0;
+			this.handle = 0;
+			return;
+		}
+
 		this.handle = glCreateFramebuffers();
 
 		this.posTexture = glCreateTextures(GL_TEXTURE_2D);
@@ -93,6 +103,10 @@ public class GeometryBuffer {
 				throw new RuntimeException("Unknown framebuffer status: " + status);
 			}
 		}
+	}
+
+	public void clear() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	public void bindTextures() {

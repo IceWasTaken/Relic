@@ -4,50 +4,50 @@ import imgui.ImGuiTextFilter;
 import imgui.ImVec2;
 import imgui.type.ImString;
 import net.ice.curio.graphics.object.resource.Texture;
+import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.relic.application.RelicApplication;
-import net.ice.curio.library.opengl.object.resource.BindlessTexture;
+import net.ice.relic.core.gui.GuiContext;
+import net.ice.relic.core.gui.drawable.GuiWindow;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static imgui.ImGui.*;
-import static imgui.ImGui.selectable;
 import static imgui.flag.ImGuiWindowFlags.*;
 
-public class ImageViewer {
+public class ImageViewer extends GuiWindow {
 
     private ImString buffer = new ImString(256);
-    private RelicApplication application;
 
-    private BindlessTexture selectedTexture;
+    private GLTexture selectedTexture;
 
     private int selectedIndex;
 
     public ImageViewer(RelicApplication relicApplication) {
-        this.application = relicApplication;
+	    super(new GuiInfo(
+                "Image Viewer",
+                NoResize | NoScrollbar | AlwaysAutoResize
+        ), relicApplication);
     }
 
 
-    public void draw() {
-        if(begin("Image Viewer", NoResize | NoScrollbar | AlwaysAutoResize)) {
-            ImVec2 size = new ImVec2(20f, 20f);
+    @Override
+    protected void draw(GuiContext ctx) {
+        ImVec2 size = new ImVec2(20f, 20f);
 
-            size.plus(combo());
+        size.plus(combo(ctx));
 
-            size.plus(showImage());
+        size.plus(showImage());
 
-            setWindowSize(size.x, size.y);
-            end();
-        }
-
+        setWindowSize(size.x, size.y);
     }
 
-    private ImVec2 combo() {
+    private ImVec2 combo(GuiContext ctx) {
         ImVec2 size = new ImVec2(0, 0);
 
-        List<Texture> textures = new ArrayList<>(application.getTextureCache().getTextureMaps());
+        List<Texture> textures = new ArrayList<>(ctx.getApplication().getTextureCache().getTextureMaps());
 
-        if(beginCombo("Textures", String.valueOf(textures.get(selectedIndex).getImage().getResource().getPath()))) {
+        if(beginCombo("Textures", selectedIndex + ":" + textures.get(selectedIndex).getImage().getResource().getAsPath())) {
             ImGuiTextFilter filter = new ImGuiTextFilter();
             if(isWindowAppearing()) {
                 setKeyboardFocusHere();
@@ -56,10 +56,10 @@ public class ImageViewer {
             filter.draw("##Filter", 300);
             for (int i = 0; i < textures.size(); i++) {
                 boolean selected = selectedIndex == i;
-                if(filter.passFilter(String.valueOf(textures.get(i).getImage().getResource().getPath()))) {
-                    if(selectable(String.valueOf(textures.get(i).getImage().getResource().getPath()), selected)) {
+                if(filter.passFilter(String.valueOf(textures.get(i).getImage().getResource().getAsPath()))) {
+                    if(selectable(String.valueOf(textures.get(i).getImage().getResource().getAsPath()), selected)) {
                         selectedIndex = i;
-                        selectedTexture = (BindlessTexture) textures.get(i);
+                        selectedTexture = (GLTexture) textures.get(i);
                     }
                 }
             }
@@ -69,7 +69,7 @@ public class ImageViewer {
         }
 
         if(selectedTexture == null) {
-            selectedTexture = (BindlessTexture) textures.getFirst();
+            selectedTexture = (GLTexture) textures.getFirst();
         }
 
         return size;

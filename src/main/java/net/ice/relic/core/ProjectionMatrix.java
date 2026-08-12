@@ -2,13 +2,11 @@ package net.ice.relic.core;
 
 import net.ice.relic.application.RelicApplication;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 public class ProjectionMatrix {
 
     public static final float FOV = (float) Math.toRadians(90.0f);
-    public static final float Z_FAR = 50.f;
+    public static final float Z_FAR = Float.POSITIVE_INFINITY;
     public static final float Z_NEAR = 0.5f;
 
     private static boolean shouldResize = false;

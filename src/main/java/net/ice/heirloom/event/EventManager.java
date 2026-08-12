@@ -20,11 +20,11 @@ public class EventManager {
             }
 
             if (!Modifier.isStatic(method.getModifiers())) {
-                Logger.error("EventManager: Listener method [{}] must be static.", method.getName());
+                Logger.error("[EventManager] Listener method {} must be static.", method.getName());
             }
 
             if (method.getParameterCount() != 1 || !Event.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                Logger.error("EventManager: Listener method [{}] is invalid.", method.getName());
+                Logger.error("[EventManager] Listener method {} is invalid.", method.getName());
                 continue;
             }
 
@@ -33,7 +33,7 @@ public class EventManager {
             listeners.computeIfAbsent(eventType, k -> {
                 ArrayList<Listener> arrayList = new ArrayList<>();
                 arrayList.add(new Listener(null, method));
-                Logger.info("EventManager: Added new listener: [{}]", method.getName());
+                Logger.info("[EventManager] Added new listener: {}#{}", method.getDeclaringClass().getCanonicalName(), method.getName());
                 return arrayList;
 
             });
@@ -48,7 +48,7 @@ public class EventManager {
             }
 
             if (method.getParameterCount() != 1 || !Event.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                Logger.error("EventManager: Listener method [{}] is invalid.", method.getName());
+                Logger.error("[EventManager] Listener method {} is invalid.", method.getName());
                 continue;
             }
 

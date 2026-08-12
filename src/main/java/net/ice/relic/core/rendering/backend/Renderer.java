@@ -1,8 +1,8 @@
 package net.ice.relic.core.rendering.backend;
 
+import net.ice.curio.config.RendererConfig;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.application.RelicApplication;
-import net.ice.curio.config.RendererConfig;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.vulkan.VulkanRenderer;
 

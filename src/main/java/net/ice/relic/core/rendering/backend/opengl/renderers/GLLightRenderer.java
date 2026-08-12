@@ -5,19 +5,15 @@ import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.ShadowData;
 import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
+import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.QuadMesh;
-import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
 import org.joml.Vector4f;
 
-import java.util.List;
-
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE4;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 
@@ -40,10 +36,7 @@ public class GLLightRenderer implements Lifecycle {
 
     @Override
     public void init() {
-        this.shaderProgram = new GLShaderProgram().attach(List.of(
-                new GLShader(ShaderType.VERTEX).load("lights.vert", ShaderType.VERTEX),
-                new GLShader(ShaderType.FRAGMENT).load("lights.frag", ShaderType.FRAGMENT)
-        ));
+        this.shaderProgram = new GLShaderProgram("lights");
 
         this.uniformBufferObject = new Uniforms(shaderProgram);
 
@@ -108,7 +101,8 @@ public class GLLightRenderer implements Lifecycle {
 
         uniformBufferObject.setUniform("shadowSampler", 4);
 
-        quadMesh.getMeshVAO().bind();glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
+        quadMesh.getMeshVAO().bind();
+        glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glEnable(GL_FRAMEBUFFER_SRGB);
         shaderProgram.unbind();

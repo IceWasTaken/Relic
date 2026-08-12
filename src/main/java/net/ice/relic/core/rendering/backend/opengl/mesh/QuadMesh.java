@@ -1,29 +1,22 @@
 package net.ice.relic.core.rendering.backend.opengl.mesh;
 
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.curio.library.opengl.object.buffer.GLBuffer;
-import net.ice.curio.library.opengl.object.buffer.IndexBufferObject;
-import net.ice.curio.library.opengl.object.buffer.VertexBufferObject;
-import net.ice.curio.library.opengl.wrapper.enums.Usage;
-import org.lwjgl.system.MemoryUtil;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
+import net.ice.curio.library.opengl.object.GLBuffer;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL45.*;
-import static org.lwjgl.opengl.GL45.glVertexArrayAttribBinding;
 
 public class QuadMesh {
 
     private int vertexCount;
 
-    private VertexArrayObject meshVAO;
+    private VertexArrayObject vertexArrayObject;
     private List<GLBuffer> meshVBOs;
+
+    private final GLBuffer vertexBuffer;
+    private final GLBuffer textureCoordinateBuffer;
+    private final GLBuffer indexBuffer;
 
     private final float[] positions = new float[]{
             -1.0f, 1.0f, 0.0f,
@@ -44,52 +37,43 @@ public class QuadMesh {
     };
 
     public QuadMesh() {
-        meshVBOs = new ArrayList<>();
+        this.vertexArrayObject = new VertexArrayObject();
+        this.vertexBuffer = new GLBuffer(positions.length * 4L, GL_MAP_WRITE_BIT);
+        this.textureCoordinateBuffer = new GLBuffer(textCoords.length * 4L, GL_MAP_WRITE_BIT);
+        this.indexBuffer = new GLBuffer(indices.length * 4L, GL_MAP_WRITE_BIT);
 
         vertexCount = indices.length;
 
-        this.meshVAO = new VertexArrayObject();
-        meshVAO.bind();
+        vertexArrayObject.bind();
 
-        VertexBufferObject vertexVBO = new VertexBufferObject();
-        meshVBOs.add(vertexVBO);
-        FloatBuffer positionsBuffer = MemoryUtil.memCallocFloat(positions.length).put(positions).flip();
-        vertexVBO.bufferData(positionsBuffer, Usage.STATIC_DRAW);
+        vertexBuffer.putFloat(positions);
+        textureCoordinateBuffer.putFloat(textCoords);
+        indexBuffer.putInt(indices);
 
-        VertexBufferObject textureCoordinateVBO = new VertexBufferObject();
-        meshVBOs.add(textureCoordinateVBO);
-        FloatBuffer textCoordsBuffer = MemoryUtil.memCallocFloat(textCoords.length).put(textCoords).flip();
-        textureCoordinateVBO.bufferData(textCoordsBuffer, Usage.STATIC_DRAW);
 
-        glVertexArrayVertexBuffer(meshVAO.getHandle(), 0, vertexVBO.getHandle(), 0, 12);
-        glVertexArrayVertexBuffer(meshVAO.getHandle(), 1, textureCoordinateVBO.getHandle(), 0, 8);
+        vertexArrayObject.vertexBuffer(0, vertexBuffer, 0, 12);
+        vertexArrayObject.vertexBuffer(1, textureCoordinateBuffer, 0, 8);
 
-        glVertexArrayAttribFormat(meshVAO.getHandle(), 0, 3, GL_FLOAT, false, 0);
-        glVertexArrayAttribFormat(meshVAO.getHandle(), 1, 2, GL_FLOAT, false, 0);
+        vertexArrayObject.attributeFormat(0, 3, GL_FLOAT, false, 0);
+        vertexArrayObject.attributeFormat(1, 2, GL_FLOAT, false, 0);
 
-        glVertexArrayAttribBinding(meshVAO.getHandle(), 0, 0);
-        glVertexArrayAttribBinding(meshVAO.getHandle(), 1, 1);
+        vertexArrayObject.attributeBinding(0, 0);
+        vertexArrayObject.attributeBinding(1, 1);
 
-        glEnableVertexArrayAttrib(meshVAO.getHandle(), 0);
-        glEnableVertexArrayAttrib(meshVAO.getHandle(), 1);
+        vertexArrayObject.enableAttribute(0);
+        vertexArrayObject.enableAttribute(1);
 
-        IndexBufferObject indicesVBO = new IndexBufferObject();
-        meshVBOs.add(indicesVBO);
-        IntBuffer indicesBuffer = MemoryUtil.memCallocInt(indices.length).put(indices).flip();
-        indicesVBO.bufferData(indicesBuffer, Usage.STATIC_DRAW);
+        vertexArrayObject.elementBuffer(indexBuffer);
 
-        glVertexArrayElementBuffer(meshVAO.getHandle(), indicesVBO.getHandle());
+        vertexBuffer.unmap();
+        textureCoordinateBuffer.unmap();
+        indexBuffer.unmap();
 
         glBindVertexArray(0);
-
-        MemoryUtil.memFree(positionsBuffer);
-        MemoryUtil.memFree(textCoordsBuffer);
-        MemoryUtil.memFree(indicesBuffer);
     }
 
     public void cleanup() {
-        meshVBOs.forEach(b -> glDeleteBuffers(b.getHandle()));
-        meshVAO.delete();
+        vertexArrayObject.delete();
     }
 
     public int getVertexCount() {
@@ -97,6 +81,6 @@ public class QuadMesh {
     }
 
     public VertexArrayObject getMeshVAO() {
-        return meshVAO;
+        return vertexArrayObject;
     }
 }
