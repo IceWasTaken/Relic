@@ -45,7 +45,7 @@ dependencies {
 
 
     implementation 'net.bytebuddy:byte-buddy:1.18.11-jdk5'
-    implementation "net.bytebuddy:byte-buddy-agent:1.17.8"
+    implementation "net.bytebuddy:byte-buddy-agent:1.18.11"
 
     implementation "org.json:json:20250107"
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
