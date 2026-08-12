@@ -43,7 +43,6 @@ dependencies {
     implementation 'org.tinylog:tinylog-api:2.7.0'
     implementation 'org.tinylog:tinylog-impl:2.7.0'
 
-    implementation "org.json:json:20250107"
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     //implementation "com.code-disaster.steamworks4j:steamworks4j:1.9.0"
     //implementation "com.code-disaster.steamworks4j:steamworks4j-server:1.9.0"
