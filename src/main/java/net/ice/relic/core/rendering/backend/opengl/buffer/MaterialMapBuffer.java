@@ -7,8 +7,9 @@ import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.cache.MaterialCache;
-import net.ice.relic.core.model.Material;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.model.material.Material;
+import net.ice.relic.core.model.material.MaterialColor;
+import net.ice.relic.core.model.material.MaterialFactor;
 
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
@@ -57,11 +58,11 @@ public class MaterialMapBuffer implements Lifecycle {
 		for (Material material : materialCache.getMaterialsList()) {
 			int base = materialBufferStruct.getStride() * index;
 
-			materialBuffer.putVec4f(materialBufferStruct.getOffset(0) + base, material.getDiffuseColor().div().vec4f());
-			materialBuffer.putVec4f(materialBufferStruct.getOffset(1) + base, material.getSpecularColor().div().vec4f());
-			materialBuffer.putFloat(materialBufferStruct.getOffset(2) + base, material.getReflectance());
-			materialBuffer.putFloat(materialBufferStruct.getOffset(3) + base, material.getRoughnessFactor());
-			materialBuffer.putFloat(materialBufferStruct.getOffset(4) + base, material.getMetallicFactor());
+			materialBuffer.putVec4f(materialBufferStruct.getOffset(0) + base, material.getColor(MaterialColor.DIFFUSE).div().vec4f());
+			materialBuffer.putVec4f(materialBufferStruct.getOffset(1) + base, material.getColor(MaterialColor.SPECULAR).div().vec4f());
+			materialBuffer.putFloat(materialBufferStruct.getOffset(2) + base, material.getFactor(MaterialFactor.REFLECTANCE));
+			materialBuffer.putFloat(materialBufferStruct.getOffset(3) + base, material.getFactor(MaterialFactor.ROUGHNESS_FACTOR));
+			materialBuffer.putFloat(materialBufferStruct.getOffset(4) + base, material.getFactor(MaterialFactor.METALLIC_FACTOR));
 
 			base = mapBufferStruct.getStride() * index;
 

@@ -10,11 +10,13 @@ import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
 import org.joml.Random;
 import org.joml.Vector3f;
 
+import static org.lwjgl.assimp.Assimp.aiProcess_PreTransformVertices;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
 
 public class TestingScene extends Scene {
@@ -28,9 +30,9 @@ public class TestingScene extends Scene {
     @Override
     protected void sceneInit() {
 
-        Model scarabModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/scarab/scarab.dae"), false);
-        Model sponzaModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/sponza/Sponza.gltf"), false);
-        Model companionCube = getModelLoader().loadModel(Resource.getResourceFromString("relic:assets/models/CompanionCubes/EDITOR_companion_cube.obj"), false);
+        Model scarabModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/scarab/scarab.dae"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
+        Model sponzaModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/sponza/Sponza.gltf"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
+        Model companionCube = getModelLoader().loadModel(Resource.getResourceFromString("relic:assets/models/CompanionCubes/EDITOR_companion_cube.obj"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
 
         Entity scarabEntity = createEntity("scarab");
         scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));

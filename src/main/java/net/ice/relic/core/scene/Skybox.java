@@ -1,6 +1,6 @@
 package net.ice.relic.core.scene;
 
-import net.ice.relic.core.model.Material;
+import net.ice.relic.core.model.material.Material;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 

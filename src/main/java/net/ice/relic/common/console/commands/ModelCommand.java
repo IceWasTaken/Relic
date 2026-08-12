@@ -6,6 +6,9 @@ import net.ice.relic.common.console.nodes.ArgumentNode;
 import net.ice.relic.common.console.nodes.CommandNode;
 import net.ice.relic.common.console.register.Command;
 import net.ice.relic.common.console.register.CommandRegistry;
+import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
+
+import static org.lwjgl.assimp.Assimp.aiProcess_PreTransformVertices;
 
 @AutoRegister
 public class ModelCommand implements Command {
@@ -21,7 +24,7 @@ public class ModelCommand implements Command {
 				.setActivity(((ctx, args) -> {
 					ctx.getCurrentScene().getModelLoader().loadModel(
 							(Resource) args.get("resource"),
-							(Boolean) args.get("animated")
+							ModelLoader.DEFAULT_FLAGS | (((boolean) args.get("animated")) ? 0 : aiProcess_PreTransformVertices)
 					);
 				}));
 	}

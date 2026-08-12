@@ -109,7 +109,6 @@ public class AssimpUtil {
     }
 
     public static RGBColor getMaterialColor(AIMaterial aiMaterial, String matKey) {
-
         AIColor4D color = AIColor4D.create();
         int result = aiGetMaterialColor(aiMaterial, matKey, aiTextureType_NONE, 0, color);
         if (result == aiReturn_SUCCESS) {

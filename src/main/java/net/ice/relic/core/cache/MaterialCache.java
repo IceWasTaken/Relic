@@ -1,6 +1,6 @@
 package net.ice.relic.core.cache;
 
-import net.ice.relic.core.model.Material;
+import net.ice.relic.core.model.material.Material;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;

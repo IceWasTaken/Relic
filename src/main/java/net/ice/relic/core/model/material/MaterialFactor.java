@@ -1,0 +1,22 @@
+package net.ice.relic.core.model.material;
+
+//mostly just properties taken from org.lwjgl.assimp.Assimp
+public enum MaterialFactor {
+
+	METALLIC_FACTOR,
+	ROUGHNESS_FACTOR,
+	ANISOTROPY_FACTOR,
+	SPECULAR_FACTOR,
+	GLOSSINESS_FACTOR,
+
+	SHEEN_COLOR_FACTOR,
+	SHEEN_ROUGHNESS_FACTOR,
+
+	CLEARCOAT_FACTOR,
+	CLEARCOAT_ROUGHNESS_FACTOR,
+
+	TRANSMISSION_FACTOR,
+	VOLUME_THICKNESS_FACTOR,
+
+	REFLECTANCE
+}
