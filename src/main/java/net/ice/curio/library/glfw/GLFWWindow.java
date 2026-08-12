@@ -93,6 +93,9 @@ public final class GLFWWindow implements Lifecycle {
         glfwSetErrorCallback(null).free();
     }
 
+    public void refreshName() {
+        glfwSetWindowTitle(windowHandle, windowProperties.getTitle());
+    }
 
 
     private void setupCallbacks() {
@@ -215,4 +218,7 @@ public final class GLFWWindow implements Lifecycle {
         return glfwWindowShouldClose(windowHandle);
     }
 
+    public GLFWWindowProperties getWindowProperties() {
+        return windowProperties;
+    }
 }

@@ -79,7 +79,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
-        setupDebugMessageCallback();
+        //setupDebugMessageCallback();
         //SystemInfo.logGLInfo();
 
         this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
@@ -119,7 +119,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
         glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
 
-        visualizeRenderer.render();
+        //visualizeRenderer.render();
         guiRenderer.render();
 
         bufferManager.sync();

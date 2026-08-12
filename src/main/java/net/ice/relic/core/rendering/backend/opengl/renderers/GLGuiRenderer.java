@@ -23,7 +23,7 @@ import org.joml.Vector2f;
 import java.nio.ByteBuffer;
 
 import static imgui.flag.ImGuiBackendFlags.HasMouseCursors;
-import static imgui.flag.ImGuiConfigFlags.NavEnableKeyboard;
+import static imgui.flag.ImGuiConfigFlags.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
@@ -68,6 +68,8 @@ public class GLGuiRenderer implements Lifecycle {
         imGuiIO.setBackendFlags(HasMouseCursors);
         imGuiIO.setBackendPlatformName("imgui_java_impl_glfw");
         imGuiIO.setConfigWindowsMoveFromTitleBarOnly(true);
+        imGuiIO.addConfigFlags(DockingEnable);
+        imGuiIO.addConfigFlags(ViewportsEnable);
 
         imGuiIO.setDisplaySize(glRenderer.getApplication().getWindow().getWidth(), glRenderer.getApplication().getWindow().getHeight());
 

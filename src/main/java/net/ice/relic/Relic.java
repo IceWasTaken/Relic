@@ -5,7 +5,7 @@ import net.ice.relic.application.RelicApplication;
 
 public final class Relic {
 
-	private static final Version RELIC_VERSION = new Version(0, 5, 1);
+	private static final Version RELIC_VERSION = new Version(0, 6, 0);
 
 	//private final RelicApplication relicApplication;
 

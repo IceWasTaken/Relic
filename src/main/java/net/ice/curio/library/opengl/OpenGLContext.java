@@ -26,11 +26,11 @@ public class OpenGLContext extends GraphicsContext {
     public void init() {
         this.capabilities = GL.createCapabilities();
 
-//        checkCapability(capabilities.OpenGL46, "OpenGL backend requires an OpenGL 4.6 capable GPU");
-//        checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
-//        checkCapability(capabilities.GL_ARB_gpu_shader_int64, "OpenGL backend requires GL_ARB_gpu_shader_int64 extension");
+        checkCapability(capabilities.OpenGL46, "OpenGL backend requires an OpenGL 4.6 capable GPU");
+        checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
+        checkCapability(capabilities.GL_ARB_gpu_shader_int64, "OpenGL backend requires GL_ARB_gpu_shader_int64 extension");
 
-        //detectMemoryInfoExtension();
+        detectMemoryInfoExtension();
     }
 
     @Override

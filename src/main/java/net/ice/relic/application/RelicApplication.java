@@ -7,7 +7,7 @@ import net.ice.curio.input.Input;
 import net.ice.curio.window.Window;
 import net.ice.heirloom.register.RegistrationManager;
 import net.ice.relic.Relic;
-import net.ice.relic.common.EngineState;
+import net.ice.relic.core.EngineState;
 import net.ice.relic.common.console.Console;
 import net.ice.relic.common.console.ConsoleItem;
 import net.ice.relic.common.console.register.Command;
@@ -30,7 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static net.ice.relic.common.EngineState.*;
+import static net.ice.relic.core.EngineState.*;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
@@ -73,6 +73,9 @@ public abstract class RelicApplication implements ApplicationContext {
         this.modelCache = new ModelCache();
         this.textureCache = new TextureCache(curio.getGraphicsContext());
         this.materialCache = new MaterialCache();
+
+        curio.getWindow().getWindow().getWindowProperties().setTitle(info.applicationName());
+        curio.getWindow().getWindow().refreshName();
     }
 
     public void run() {

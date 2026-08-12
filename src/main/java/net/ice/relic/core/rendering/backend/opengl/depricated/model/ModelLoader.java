@@ -22,7 +22,6 @@ import static net.ice.relic.common.util.AssimpUtil.*;
 import static net.ice.relic.core.model.Material.processMaterial;
 import static org.lwjgl.assimp.Assimp.*;
 
-@Deprecated
 public class ModelLoader {
 
     public static final int MAX_BONES = 150;

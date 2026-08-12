@@ -25,7 +25,7 @@ public class TextureCache {
     }
 
     public void init() {
-        createTexture(DEFAULT_TEXTURE);
+        //createTexture(DEFAULT_TEXTURE);
     }
 
     public void cleanup() {
