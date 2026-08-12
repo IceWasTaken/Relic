@@ -1,16 +1,17 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
-import net.ice.relic.core.rendering.shader.IShader;
+import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.rendering.shader.ShaderType;
+import org.tinylog.Logger;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import static org.lwjgl.opengl.GL43.*;
 
-public class GLShader implements IShader {
+public class GLShader implements Lifecycle {
 
     private final int shaderID;
     private final ShaderType type;
@@ -38,22 +39,20 @@ public class GLShader implements IShader {
         validateShader(shaderID);
     }
 
-    @Override
     public GLShader load(String fileName, ShaderType type) {
         StringBuilder shaderSource = new StringBuilder();
+        fileName = "resources/relic/data/rendering/gl/shaders/" + fileName;
 
-        try(InputStream stream = GLShader.class.getResourceAsStream("/relic/data/rendering/gl/shaders/" + fileName)) {
-            if(stream != null) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        shaderSource.append(line).append("\n");
+        Logger.info("[GLShader]: Loading shader: {}", fileName);
+        try(InputStream stream = new FileInputStream(fileName)) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    shaderSource.append(line).append("\n");
                     }
-
-                }
             }
-        } catch (IOException exception) {
-            throw new RuntimeException("Unable to load shader (or shader not found): " + fileName, exception);
+        } catch (Exception exception) {
+            Logger.error("[GLShader]: Error while loading shader: {}", exception);
         }
 
         return createShader(type, shaderSource.toString());
@@ -71,8 +70,7 @@ public class GLShader implements IShader {
         glDeleteShader(shaderID);
     }
 
-    @Override
-    public long getHandle() {
+    public int getHandle() {
         return shaderID;
     }
 

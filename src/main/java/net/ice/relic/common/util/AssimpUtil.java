@@ -8,7 +8,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Integer.parseInt;
 import static org.lwjgl.assimp.Assimp.*;
 
 public class AssimpUtil {

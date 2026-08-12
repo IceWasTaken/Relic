@@ -1,6 +1,6 @@
 package net.ice.relic.core.cache;
 
-import net.ice.relic.core.rendering.backend.opengl.depricated.model.Model;
+import net.ice.relic.core.model.Model;
 
 import java.util.HashMap;
 import java.util.Map;

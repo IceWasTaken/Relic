@@ -1,5 +1,7 @@
 package net.ice.relic.common.console;
 
+import net.ice.heirloom.io.resource.Resource;
+
 public interface Argument<T> {
 
     T parse(String input);
@@ -9,6 +11,14 @@ public interface Argument<T> {
         @Override
         public String parse(String input) {
             return input;
+        }
+
+    }
+    public class ResourceArgument implements Argument<Resource> {
+
+        @Override
+        public Resource parse(String input) {
+            return Resource.getResourceFromString(input);
         }
 
     }

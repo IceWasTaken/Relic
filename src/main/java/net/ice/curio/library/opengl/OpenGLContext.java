@@ -2,15 +2,17 @@ package net.ice.curio.library.opengl;
 
 import net.ice.curio.Curio;
 import net.ice.curio.graphics.context.GraphicsContext;
+import net.ice.curio.graphics.context.GraphicsContextLogger;
 import net.ice.curio.graphics.exception.UnsupportedGraphicsContextException;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
+import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
+import org.tinylog.Logger;
 
 public class OpenGLContext extends GraphicsContext {
 
@@ -24,15 +26,22 @@ public class OpenGLContext extends GraphicsContext {
     public void init() {
         this.capabilities = GL.createCapabilities();
 
-        if(!capabilities.OpenGL46) {
-            throw new UnsupportedGraphicsContextException("OpenGL backend requires an OpenGL 4.6 capable GPU");
-        }
-        if(!capabilities.GL_ARB_bindless_texture) {
-            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_bindless_texture extension");
-        }
-        if(!capabilities.GL_ARB_gpu_shader_int64) {
-            throw new UnsupportedGraphicsContextException("OpenGL backend requires GL_ARB_gpu_shader_int64");
-        }
+        checkCapability(capabilities.OpenGL46, "OpenGL backend requires an OpenGL 4.6 capable GPU");
+        checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
+        checkCapability(capabilities.GL_ARB_gpu_shader_int64, "OpenGL backend requires GL_ARB_gpu_shader_int64 extension");
+
+        detectMemoryInfoExtension();
+    }
+
+    @Override
+    public void cleanup() {
+        GL.destroy();
+        capabilities = null;
+    }
+
+    @Override
+    public GraphicsContextLogger createContextLogger() {
+        return new OpenGLContextLogger();
     }
 
     @Override
@@ -43,6 +52,26 @@ public class OpenGLContext extends GraphicsContext {
     @Override
     public Texture createTexture(Bitmap bitmap) {
         return new BindlessTexture(GLTexture.defaultTextureSettings.buildWithDataAndMipmaps(bitmap));
+    }
+
+    private void checkCapability(boolean capability, String msg) {
+        if(!capability) {
+            throw new UnsupportedGraphicsContextException("[OpenGLContext] " + msg);
+        }
+    }
+
+    private void detectMemoryInfoExtension() {
+        if(capabilities.GL_NVX_gpu_memory_info) {
+            Logger.info("[OpenGLContext] Using GL_NVX_gpu_memory_info extension for graphics memory information.");
+
+            return;
+        }
+        if(capabilities.GL_ATI_meminfo) {
+            Logger.info("[OpenGLContext] Using GL_ATI_meminfo extension for graphics memory information.");
+
+            return;
+        }
+        Logger.error("[OpenGLContext] Unable to find suitable graphics memory info extension. No graphics memory usage info will be available.");
     }
 }
 

@@ -3,14 +3,10 @@ package net.ice.relic.core.rendering.backend.opengl.renderers;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShader;
-import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.Uniforms;
+import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.QuadMesh;
-import net.ice.relic.core.rendering.shader.ShaderType;
 import net.ice.relic.core.scene.Scene;
-
-import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -35,10 +31,8 @@ public class GLPostRenderer implements Lifecycle {
 
 	@Override
 	public void init() {
-		this.shaderProgram = new GLShaderProgram().attach(List.of(
-				new GLShader(ShaderType.VERTEX).load("post.vert", ShaderType.VERTEX),
-				new GLShader(ShaderType.FRAGMENT).load("post.frag", ShaderType.FRAGMENT)
-		));
+		this.shaderProgram = new GLShaderProgram("post");
+
 
 		this.uniforms = new Uniforms(shaderProgram);
 
@@ -49,19 +43,22 @@ public class GLPostRenderer implements Lifecycle {
 
 	@Override
 	public void render() {
-		shaderProgram.bind();
-		Scene scene = renderer.getApplication().getCurrentScene();
+		if(enabled) {
+			shaderProgram.bind();
+			Scene scene = renderer.getApplication().getCurrentScene();
 
-		viewport.bind();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			viewport.bind();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		renderer.getSwapBuffer().bindTextures();
-		uniforms.setUniform("inputSampler", 0);
+			renderer.getLightBuffer().bindTextures(0);
+			uniforms.setUniform("inputSampler", 0);
 
-		quadMesh.getMeshVAO().bind();
-		glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
+			quadMesh.getMeshVAO().bind();
+			glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
 
-		shaderProgram.unbind();
+			shaderProgram.unbind();
+		}
+
 	}
 
 	public boolean shouldRender() {
@@ -73,6 +70,6 @@ public class GLPostRenderer implements Lifecycle {
 	}
 
 	public void resize(int width, int height) {
-
+		this.viewport.resize(width, height);
 	}
 }

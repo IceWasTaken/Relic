@@ -15,7 +15,6 @@ import static net.ice.curio.library.opengl.wrapper.enums.texture.parameter.WrapP
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
 import static org.lwjgl.opengl.GL14.GL_TEXTURE_COMPARE_MODE;
-import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.opengl.GL45.*;
 
 public class GLTexture extends Texture {
@@ -42,8 +41,8 @@ public class GLTexture extends Texture {
         this.textureType = texture.textureType;
     }
 
-    public void bind() {
-        glBindTexture(textureType.getGLEnum(), textureHandle);
+    public void bind(int pos) {
+        glBindTextureUnit(pos, textureHandle);
     }
 
     public void unbind() {

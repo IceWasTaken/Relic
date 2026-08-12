@@ -1,10 +1,8 @@
 package net.ice.curio.library.opengl.object;
 
-import net.ice.curio.library.opengl.wrapper.enums.Format;
-
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL45.glCreateVertexArrays;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+import static org.lwjgl.opengl.GL45.*;
 
 public class VertexArrayObject {
 
@@ -18,19 +16,28 @@ public class VertexArrayObject {
         glBindVertexArray(handle);
     }
 
-    @Deprecated
-    public void enableVertexAttributeArray(int index) {
-        glEnableVertexAttribArray(index);
+    public void unbind() {
+        glBindVertexArray(0);
     }
 
-    @Deprecated
-    public void disableVertexAttribArray(int index) {
-        glDisableVertexAttribArray(index);
+    public void elementBuffer(GLBuffer indexBuffer) {
+        glVertexArrayElementBuffer(handle, indexBuffer.getHandle());
     }
 
-    @Deprecated
-    public void vertexAttribPointer(int index, int size, Format format, boolean normalized, int stride, long pointer) {
-        glVertexAttribPointer(index, size, format.getGLEnum(), normalized, stride, pointer);
+    public void vertexBuffer(int bindingIndex, GLBuffer glBuffer, int offset, int stride) {
+        glVertexArrayVertexBuffer(handle, bindingIndex, glBuffer.getHandle(), offset, stride);
+    }
+
+    public void attributeFormat(int index, int size, int type, boolean normalized, int relativeOffset) {
+        glVertexArrayAttribFormat(handle, index, size, type, normalized, relativeOffset);
+    }
+
+    public void attributeBinding(int attributeIndex, int bindingIndex) {
+        glVertexArrayAttribBinding(handle, attributeIndex, bindingIndex);
+    }
+
+    public void enableAttribute(int index) {
+        glEnableVertexArrayAttrib(handle, index);
     }
 
     public int getHandle() {

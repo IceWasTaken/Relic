@@ -3,8 +3,8 @@ package net.ice.relic.core.cache;
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
-import org.tinylog.Logger;
 import net.ice.heirloom.io.resource.Resource;
+import org.tinylog.Logger;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class TextureCache {
     }
 
     public void init() {
-        createTexture(DEFAULT_TEXTURE);
+        //createTexture(DEFAULT_TEXTURE);
     }
 
     public void cleanup() {

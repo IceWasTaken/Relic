@@ -43,6 +43,10 @@ public class GLFWWindowProperties {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public GLFWPlatform getGlfwPlatform() {
         return glfwPlatform;
     }
