@@ -61,7 +61,7 @@ Just me. icewastaken_ on discord.
   * Refactor that created the RelicApplication class and better versioning
   * Introduced a now scrapped Vulkan implementation
 * 0.2
-  * Also really tracked on GitHub
+  * Also not really tracked on GitHub
   * Introduced bindless textures
 * 0.1
   * Mostly just a collection of other people's code. 
