@@ -5,6 +5,13 @@ Java based game engine. Features distinct backends for OpenGL and Vulkan.
 ## Description
 
 Heavily in development game engine. Based upon bindings from LWJGL. 
+Contains 3 main packages:
+* Relic
+  * The engine itself. Depends on Curio and Heirloom
+* Curio
+  * Backend that wraps OpenGL, Vulkan, GLFW, etc into one public facing API that Relic uses
+* Heirloom
+  * Non-relic specific utilities, basically the only package that makes sense for use outside of this project
 
 ## Dependencies
 
