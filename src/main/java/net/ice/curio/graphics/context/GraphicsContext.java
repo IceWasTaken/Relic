@@ -3,6 +3,7 @@ package net.ice.curio.graphics.context;
 import net.ice.curio.Curio;
 import net.ice.curio.config.RendererConfig;
 import net.ice.curio.graphics.object.Viewport;
+import net.ice.curio.graphics.object.pipeline.shader.Shader;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.OpenGLContext;
 import net.ice.curio.library.stb.Bitmap;
@@ -24,6 +25,7 @@ public abstract class GraphicsContext implements Lifecycle {
 
     public abstract Texture createTexture(Bitmap bitmap);
     public abstract Viewport createViewport(int width, int height);
+    public abstract <T> Shader<T>[] createShaderProgram();
 
     public static GraphicsContext getGraphicsContext(Curio curio) {
         if (INSTANCE == null) {

@@ -4,6 +4,7 @@ import net.ice.curio.Curio;
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.context.GraphicsContextLogger;
 import net.ice.curio.graphics.object.Viewport;
+import net.ice.curio.graphics.object.pipeline.shader.Shader;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.object.VulkanViewport;
@@ -43,6 +44,11 @@ public class VulkanContext extends GraphicsContext {
     @Override
     public Viewport createViewport(int width, int height) {
         return new VulkanViewport(width, height);
+    }
+
+    @Override
+    public <T> Shader<T>[] createShaderProgram() {
+        return new Shader[0];
     }
 
     public VulkanInstance getInstance() {

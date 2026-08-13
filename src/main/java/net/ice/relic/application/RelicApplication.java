@@ -12,7 +12,6 @@ import net.ice.relic.common.console.Console;
 import net.ice.relic.common.console.ConsoleItem;
 import net.ice.relic.common.console.register.Command;
 import net.ice.relic.common.console.register.CommandRegistry;
-import net.ice.relic.core.Stats;
 import net.ice.relic.core.Timer;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
@@ -42,7 +41,6 @@ public abstract class RelicApplication implements ApplicationContext {
     protected EngineState currentState;
 
     protected final Timer clock;
-    protected final Stats stats;
     protected final RegistrationManager registrationManager;
 
     protected final Curio curio;
@@ -64,7 +62,6 @@ public abstract class RelicApplication implements ApplicationContext {
         this.applicationProperties = info;
 
         this.clock = new Timer();
-        this.stats = new Stats(this);
         this.registrationManager = new RegistrationManager();
 
         this.curio = new Curio(info);
@@ -245,10 +242,6 @@ public abstract class RelicApplication implements ApplicationContext {
     @Override
     public Timer getClock() {
         return clock;
-    }
-
-    public Stats getStats() {
-        return stats;
     }
 
     public Scene getCurrentScene() {

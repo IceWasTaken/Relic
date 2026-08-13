@@ -1,9 +1,5 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
-import net.ice.relic.core.rendering.shader.ShaderType;
-
-import static org.lwjgl.opengl.GL43.*;
-
 @Deprecated
 public class AnimationRenderer {
 

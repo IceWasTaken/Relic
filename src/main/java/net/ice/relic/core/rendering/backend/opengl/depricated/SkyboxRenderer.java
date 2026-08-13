@@ -1,11 +1,5 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
-import net.ice.relic.core.rendering.shader.ShaderType;
-import net.ice.relic.core.scene.Scene;
-import org.joml.Matrix4f;
-
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-
 //@Deprecated
 //public class SkyboxRenderer extends AbstractGLRenderer {
 //

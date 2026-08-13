@@ -9,11 +9,13 @@ import org.tinylog.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK11.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 import static org.lwjgl.vulkan.VK12.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -84,6 +86,10 @@ public class Device implements Lifecycle {
         }
     }
 
+    public void createShaderModule(VkShaderModuleCreateInfo shaderCreateInfo, LongBuffer handleBuffer) {
+        checkVulkan(vkCreateShaderModule(vkDevice, shaderCreateInfo, null, handleBuffer), "[Device]: Failed to create new shader module");
+    }
+
     public Fence createFence(boolean signaled) {
         return new Fence(vkDevice, signaled);
     }
@@ -126,7 +132,7 @@ public class Device implements Lifecycle {
             for(VkExtensionProperties properties : physicalDevice.getVkDeviceExtensions()) {
                 String name = properties.extensionNameString();
                 extensions.add(name);
-                Logger.info("Device: Found supported extension: [{}]", name);
+                Logger.info("[Device]: Found supported extension: [{}]", name);
             }
         }
         return extensions;

@@ -5,6 +5,7 @@ import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.context.GraphicsContextLogger;
 import net.ice.curio.graphics.exception.UnsupportedGraphicsContextException;
 import net.ice.curio.graphics.object.Viewport;
+import net.ice.curio.graphics.object.pipeline.shader.Shader;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.resource.BindlessTexture;
@@ -47,6 +48,11 @@ public class OpenGLContext extends GraphicsContext {
     @Override
     public Viewport createViewport(int width, int height) {
         return new GLViewport(width, height);
+    }
+
+    @Override
+    public <T> Shader<T>[] createShaderProgram() {
+        return new Shader[0];
     }
 
     @Override

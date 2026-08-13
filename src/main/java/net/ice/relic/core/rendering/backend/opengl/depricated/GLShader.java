@@ -1,7 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.core.rendering.shader.ShaderType;
+import net.ice.curio.graphics.object.pipeline.shader.ShaderType;
 import org.tinylog.Logger;
 
 import java.io.BufferedReader;
