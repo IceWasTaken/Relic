@@ -1,0 +1,48 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'application'
+}
+
+String lwjglNatives;
+
+if(Os.isFamily(Os.FAMILY_WINDOWS)) {
+    lwjglNatives = "natives-windows";
+} else if (Os.isFamily(Os.FAMILY_UNIX)) {
+    lwjglNatives = "natives-linux";
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://central.sonatype.com/repository/maven-snapshots" }
+}
+
+dependencies {
+    implementation project(':relic-engine.heirloom')
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+
+    implementation "org.lwjgl:lwjgl"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+
+    implementation "org.lwjgl:lwjgl-glfw"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+
+    implementation "org.lwjgl:lwjgl-opengl"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+
+    implementation "org.lwjgl:lwjgl-vulkan"
+
+    implementation "org.lwjgl:lwjgl-stb"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+
+    implementation "io.github.spair:imgui-java-app:${imguiVersion}"
+    runtimeOnly "io.github.spair:imgui-java-app:${imguiVersion}"
+
+    implementation 'org.tinylog:tinylog-api:2.7.0'
+    implementation 'org.tinylog:tinylog-impl:2.7.0'
+
+    implementation "org.joml:joml:${jomlVersion}"
+}

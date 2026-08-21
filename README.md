@@ -5,7 +5,7 @@ Java based game engine. Features distinct backends for OpenGL and Vulkan.
 ## Description
 
 Heavily in development game engine. Based upon bindings from LWJGL. 
-Contains 3 main packages:
+Contains 3 main modules:
 * Relic
   * The engine itself. Depends on Curio and Heirloom
 * Curio
@@ -14,25 +14,44 @@ Contains 3 main packages:
   * Non-relic specific utilities, basically the only package that makes sense for use outside of this project
 
 ## Dependencies
+### Relic
+  - Curio
+  - Heirloom
+  - LWJGL
+    - GLFW
+    - OpenGL
+    - Vulkan
+    - Shaderc
+    - Assimp
+  - ImGui (SpaiR)
+  - Tinylog
+  - Classgraph
+  - JOML
+  
 
-- LWJGL 3.4.0
-   - Includes bindings for:
-     - Assimp
-     - GLFW
-     - OpenGL
-     - OpenAL
-     - Shaderc
-     - STB
-     - Vulkan
-     - OpenXR
-- OpenGL
-    - OpenGL 4.6 Capable GPU (GeForce 400 Series, Radeon HD 7000 Series)
-      - Support for GL_ARB_bindless_texture
-      - Support for GL_ARB_gpu_shader_int64
-      - Support for either GL_NVX_gpu_memory_info or GL_ATI_meminfo not required but HEAVILY recommended
-- Vulkan
-    - Vulkan 1.3 Capable GPU
-        - Support for VK_KHR_swapchain
+### Curio 
+  - Heirloom
+  - LWJGL
+    - GLFW
+    - OpenGL
+    - Vulkan
+    - STB
+  - ImGui (SpaiR)
+  - Tinylog
+  - JOML
+
+
+### Heirloom
+  - Classgraph
+  - JOML
+  - Tinylog
+
+### OpenGL 4.6
+- Support for GL_ARB_bindless_texture
+- Support for GL_ARB_gpu_shader_int64
+- Support for either GL_NVX_gpu_memory_info or GL_ATI_meminfo (optional)
+### Vulkan 1.3+
+- Support for VK_KHR_swapchain
 
 ## Getting Started
 
@@ -49,22 +68,21 @@ Just me. icewastaken_ on discord.
 
 ## Version History
 
-* 0.4
+* 0.6.1
+  * Separated Relic, Heirloom, Curio into different modules
+* 0.6
+  * Implemented asset streaming
+  * Material/Map/Instance buffers separated into different classes
+  * OpenGL
+    * Now using DSA calls
+    * Buffers now mapped (glMapNamedBufferRange)
+* 0.5
   * Beginning steps on Curio package
     * Moved most GLFW specific methods and objects to said package
   * Added console system to testing application, which would eventually be merged into Relic's core
   * Deleted or moved files/classes that were no longer used or were replaced
   * Move general use, non-relic specific classes and utils to own package, Heirloom
-
-* 0.3
-  * When modern day Relic really started to take hold
-  * Refactor that created the RelicApplication class and better versioning
-  * Introduced a now scrapped Vulkan implementation
-* 0.2
-  * Also not really tracked on GitHub
-  * Introduced bindless textures
-* 0.1
-  * Mostly just a collection of other people's code. 
-  * Wasn't tracked on GitHub, so I have no idea what it contained
+* 0.1 - 0.4
+  * Not/barely tracked
 
   
