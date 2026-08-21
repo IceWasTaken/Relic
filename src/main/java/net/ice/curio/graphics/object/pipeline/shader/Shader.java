@@ -1,21 +1,24 @@
 package net.ice.curio.graphics.object.pipeline.shader;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+public abstract class Shader {
 
-public abstract class Shader<T> {
+	protected final ShaderType type;
 
-	//protected final T handle;
-
-	protected abstract T createShader();
-	protected abstract String getShadersDirPrefix();
-
-	protected Shader() {
-
+	protected Shader(ShaderType type) {
+		this.type = type;
 	}
 
-	public static Shader[] readShaderProgram(String path) {
-		Path dir = Paths.get("" + "/");
-		return null;
+	protected static ShaderType getShaderTypeFromFileExtension(String fileName) {
+		if(fileName.endsWith("vert")) {
+			return ShaderType.VERTEX;
+		} else if(fileName.endsWith("geom")) {
+			return ShaderType.GEOMETRY;
+		} else if(fileName.endsWith("frag")) {
+			return ShaderType.FRAGMENT;
+		} else if(fileName.endsWith("comp")) {
+			return ShaderType.COMPUTE;
+		}
+
+		throw new RuntimeException("gfdghfdshsdfg");
 	}
 }

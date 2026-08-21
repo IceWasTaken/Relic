@@ -1,9 +1,11 @@
 package net.ice.curio.graphics.object.pipeline;
 
+import net.ice.curio.graphics.object.pipeline.depth.DepthState;
 import net.ice.curio.graphics.object.pipeline.raster.CullMode;
 import net.ice.curio.graphics.object.pipeline.raster.FrontFace;
 import net.ice.curio.graphics.object.pipeline.raster.PolygonMode;
 import net.ice.curio.graphics.object.pipeline.raster.RasterizationState;
+import org.tinylog.Logger;
 
 public abstract class Pipeline {
 
@@ -16,15 +18,20 @@ public abstract class Pipeline {
             1.0f
     );
 
-    private final PrimitiveType primitiveType;
-    private final RasterizationState rasterizationState;
+    protected final PrimitiveType primitiveType;
+    protected final RasterizationState rasterizationState;
+    protected final DepthState depthState;
+
+    public abstract void bindPipeline();
 
     protected Pipeline(
             PrimitiveType primitiveType,
-            RasterizationState rasterizationState
+            RasterizationState rasterizationState,
+            DepthState depthState
     ) {
         this.primitiveType = primitiveType;
         this.rasterizationState = rasterizationState;
+        this.depthState = depthState;
     }
 }
 

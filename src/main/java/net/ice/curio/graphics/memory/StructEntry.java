@@ -13,7 +13,7 @@ public record StructEntry(String name, Type type, boolean isPadding) implements 
 
 	@Override
 	public String toString() {
-		return name + " " + type.toString() + " " + isPadding;
+		return type.name().toLowerCase() + " " + name + ";";
 	}
 
 	@Override
@@ -25,14 +25,14 @@ public record StructEntry(String name, Type type, boolean isPadding) implements 
 
 		BOOL(4, 4),
 
-		INT32(4, 4),
-		UINT32(4, 4),
+		INT(4, 4),
+		UINT(4, 4),
 
-		INT64(8, 8),
-		UINT64(8, 8),
+		INT64_t(8, 8),
+		UINT64_t(8, 8),
 
-		FLOAT32(4, 4),
-		DOUBLE64(8, 8),
+		FLOAT(4, 4),
+		DOUBLE(8, 8),
 
 		VEC2(8, 8),
 		VEC3(12, 16),
@@ -65,10 +65,10 @@ public record StructEntry(String name, Type type, boolean isPadding) implements 
 		public static Type fromRecordComponent(RecordComponent component) {
 			return switch(component.getType()) {
 				case Class<?> cls when cls == boolean.class -> BOOL;
-				case Class<?> cls when cls == int.class -> INT32;
-				case Class<?> cls when cls == long.class -> INT64;
-				case Class<?> cls when cls == float.class -> FLOAT32;
-				case Class<?> cls when cls == double.class -> DOUBLE64;
+				case Class<?> cls when cls == int.class -> INT;
+				case Class<?> cls when cls == long.class -> UINT64_t;
+				case Class<?> cls when cls == float.class -> FLOAT;
+				case Class<?> cls when cls == double.class -> DOUBLE;
 
 				case Class<?> cls when cls == Vector2f.class -> VEC2;
 				case Class<?> cls when cls == Vector3f.class -> VEC3;

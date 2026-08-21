@@ -60,6 +60,8 @@ public final class GLFWWindow implements Lifecycle {
         glfwWindowHintString(GLFW_WAYLAND_APP_ID, "net.ice.curio.library.glfw.GLFWWindow");
         EventManager.execute(new WindowHintEvent(this));
 
+        glfwSetErrorCallback((int errorCode, long msgPtr) -> Logger.error("GLFW Error: [{}], [{}]", errorCode, MemoryUtil.memUTF8(msgPtr)));
+
         this.windowHandle = glfwCreateWindow(width, height, windowProperties.getTitle(), 0, 0);
 
         if(windowHandle == 0) {
@@ -100,7 +102,6 @@ public final class GLFWWindow implements Lifecycle {
 
     private void setupCallbacks() {
         glfwSetFramebufferSizeCallback(windowHandle, (window, width, height) -> resize(width, height));
-        glfwSetErrorCallback((int errorCode, long msgPtr) -> Logger.error("GLFW Error: [{}], [{}]", errorCode, MemoryUtil.memUTF8(msgPtr)));
 
         glfwSetKeyCallback(windowHandle, keyCallback = new GLFWKeyCallback() {
             @Override

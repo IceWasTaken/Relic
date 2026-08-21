@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 
 import static org.lwjgl.opengl.GL43.*;
 
+@Deprecated
 public class GLShader implements Lifecycle {
 
     private final int shaderID;
@@ -19,7 +20,7 @@ public class GLShader implements Lifecycle {
     public GLShader(ShaderType type) {
         this.type = type;
 
-        this.shaderID = glCreateShader(type.getGlType());
+        this.shaderID = glCreateShader(getTypeInt());
     }
 
     private static GLShader createShader(ShaderType type, String source) {
@@ -49,7 +50,7 @@ public class GLShader implements Lifecycle {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     shaderSource.append(line).append("\n");
-                    }
+                }
             }
         } catch (Exception exception) {
             Logger.error("[GLShader]: Error while loading shader: {}", exception);
@@ -63,6 +64,15 @@ public class GLShader implements Lifecycle {
             String log = glGetShaderInfoLog(shaderId);
             throw new RuntimeException("Shader compilation failed:\n" + log);
         }
+    }
+
+    private int getTypeInt() {
+        return switch(type) {
+            case VERTEX -> GL_VERTEX_SHADER;
+            case FRAGMENT -> GL_FRAGMENT_SHADER;
+            case GEOMETRY -> GL_GEOMETRY_SHADER;
+            case COMPUTE -> GL_COMPUTE_SHADER;
+        };
     }
 
     @Override

@@ -1,52 +1,28 @@
 package net.ice.relic.core.rendering.backend.opengl.buffer;
 
-import net.ice.curio.graphics.memory.Fence;
 import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
-import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.curio.library.opengl.object.GLFence;
-import net.ice.heirloom.Lifecycle;
+import net.ice.curio.library.opengl.object.pipeline.GLPipeline;
 import net.ice.relic.core.model.mesh.Mesh;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
-import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
-import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
-public class GLCommandBuffer implements Lifecycle {
+public class GLCommandBuffer extends Buffer {
 
 	private final List<DrawCommand> commands = new ArrayList<>();
 
-	private final Struct commandBufferStruct;
-
-	private GLBuffer commandBuffer;
-	private Fence fence;
-
 	public GLCommandBuffer() {
-		this.commandBufferStruct = new Struct(StructType.RAW) {
-			@Override
-			public Class<?> getRecord() {
-				return DrawCommandStruct.class;
-			}
-		};
-	}
-
-	@Override
-	public void init() {
-		if(commandBuffer != null) {
-			commandBuffer.cleanup();
-		}
-
-		this.fence = new GLFence();
-
-		//10,000 commands to start
-		this.commandBuffer = new GLBuffer(
-				(long) 10000 * commandBufferStruct.getStride(),
-				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT
-		);
+		super(new Struct(StructType.RAW) {
+					@Override
+					public Class<?> getRecord() {
+						return DrawCommandStruct.class;
+					}
+				});
 	}
 
 	@Override
@@ -54,28 +30,24 @@ public class GLCommandBuffer implements Lifecycle {
 		fence.waitSync();
 
 		int baseInstance = 0;
-		commandBuffer.position(0);
+		buffer.position(0);
 		for(DrawCommand drawCommand : commands) {
-			commandBuffer.putInt(drawCommand.getMesh().getCount());
-			commandBuffer.putInt(drawCommand.instanceCount);
-			commandBuffer.putInt(drawCommand.getMesh().getIndexStartPos());
-			commandBuffer.putInt(drawCommand.getMesh().getVertexStartPos() / 3);
-			commandBuffer.putInt(baseInstance);
+			buffer.putInt(drawCommand.getMesh().getCount());
+			buffer.putInt(drawCommand.instanceCount);
+			buffer.putInt(drawCommand.getMesh().getIndexStartPos());
+			buffer.putInt(drawCommand.getMesh().getVertexStartPos() / 3);
+			buffer.putInt(baseInstance);
 
 			baseInstance += drawCommand.instanceCount;
 		}
 	}
 
 	public void bind() {
-		commandBuffer.bind(GL_DRAW_INDIRECT_BUFFER);
+		buffer.bind(GL_DRAW_INDIRECT_BUFFER);
 	}
 
-	public void sync() {
-		fence.sync();
-	}
-
-	public int getDrawCount() {
-		return commands.size();
+	public void draw(GLPipeline pipeline) {
+		glMultiDrawElementsIndirect(pipeline.getMode(), GL_UNSIGNED_INT, 0, commands.size(), 0);
 	}
 
 	public static class DrawCommand {

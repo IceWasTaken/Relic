@@ -6,7 +6,7 @@ import org.joml.Matrix4f;
 public class ProjectionMatrix {
 
     public static final float FOV = (float) Math.toRadians(90.0f);
-    public static final float Z_FAR = Float.POSITIVE_INFINITY;
+    public static final float Z_FAR = 50.0f;
     public static final float Z_NEAR = 0.5f;
 
     private static boolean shouldResize = false;

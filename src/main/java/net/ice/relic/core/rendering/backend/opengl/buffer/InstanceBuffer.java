@@ -12,6 +12,7 @@ import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import org.joml.Matrix4f;
+import org.tinylog.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +47,11 @@ public class InstanceBuffer implements Lifecycle {
 		this.instanceBuffer = new GLBuffer(
 				instanceBufferStruct.getStride() * 5000L,
 				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT
-		).bind(GL_SHADER_STORAGE_BUFFER, 9);
+		).bind(GL_SHADER_STORAGE_BUFFER, 7);
 
 		this.fence = new GLFence();
+
+		Logger.debug("[InstanceBuffer]: Created and bound InstanceBuffer to index 7");
 	}
 
 	@Override

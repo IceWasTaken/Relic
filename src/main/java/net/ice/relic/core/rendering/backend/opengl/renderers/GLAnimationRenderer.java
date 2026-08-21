@@ -30,10 +30,10 @@ public class GLAnimationRenderer implements Lifecycle {
 
 	public GLAnimationRenderer(GLRenderer renderer) {
 		this.renderer = renderer;
-		this.viewport = new GLViewport(
-				renderer.getApplication().getWindow().getWidth(),
-				renderer.getApplication().getWindow().getHeight()
-		);
+//		this.viewport = new GLViewport(
+//				renderer.getApplication().getWindow().getWidth(),
+//				renderer.getApplication().getWindow().getHeight()
+//		);
 		this.drawParameterStruct = new DrawParameterStruct(StructType.STD430);
 		this.floatStruct = new Struct.GenericFloatStruct(StructType.STD430);
 		this.matrix4fStruct = new Struct.GenericMatrix4fStruct(StructType.STD430);
@@ -43,7 +43,7 @@ public class GLAnimationRenderer implements Lifecycle {
 	public void init() {
 		this.shaderProgram = new GLShaderProgram("animation");
 
-		this.uniforms = new Uniforms(shaderProgram);
+		this.uniforms = new Uniforms(shaderProgram.getProgramID());
 
 		drawParameterBuffer = new GLBuffer(
 				drawParameterStruct.getStride() * 1000L,

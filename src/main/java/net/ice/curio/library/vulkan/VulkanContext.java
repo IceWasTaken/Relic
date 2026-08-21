@@ -46,10 +46,6 @@ public class VulkanContext extends GraphicsContext {
         return new VulkanViewport(width, height);
     }
 
-    @Override
-    public <T> Shader<T>[] createShaderProgram() {
-        return new Shader[0];
-    }
 
     public VulkanInstance getInstance() {
         return instance;

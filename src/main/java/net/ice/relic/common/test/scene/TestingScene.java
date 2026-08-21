@@ -34,10 +34,10 @@ public class TestingScene extends Scene {
         Model sponzaModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/sponza/Sponza.gltf"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
         Model companionCube = getModelLoader().loadModel(Resource.getResourceFromString("relic:assets/models/CompanionCubes/EDITOR_companion_cube.obj"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
 
-        Entity scarabEntity = createEntity("scarab");
-        scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
-        scarabEntity.addComponent(new ModelComponent(scarabModel));
-        scarabModel.getEntities().add(scarabEntity);
+//        Entity scarabEntity = createEntity("scarab");
+//        scarabEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));
+//        scarabEntity.addComponent(new ModelComponent(scarabModel));
+//        scarabModel.getEntities().add(scarabEntity);
 
         Entity sponzaEntity = createEntity("sponza");
         sponzaEntity.addComponent(new TransformComponent().setPosition(0, 0, 0));

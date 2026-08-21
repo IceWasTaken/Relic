@@ -26,7 +26,7 @@ Contains 3 main packages:
      - Vulkan
      - OpenXR
 - OpenGL
-    - OpenGL 4.6 Capable GPU
+    - OpenGL 4.6 Capable GPU (GeForce 400 Series, Radeon HD 7000 Series)
       - Support for GL_ARB_bindless_texture
       - Support for GL_ARB_gpu_shader_int64
       - Support for either GL_NVX_gpu_memory_info or GL_ATI_meminfo not required but HEAVILY recommended

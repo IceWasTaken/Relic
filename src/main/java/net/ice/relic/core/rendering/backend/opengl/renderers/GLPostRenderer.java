@@ -34,7 +34,7 @@ public class GLPostRenderer implements Lifecycle {
 		this.shaderProgram = new GLShaderProgram("post");
 
 
-		this.uniforms = new Uniforms(shaderProgram);
+		this.uniforms = new Uniforms(shaderProgram.getProgramID());
 
 		uniforms.createUniform("inputSampler");
 

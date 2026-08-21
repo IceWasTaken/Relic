@@ -5,15 +5,15 @@ import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.context.GraphicsContextLogger;
 import net.ice.curio.graphics.exception.UnsupportedGraphicsContextException;
 import net.ice.curio.graphics.object.Viewport;
-import net.ice.curio.graphics.object.pipeline.shader.Shader;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
-import net.ice.curio.library.opengl.object.resource.BindlessTexture;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 import org.tinylog.Logger;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class OpenGLContext extends GraphicsContext {
 
@@ -27,7 +27,7 @@ public class OpenGLContext extends GraphicsContext {
     public void init() {
         this.capabilities = GL.createCapabilities();
 
-        checkCapability(capabilities.OpenGL46, "OpenGL backend requires an OpenGL 4.6 capable GPU");
+        checkCapability(capabilities.OpenGL46, "OpenGL backend requires an OpenGL 4.6 capable driver & GPU");
         checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
         checkCapability(capabilities.GL_ARB_gpu_shader_int64, "OpenGL backend requires GL_ARB_gpu_shader_int64 extension");
 
@@ -47,17 +47,23 @@ public class OpenGLContext extends GraphicsContext {
 
     @Override
     public Viewport createViewport(int width, int height) {
-        return new GLViewport(width, height);
-    }
-
-    @Override
-    public <T> Shader<T>[] createShaderProgram() {
-        return new Shader[0];
+        return new GLViewport(0, 0, width, height, true);
     }
 
     @Override
     public Texture createTexture(Bitmap bitmap) {
-        return new BindlessTexture(GLTexture.defaultTextureSettings.buildWithDataAndMipmaps(bitmap));
+        return new GLTexture(
+                new GLTexture.TextureFormat(
+                        GL_TEXTURE_2D,
+                        GL_RGBA8,
+                        GL_REPEAT,
+                        GL_REPEAT,
+                        GL_REPEAT,
+                        GL_LINEAR_MIPMAP_LINEAR,
+                        GL_NEAREST
+                ),
+                bitmap
+        );
     }
 
     private void checkCapability(boolean capability, String msg) {

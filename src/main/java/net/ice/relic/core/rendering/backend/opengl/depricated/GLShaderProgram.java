@@ -21,7 +21,7 @@ public class GLShaderProgram {
 
     public GLShaderProgram(String programDirPath) {
         this.programID = glCreateProgram();
-        this.uniforms = new Uniforms(this);
+        this.uniforms = new Uniforms(programID);
 
         if(programID == 0) {
             throw new RuntimeException("Error while creating new shader shaderProgram. \nMost recent OpenGL error: " + glGetError());

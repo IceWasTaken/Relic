@@ -72,7 +72,7 @@ public class GLDebugRenderer implements Lifecycle {
 		this.shaderProgram = new GLShaderProgram("debug");
 
 
-		this.uniforms = new Uniforms(shaderProgram);
+		this.uniforms = new Uniforms(shaderProgram.getProgramID());
 
 		uniforms.createUniform("color");
 		uniforms.createUniform("centerPos");

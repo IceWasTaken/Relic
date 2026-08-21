@@ -17,6 +17,7 @@ public class BufferManager implements Lifecycle {
 	private final GLCommandBuffer staticCommandBuffer;
 	private final GLCommandBuffer animatedCommandBuffer;
 	private final MaterialMapBuffer materialMapBuffer;
+	private final SceneInfoBuffer sceneInfoBuffer;
 	private final MeshBuffer meshBuffer;
 
 	private static final Deque<Entity> entityLoadingQueue = new ArrayDeque<>();
@@ -32,6 +33,7 @@ public class BufferManager implements Lifecycle {
 		this.staticCommandBuffer = new GLCommandBuffer();
 		this.animatedCommandBuffer = new GLCommandBuffer();
 		this.materialMapBuffer = new MaterialMapBuffer();
+		this.sceneInfoBuffer = new SceneInfoBuffer();
 		this.meshBuffer = new MeshBuffer();
 	}
 
@@ -41,6 +43,7 @@ public class BufferManager implements Lifecycle {
 		staticCommandBuffer.init();
 		animatedCommandBuffer.init();
 		materialMapBuffer.init();
+		sceneInfoBuffer.init();
 		meshBuffer.init();
 	}
 
@@ -49,6 +52,7 @@ public class BufferManager implements Lifecycle {
 		staticCommandBuffer.sync();
 		animatedCommandBuffer.sync();
 		materialMapBuffer.sync();
+		sceneInfoBuffer.sync();
 		meshBuffer.sync();
 	}
 
@@ -70,6 +74,7 @@ public class BufferManager implements Lifecycle {
 		}
 
 		staticCommandBuffer.update();
+		sceneInfoBuffer.update(glRenderer.getApplication().getCurrentScene());
 		instanceBuffer.update();
 		materialMapBuffer.update(glRenderer.getApplication().getMaterialCache());
 	}

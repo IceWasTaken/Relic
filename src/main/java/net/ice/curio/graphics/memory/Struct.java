@@ -2,6 +2,7 @@ package net.ice.curio.graphics.memory;
 
 import net.ice.heirloom.sort.SortingUtil;
 import org.joml.Matrix4f;
+import org.tinylog.Logger;
 
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public abstract class Struct {
 
 		for(RecordComponent component : components) {
 			entries.add(StructEntry.fromRecordComponent(component));
+
 		}
 
 		if(structType == StructType.RAW) {
@@ -35,6 +37,7 @@ public abstract class Struct {
 			this.size = calculateSize();
 			this.stride = calculateStride();
 			this.offsets = generateOffsets();
+			Logger.debug("[Struct]: Created new struct: {}", toString());
 			return;
 		}
 
@@ -91,6 +94,8 @@ public abstract class Struct {
 
 		this.stride = calculateStride();
 		this.offsets = generateOffsets();
+
+		Logger.debug("[Struct]: Created new struct: {}", toString());
 	}
 
 	private boolean isMultiple(int multiple, int of) {
@@ -146,7 +151,7 @@ public abstract class Struct {
 
 	private StructEntry.Type getTypeFromSize(int size) {
 		return switch (size) {
-			case 4 -> StructEntry.Type.FLOAT32;
+			case 4 -> StructEntry.Type.FLOAT;
 			case 8 -> StructEntry.Type.VEC2;
 			case 12 -> StructEntry.Type.VEC3;
 			case 16 -> StructEntry.Type.VEC4;
@@ -156,8 +161,8 @@ public abstract class Struct {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("STRUCT:\n");
+		StringBuilder builder = new StringBuilder().append("\n\n");
+		builder.append(String.format("Size: %1$s, Stride: %2$s", size, stride)).append("\n");
 		for(StructEntry entry : fields) {
 			builder.append(entry.toString()).append("\n");
 		}

@@ -5,7 +5,6 @@ import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.ecs.entity.Entity;
 
 import net.ice.relic.core.rendering.backend.Renderer;
-import net.ice.relic.core.rendering.backend.opengl.framebuffers.GeometryBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
 import net.ice.relic.core.rendering.backend.opengl.renderers.*;
@@ -21,7 +20,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     public static final Vector2i SHADOW_MAP_SIZE = new Vector2i(4096);
 
-    private GeometryBuffer geometryBuffer;
     private ShadowBuffer shadowBuffer;
     private SwapBuffer lightBuffer;
     private SwapBuffer swapBuffer;
@@ -32,8 +30,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
     private final GLShadowRenderer shadowRenderer;
     private final GLLightRenderer lightRenderer;
 
-    private final GLBloomRenderer bloomRenderer;
-
     private final GLPostRenderer postRenderer;
     private final GLDebugRenderer visualizeRenderer;
     private final GLGuiRenderer guiRenderer;
@@ -41,7 +37,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void resize(int width, int height) {
-        this.geometryBuffer = new GeometryBuffer(width, height);
         this.lightBuffer = new SwapBuffer(width, height);
         this.swapBuffer = new SwapBuffer(width, height);
 
@@ -50,7 +45,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.sceneRenderer.resize(width, height);
         this.lightRenderer.resize(width, height);
         this.postRenderer.resize(width, height);
-        this.bloomRenderer.resize(width, height);
     }
 
     @Override
@@ -66,8 +60,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.shadowRenderer = new GLShadowRenderer(this);
         this.lightRenderer = new GLLightRenderer(this);
 
-        this.bloomRenderer = new GLBloomRenderer(this);
-
         this.postRenderer = new GLPostRenderer(this);
         this.visualizeRenderer = new GLDebugRenderer(this);
         this.guiRenderer = new GLGuiRenderer(this);
@@ -75,14 +67,12 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void init() {
-        glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
-        //setupDebugMessageCallback();
+        setupDebugMessageCallback();
         //SystemInfo.logGLInfo();
 
-        this.geometryBuffer = new GeometryBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.lightBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.shadowBuffer = new ShadowBuffer();
@@ -92,7 +82,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
         sceneRenderer.init();
         shadowRenderer.init();
         lightRenderer.init();
-        bloomRenderer.init();
 
         postRenderer.init();
 
@@ -113,25 +102,23 @@ public class GLRenderer extends Renderer implements Lifecycle {
         lightRenderer.render();
         //lightBuffer.unbind();
 
-        //bloomRenderer.render();
 
         //postRenderer.render();
 
         glViewport(0, 0, application.getWindow().getWidth(), application.getWindow().getHeight());
 
-        //visualizeRenderer.render();
+        visualizeRenderer.render();
         guiRenderer.render();
 
         bufferManager.sync();
     }
 
-
-    public GeometryBuffer getGeometryBuffer() {
-        return geometryBuffer;
-    }
-
     public ShadowBuffer getShadowBuffer() {
         return shadowBuffer;
+    }
+
+    public GLSceneRenderer getSceneRenderer() {
+        return sceneRenderer;
     }
 
     public SwapBuffer getSwapBuffer() {

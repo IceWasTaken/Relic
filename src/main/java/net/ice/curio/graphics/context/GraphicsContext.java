@@ -10,6 +10,8 @@ import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.heirloom.Lifecycle;
 
+import java.nio.ByteBuffer;
+
 public abstract class GraphicsContext implements Lifecycle {
 
     protected Curio curio;
@@ -25,7 +27,6 @@ public abstract class GraphicsContext implements Lifecycle {
 
     public abstract Texture createTexture(Bitmap bitmap);
     public abstract Viewport createViewport(int width, int height);
-    public abstract <T> Shader<T>[] createShaderProgram();
 
     public static GraphicsContext getGraphicsContext(Curio curio) {
         if (INSTANCE == null) {

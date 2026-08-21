@@ -10,6 +10,7 @@ import net.ice.relic.core.gui.GuiContext;
 import net.ice.relic.core.gui.drawable.GuiWindow;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static imgui.ImGui.*;

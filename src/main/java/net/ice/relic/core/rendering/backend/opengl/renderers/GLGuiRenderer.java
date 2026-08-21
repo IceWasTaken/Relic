@@ -51,7 +51,7 @@ public class GLGuiRenderer implements Lifecycle {
     public void init() {
         this.shaderProgram = new GLShaderProgram("gui");
 
-        this.uniforms = new Uniforms(shaderProgram);
+        this.uniforms = new Uniforms(shaderProgram.getProgramID());
         this.scale = new Vector2f();
 
         uniforms.createUniform("scale");
@@ -140,12 +140,18 @@ public class GLGuiRenderer implements Lifecycle {
         ImInt width = new ImInt();
         ImInt height = new ImInt();
         ByteBuffer buf = fontAtlas.getTexDataAsRGBA32(width, height);
-        texture = new GLTexture.TextureBuilder()
-                .minificationFilter(FilteringParameter.NEAREST)
-                .magnificationFiler(FilteringParameter.NEAREST)
-                .textureType(TextureType.TEXTURE_2D)
-                .imageFormat(ImageFormat.RGBA8)
-                .buildWithDataAndMipmaps(new Bitmap(width.get(), height.get(), 4,  buf));
+        texture = new GLTexture(
+                new GLTexture.TextureFormat(
+                        GL_TEXTURE_2D,
+                        GL_RGBA8,
+                        GL_REPEAT,
+                        GL_REPEAT,
+                        GL_REPEAT,
+                        GL_NEAREST,
+                        GL_NEAREST
+                ),
+                new Bitmap(width.get(), height.get(), 4,  buf)
+        );
         guiMesh = new GuiMesh();
     }
 

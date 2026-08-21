@@ -15,7 +15,7 @@ struct Instance {
 };
 
 
-layout(std430, binding = 9) buffer InstanceBuffer {
+layout(std430, binding = 7) buffer InstanceBuffer {
     Instance instances[];
 };
 

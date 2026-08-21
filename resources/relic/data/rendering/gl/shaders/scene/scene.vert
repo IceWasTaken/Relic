@@ -21,7 +21,7 @@ struct Instance {
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 
-layout(std430, binding = 9) buffer InstanceBuffer {
+layout(std430, binding = 7) buffer InstanceBuffer {
     Instance instances[];
 };
 

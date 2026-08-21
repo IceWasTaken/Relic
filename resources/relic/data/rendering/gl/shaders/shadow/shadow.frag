@@ -24,11 +24,11 @@ struct Map {
     uint64_t pbrMap;
 };
 
-layout(std430, binding = 7) buffer MaterialBuffer {
+layout(std430, binding = 5) buffer MaterialBuffer {
     Material materials[MAX_MATERIALS];
 };
 
-layout(std430, binding = 8) buffer MapBuffer {
+layout(std430, binding = 6) buffer MapBuffer {
     Map maps[MAX_MATERIALS];
 };
 

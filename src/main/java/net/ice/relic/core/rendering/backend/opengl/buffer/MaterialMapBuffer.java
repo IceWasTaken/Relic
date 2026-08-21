@@ -10,6 +10,7 @@ import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.model.material.Material;
 import net.ice.relic.core.model.material.MaterialColor;
 import net.ice.relic.core.model.material.MaterialFactor;
+import org.tinylog.Logger;
 
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
 import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
@@ -46,8 +47,11 @@ public class MaterialMapBuffer implements Lifecycle {
 			}
 		};
 
-		this.materialBuffer = new GLBuffer(44 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT).bind(GL_SHADER_STORAGE_BUFFER, 7);
-		this.mapBuffer = new GLBuffer(8 * 3 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT).bind(GL_SHADER_STORAGE_BUFFER, 8);
+		this.materialBuffer = new GLBuffer(44 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT).bind(GL_SHADER_STORAGE_BUFFER, 5);
+		this.mapBuffer = new GLBuffer(8 * 3 * 200, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT).bind(GL_SHADER_STORAGE_BUFFER, 6);
+
+		Logger.debug("[MaterialMapBuffer]: Created and bound MaterialBuffer to index 5");
+		Logger.debug("[MaterialMapBuffer]: Created and bound MapBuffer to index 6");
 	}
 
 	public void update(MaterialCache materialCache) {

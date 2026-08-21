@@ -59,7 +59,7 @@ public class ConsoleGui {
                 return;
             }
 
-            setWindowSize(540, 640);
+            setWindowSize(800, 640);
             popStyleVar();
             menuBar();
 

@@ -25,19 +25,25 @@ struct CascadeShadow {
     vec4 splitDistance;
 };
 
+struct SceneInfo {
+    mat4 projectionMatrix;
+    mat4 viewMatrix;
+    vec3 cameraPos;
+    int lightCount;
+    vec3 ambientLightColor;
+    float ambientLightStrength;
+};
+
+
 layout(binding = 0) uniform sampler2D posSampler;
 layout(binding = 1) uniform sampler2D albedoSampler;
 layout(binding = 2) uniform sampler2D normalSampler;
 layout(binding = 3) uniform sampler2D pbrSampler;
 layout(binding = 4) uniform sampler2DArray shadowSampler;
 
-uniform vec3 cameraPos;
-uniform mat4 viewMatrix;
-
-uniform float ambientLightIntensity;
-uniform vec3 ambientLightColor;
-
-uniform int lightCount;
+layout(std430, binding = 8) buffer SceneInfoBuffer {
+    SceneInfo sceneInfo;
+};
 
 uniform Fog fog;
 uniform Light lights[200];
@@ -174,13 +180,13 @@ void main()
     float metallic = pbr.b;
 
     vec3 N = normalize(normal);
-    vec3 V = normalize(cameraPos - worldPos);
+    vec3 V = normalize(sceneInfo.cameraPos - worldPos);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
 
     uint cascadeIndex = 0;
-    vec4 viewPos = viewMatrix * worldPosW;
+    vec4 viewPos = sceneInfo.viewMatrix * worldPosW;
     for(uint i = 0; i < SHADOW_MAP_CASCADE_COUNT - 1; ++i) {
         if(viewPos.z < shadows[i].splitDistance.x) {
             cascadeIndex = i + 1;
@@ -190,7 +196,7 @@ void main()
     float shadow = calculateVisibility(vec4(worldPos, 1), cascadeIndex);
 
     vec3 Lo = vec3(0.0);
-    for (uint i = 0; i < lightCount; i++) {
+    for (uint i = 0; i < sceneInfo.lightCount; i++) {
         Light light = lights[i];
         if (light.directional == 1) {
             Lo += calculateDirectionalLight(light, V, N, F0, albedo, metallic, roughness);
@@ -199,7 +205,7 @@ void main()
         }
     }
 
-    vec3 ambient = ambientLightColor * albedo * ambientLightIntensity;
+    vec3 ambient = sceneInfo.ambientLightColor * albedo * sceneInfo.ambientLightStrength;
     outFragColor = vec4(Lo * shadow + ambient, 1.0f);
 
     if (DEBUG_SHADOWS == 1) {
