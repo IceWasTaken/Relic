@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://central.sonatype.com/repository/maven-snapshots" }
+}
+
+
+dependencies {
+    implementation 'io.github.classgraph:classgraph:4.8.189'
+    implementation "org.joml:joml:${jomlVersion}"
+    implementation 'org.tinylog:tinylog-api:2.7.0'
+    implementation 'org.tinylog:tinylog-impl:2.7.0'
+}

@@ -1,3 +1,5 @@
-rootProject.name = 'Relic'
+rootProject.name = 'relic-engine'
 
-
+include 'relic-engine.heirloom'
+include 'relic-engine.curio'
+include 'relic-engine.relic'

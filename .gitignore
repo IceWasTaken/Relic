@@ -43,10 +43,5 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-/src/main/resources/relic/assets/models/sponza/
-/src/main/resources/relic/assets/models/san_miguel/
-/src/main/resources/relic/assets/models/sibenik/
-
-/src/main/resources/relic/assets/textures/
-/resources/relic/assets/models/
 /resources/relic/assets/textures/
+/resources/relic/assets/models/
