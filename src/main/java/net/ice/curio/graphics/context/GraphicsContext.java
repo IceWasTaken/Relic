@@ -29,6 +29,7 @@ public abstract class GraphicsContext implements Lifecycle {
     public abstract Viewport createViewport(int width, int height);
 
     public static GraphicsContext getGraphicsContext(Curio curio) {
+
         if (INSTANCE == null) {
             INSTANCE = switch(RendererConfig.getBackendType()) {
                 case OPENGL -> new OpenGLContext(curio);

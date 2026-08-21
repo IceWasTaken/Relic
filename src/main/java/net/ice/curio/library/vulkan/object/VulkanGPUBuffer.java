@@ -1,17 +1,4 @@
-package net.ice.curio.library.vulkan.object.resource;
-
-import net.ice.curio.graphics.enums.BufferFlags;
-import net.ice.curio.graphics.enums.BufferUsage;
-import net.ice.curio.graphics.object.resource.GPUBuffer;
-import net.ice.curio.library.vulkan.utils.ConversionUtil;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.VkBufferCreateInfo;
-
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-
-import static org.lwjgl.vulkan.VK10.VK_SHARING_MODE_EXCLUSIVE;
-import static org.lwjgl.vulkan.VK10.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+package net.ice.curio.library.vulkan.object;
 
 //public final class VulkanGPUBuffer extends GPUBuffer {
 //

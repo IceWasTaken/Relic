@@ -72,9 +72,9 @@ public abstract class Scene implements Lifecycle {
         Logger.info("[Scene] Loaded scene: {}", name);
         initialized = true;
 
-        for(Entity entity : entities) {
-            ((GLRenderer) application.getRenderer()).getBufferManager().loadEntity(entity);
-        }
+//        for(Entity entity : entities) {
+//            ((GLRenderer) application.getRenderer()).getBufferManager().loadEntity(entity);
+//        }
     }
 
     @Override

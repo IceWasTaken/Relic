@@ -1,4 +1,4 @@
-package net.ice.curio.library.vulkan.object.resource;
+package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.graphics.enums.image.ImageFormat;
 import net.ice.curio.graphics.enums.image.ImageUsage;
@@ -49,7 +49,7 @@ public final class VulkanImage extends Image {
             PointerBuffer allocation = stack.callocPointer(1);
             LongBuffer longBuffer = stack.mallocLong(1);
 
-            //vulkanContext.getVMAInstance().createImage(imageCreateInfo, allocationCreateInfo, longBuffer, allocation);
+
 
             this.vkImage = longBuffer.get(0);
             this.allocation = allocation.get(0);

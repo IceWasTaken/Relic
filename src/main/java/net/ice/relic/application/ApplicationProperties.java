@@ -21,7 +21,7 @@ public record ApplicationProperties(
 				applicationName,
 				applicationVersion,
 				targetRelicVersion,
-				Arrays.asList(arguments).contains("debug")
+				Arrays.asList(arguments).contains("debug") || Arrays.asList(arguments).contains("-debug") || Arrays.asList(arguments).contains("--debug")
 		);
 	}
 

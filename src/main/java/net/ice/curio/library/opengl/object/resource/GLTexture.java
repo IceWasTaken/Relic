@@ -26,10 +26,15 @@ public class GLTexture extends Texture {
 
     public GLTexture(TextureFormat format, Bitmap bitmap) {
         super(bitmap);
+
+        while(glGetError() != GL_NO_ERROR);
+
         this.textureID = glCreateTextures(format.type);
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int levels = (int) Math.floor(log2(Math.max(width, height))) + 1;
+
+
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTextureParameteri(textureID, GL_TEXTURE_MIN_FILTER, format.minFilter);
@@ -54,6 +59,10 @@ public class GLTexture extends Texture {
 
         if(!glIsTextureHandleResidentARB(textureHandle)) {
             Logger.error("[GLTexture]: Texture handle not resident: {}");
+        }
+
+        if(glGetError() != GL_NO_ERROR) {
+            throw new RuntimeException("[GLTexture]: Encountered error while creating texture");
         }
     }
 

@@ -1,4 +1,4 @@
-package net.ice.curio.library.vulkan.object.resource;
+package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.graphics.object.resource.GPUBuffer;
 import net.ice.curio.graphics.object.resource.Texture;

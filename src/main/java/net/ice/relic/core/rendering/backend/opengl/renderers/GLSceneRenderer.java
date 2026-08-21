@@ -42,7 +42,7 @@ public class GLSceneRenderer implements Lifecycle {
                         width,
                         height,
                         4,
-                        GL_RGBA32F
+                        GL_RGBA16F
                 ),
                 PrimitiveType.TRIANGLE,
                 new RasterizationState(

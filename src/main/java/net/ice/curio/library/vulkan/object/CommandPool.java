@@ -1,7 +1,6 @@
-package net.ice.curio.library.vulkan.object.sync;
+package net.ice.curio.library.vulkan.object;
 
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.VkCommandBufferAllocateInfo;
 import org.lwjgl.vulkan.VkCommandPoolCreateInfo;
 import org.lwjgl.vulkan.VkDevice;
 import org.tinylog.Logger;
@@ -33,13 +32,13 @@ public class CommandPool {
         }
     }
 
-    public void commandBufferAlloc(VkCommandBufferAllocateInfo allocateInfo) {
-        allocateInfo.commandPool(commandPoolHandle);
-    }
-
     public void cleanup(VkDevice device) {
         Logger.info("CommandPool: Destroying pool");
         vkDestroyCommandPool(device, commandPoolHandle, null);
+    }
+
+    long getCommandPoolHandle() {
+        return commandPoolHandle;
     }
 
     public void reset(VkDevice device) {

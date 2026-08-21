@@ -55,7 +55,7 @@ public class TestingScene extends Scene {
 //        companionCube.getEntities().add(cube);
 
         getLights().add(new Light(new Vector3f(1, -1, 2), false, 2, Colors.GRAY.getRGBColor()));
-        setGUI(new DebugGui(application));
+        //setGUI(new DebugGui(application));
 
         camera.setPosition(-5, 3, 0);
         camera.setRotation((float) Math.toRadians(20.0f), (float) Math.toRadians(90));

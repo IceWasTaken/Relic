@@ -13,9 +13,10 @@ public class Curio implements Lifecycle {
     private final ApplicationProperties applicationProperties;
 
     public Curio(ApplicationProperties applicationProperties) {
+        this.applicationProperties = applicationProperties;
+
         this.window = Window.getBackend();
         this.graphicsContext = GraphicsContext.getGraphicsContext(this);
-        this.applicationProperties = applicationProperties;
     }
 
     @Override

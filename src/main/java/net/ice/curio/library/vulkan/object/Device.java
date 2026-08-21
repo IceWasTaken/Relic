@@ -1,5 +1,7 @@
-package net.ice.curio.library.vulkan.object.context;
+package net.ice.curio.library.vulkan.object;
 
+import net.ice.curio.library.vulkan.object.context.PhysicalDevice;
+import net.ice.curio.library.vulkan.object.context.Queue;
 import net.ice.curio.library.vulkan.object.sync.Fence;
 import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;
@@ -90,6 +92,10 @@ public class Device implements Lifecycle {
         checkVulkan(vkCreateShaderModule(vkDevice, shaderCreateInfo, null, handleBuffer), "[Device]: Failed to create new shader module");
     }
 
+    public void allocateCommandBuffer(VkCommandBufferAllocateInfo allocateInfo, PointerBuffer pointerBuffer) {
+        checkVulkan(vkAllocateCommandBuffers(vkDevice, allocateInfo, pointerBuffer), "[Device]: Failed to allocate command buffer");
+    }
+
     public Fence createFence(boolean signaled) {
         return new Fence(vkDevice, signaled);
     }
@@ -105,6 +111,10 @@ public class Device implements Lifecycle {
 
     public Queue createQueue(int queueFamilyIndex, int index) {
         return new Queue(vkDevice, queueFamilyIndex, index);
+    }
+
+    VkDevice getVkDevice() {
+        return vkDevice;
     }
 
     private PointerBuffer createRequiredExtensions(PhysicalDevice physicalDevice, MemoryStack stack) {

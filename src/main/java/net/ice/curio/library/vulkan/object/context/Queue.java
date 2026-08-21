@@ -33,7 +33,7 @@ public class Queue {
         vkQueueWaitIdle(vkQueue);
     }
 
-    public void submit(
+    public void submitCommands(
             VkCommandBufferSubmitInfo.Buffer commandBuffers,
             VkSemaphoreSubmitInfo.Buffer waitSemaphores,
             VkSemaphoreSubmitInfo.Buffer signalSemaphores,

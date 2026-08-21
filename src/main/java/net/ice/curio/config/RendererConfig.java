@@ -19,7 +19,7 @@ public class RendererConfig extends ConfigBase {
     private static Integer maxSpotLights = 5;
     private static GraphicsQuality shadowQuality = GraphicsQuality.LOW;
     private static GraphicsQuality lightingQuality = GraphicsQuality.LOW;
-    private static BackendType backendType = BackendType.OPENGL;
+    private static BackendType backendType = BackendType.VULKAN;
 
     public RendererConfig() {
         super(fileName);
