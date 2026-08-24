@@ -47,7 +47,7 @@ dependencies {
 
     implementation 'org.tinylog:tinylog-api:2.7.0'
     implementation 'org.tinylog:tinylog-impl:2.7.0'
-    implementation 'io.github.classgraph:classgraph:4.8.192'
+    implementation 'io.github.classgraph:classgraph:4.8.193'
     implementation "org.joml:joml:${jomlVersion}"
 }
 
