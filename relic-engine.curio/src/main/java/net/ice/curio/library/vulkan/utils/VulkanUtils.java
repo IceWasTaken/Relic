@@ -1,11 +1,45 @@
 package net.ice.curio.library.vulkan.utils;
 
+import net.ice.curio.config.RendererConfig;
+import net.ice.curio.config.enums.BackendType;
+import net.ice.curio.graphics.enums.image.ImageFormat;
+import net.ice.curio.graphics.enums.image.ImageType;
 import net.ice.curio.graphics.exception.GraphicsCallResultException;
 import net.ice.curio.graphics.exception.OutOfGraphicsMemoryException;
 
+import static net.ice.curio.graphics.enums.image.ImageFormat.RGBA8;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class VulkanUtils {
+
+    public static int getFormat(ImageFormat format) {
+        return switch(format) {
+            case RGBA8 -> VK_FORMAT_R8G8B8A8_SRGB;
+			case BGRA8 -> VK_FORMAT_B8G8R8A8_SRGB;
+        };
+    }
+
+    public static int getImageType(ImageType imageType) {
+        return switch(imageType) {
+            case IMAGE_1D -> VK_IMAGE_TYPE_1D;
+            case IMAGE_2D -> VK_IMAGE_TYPE_2D;
+            case IMAGE_3D -> VK_IMAGE_TYPE_3D;
+        };
+    }
+
+    public static int getImageViewType(ImageType imageType) {
+        return switch(imageType) {
+            case IMAGE_1D -> VK_IMAGE_VIEW_TYPE_1D;
+            case IMAGE_2D -> VK_IMAGE_VIEW_TYPE_2D;
+            case IMAGE_3D -> VK_IMAGE_VIEW_TYPE_3D;
+        };
+    }
+
+    public static void assertVulkan() {
+        if(RendererConfig.getBackendType() != BackendType.VULKAN) {
+            throw new RuntimeException("Rendering type not Vulkan");
+        }
+    }
 
     public static void checkVulkan(int vkResult, String message) {
         if(vkResult != 0) {

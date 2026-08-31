@@ -56,7 +56,6 @@ public class GLGuiRenderer implements Lifecycle {
 
         EventManager.addListener(this);
 
-        ImGui.createContext();
 
         ImGuiIO imGuiIO = ImGui.getIO();
 

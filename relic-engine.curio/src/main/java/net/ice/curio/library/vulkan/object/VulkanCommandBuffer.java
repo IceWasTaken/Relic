@@ -1,85 +1,134 @@
 package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.graphics.CommandBuffer;
-import net.ice.curio.library.vulkan.object.context.Queue;
-import net.ice.curio.library.vulkan.object.sync.Fence;
+import net.ice.curio.library.vulkan.VulkanContext;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.VkCommandBuffer;
-import org.lwjgl.vulkan.VkCommandBufferAllocateInfo;
-import org.lwjgl.vulkan.VkCommandBufferSubmitInfo;
+import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
 
+import java.nio.IntBuffer;
+
+import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
 import static org.lwjgl.vulkan.VK10.*;
-import static org.lwjgl.vulkan.VK13.VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
 
-public abstract class VulkanCommandBuffer extends CommandBuffer {
+public class VulkanCommandBuffer extends CommandBuffer {
 
-    public abstract void submitAndWait(Device device, Queue queue);
+    private final boolean isPrimary;
+    private final boolean oneTimeUse;
 
-    public static class PrimaryCommandBuffer extends VulkanCommandBuffer {
+    private final VkCommandBuffer vkCommandBuffer;
 
-        private final VkCommandBuffer vkCommandBuffer;
+    public VulkanCommandBuffer(VulkanContext context, CommandPool pool, boolean isPrimary, boolean oneTimeUse) {
+        Logger.debug("[VulkanCommandBuffer]: Creating new {} command buffer", isPrimary ? "primary" : "secondary");
 
-        public PrimaryCommandBuffer(CommandPool pool, Device device) {
-            Logger.info("[VulkanCommandBuffer]: Creating primary command buffer");
+        this.isPrimary = isPrimary;
+        this.oneTimeUse = oneTimeUse;
 
-            try(MemoryStack stack = MemoryStack.stackPush()) {
-                VkCommandBufferAllocateInfo commandBufferAllocateInfo = VkCommandBufferAllocateInfo.calloc(stack)
-                        .sType$Default()
-                        .commandPool(pool.getCommandPoolHandle())
-                        .level(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
-                        .commandBufferCount(1);
+        VkDevice vkDevice = context.getDevice().getVkDevice();
 
-                PointerBuffer pb = stack.mallocPointer(1);
-                device.allocateCommandBuffer(commandBufferAllocateInfo, pb);
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            VkCommandBufferAllocateInfo allocInfo = VkCommandBufferAllocateInfo.calloc(stack)
+                    .sType$Default()
+                    .commandPool(pool.getCommandPoolHandle())
+                    .level(isPrimary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY)
+                    .commandBufferCount(1);
 
-                this.vkCommandBuffer = new VkCommandBuffer(pb.get(0), device.getVkDevice());
-            }
-        }
+            PointerBuffer pb = stack.mallocPointer(1);
+            checkVulkan(
+                    vkAllocateCommandBuffers(
+                            vkDevice,
+                            allocInfo,
+                            pb
+                    ),
+                    "[VulkanCommandBuffer]: Failed to allocate command buffer"
+            );
 
-        @Override
-        public void submitAndWait(Device device, Queue queue) {
-            super.submitAndWait(device, queue, vkCommandBuffer);
-        }
-    }
-
-    public static class SecondaryCommandBuffer extends VulkanCommandBuffer {
-
-        private final VkCommandBuffer vkCommandBuffer;
-
-        public SecondaryCommandBuffer(CommandPool pool, Device device) {
-			Logger.info("[VulkanCommandBuffer]: Creating secondary command buffer");
-
-            try(MemoryStack stack = MemoryStack.stackPush()) {
-                VkCommandBufferAllocateInfo commandBufferAllocateInfo = VkCommandBufferAllocateInfo.calloc(stack)
-                        .sType$Default()
-                        .commandPool(pool.getCommandPoolHandle())
-                        .level(VK_COMMAND_BUFFER_LEVEL_SECONDARY)
-                        .commandBufferCount(1);
-
-                PointerBuffer pb = stack.mallocPointer(1);
-                device.allocateCommandBuffer(commandBufferAllocateInfo, pb);
-
-                this.vkCommandBuffer = new VkCommandBuffer(pb.get(0), device.getVkDevice());
-            }
-        }
-
-        @Override
-        public void submitAndWait(Device device, Queue queue) {
-            super.submitAndWait(device, queue, vkCommandBuffer);
+            vkCommandBuffer = new VkCommandBuffer(pb.get(0), vkDevice);
         }
     }
 
-    protected void submitAndWait(Device device, Queue queue, VkCommandBuffer commandBuffer) {
-        Fence fence = device.createFence(true);
+    public void beginRecording() {
+        beginRecording(null);
+    }
+
+    public void beginRecording(InheritanceInfo inheritanceInfo) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            VkCommandBufferBeginInfo commandBufferInfo = VkCommandBufferBeginInfo.calloc(stack).sType$Default();
+
+            if(oneTimeUse) {
+                commandBufferInfo.flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+            }
+            if(!isPrimary) {
+                if(inheritanceInfo == null) {
+                    throw new RuntimeException("[VulkanCommandBuffer]: Secondary buffers must have inheritance info");
+                }
+
+                IntBuffer colorFormats = stack.callocInt(inheritanceInfo.colorFormats.length);
+
+                for(int i : inheritanceInfo.colorFormats) {
+                    colorFormats.put(0, i);
+                }
+
+                VkCommandBufferInheritanceRenderingInfo renderingInfo = VkCommandBufferInheritanceRenderingInfo.calloc(stack)
+                        .sType$Default()
+                        .depthAttachmentFormat(inheritanceInfo.depthFormat)
+                        .pColorAttachmentFormats(colorFormats)
+                        .rasterizationSamples(inheritanceInfo.rasterizationSamples);
+
+                VkCommandBufferInheritanceInfo vkInheritanceInfo =VkCommandBufferInheritanceInfo.calloc(stack)
+                        .sType$Default()
+                        .pNext(renderingInfo);
+
+                commandBufferInfo.pInheritanceInfo(vkInheritanceInfo);
+            }
+
+            checkVulkan(
+                    vkBeginCommandBuffer(
+                            vkCommandBuffer,
+                            commandBufferInfo
+                    ),
+                    "[VulkanCommandBuffer]: Failed to begin command buffer"
+            );
+        }
+    }
+
+    public void endRecording() {
+        checkVulkan(
+                vkEndCommandBuffer(vkCommandBuffer),
+                "[VulkanCommandBuffer]: Failed to end command buffer"
+        );
+    }
+
+    public void reset() {
+        vkResetCommandBuffer(vkCommandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+    }
+
+    public void submitAndWait(VulkanContext context, Queue queue) {
+        Fence fence = new Fence(context, true);
+        fence.reset(context);
         try(MemoryStack stack = MemoryStack.stackPush()) {
             VkCommandBufferSubmitInfo.Buffer commands = VkCommandBufferSubmitInfo.calloc(1, stack)
-                    .sType(VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO)
-                    .commandBuffer(commandBuffer);
-            queue.submitCommands(commands, null, null, fence);
+                    .sType$Default()
+                    .commandBuffer(vkCommandBuffer);
+            queue.submit(
+                    commands,
+                    null,
+                    null,
+                    fence
+            );
         }
-        device.waitForFence(fence);
-        device.destroyFence(fence);
+        fence.waitForFence(context);
+        fence.cleanup(context);
     }
+
+    public VkCommandBufferSubmitInfo.Buffer generateSubmitInfo(MemoryStack stack) {
+        return VkCommandBufferSubmitInfo.calloc(1, stack).sType$Default().commandBuffer(vkCommandBuffer);
+    }
+
+    VkCommandBuffer getVkCommandBuffer() {
+        return vkCommandBuffer;
+    }
+
+    public record InheritanceInfo(int depthFormat, int[] colorFormats, int rasterizationSamples){}
 }

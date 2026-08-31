@@ -54,6 +54,23 @@ public class Bitmap implements Lifecycle {
         stbi_image_free(data);
     }
 
+    public boolean isTransparent() {
+        boolean transparent = false;
+        if(data != null) {
+            int pixelCount = data.capacity() / 4;
+            int offset = 0;
+            for (int i = 0; i < pixelCount; i++) {
+                int a = (0xFF & data.get(offset + 3));
+                if(a < 255) {
+                    transparent = true;
+                    break;
+                }
+                offset += 4;
+            }
+        }
+        return transparent;
+    }
+
     public Resource getResource() {
         return resource;
     }

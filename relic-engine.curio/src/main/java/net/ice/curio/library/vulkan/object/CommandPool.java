@@ -1,5 +1,6 @@
 package net.ice.curio.library.vulkan.object;
 
+import net.ice.curio.library.vulkan.VulkanContext;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkCommandPoolCreateInfo;
 import org.lwjgl.vulkan.VkDevice;
@@ -14,20 +15,27 @@ public class CommandPool {
 
     private final long commandPoolHandle;
 
-    public CommandPool(VkDevice device, int queueFamilyIndex, boolean supportReset) {
-        Logger.info("CommandPool: Creating command pool");
+    public CommandPool(VulkanContext context, int queueFamilyIndex, boolean supportReset) {
+        Logger.info("[CommandPool]: Creating command pool");
 
         try(MemoryStack stack = MemoryStack.stackPush()) {
             VkCommandPoolCreateInfo commandPoolCreateInfo = VkCommandPoolCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO)
-                    .queueFamilyIndex(queueFamilyIndex);
-
-            if(supportReset) {
-                commandPoolCreateInfo.flags(VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-            }
+                    .queueFamilyIndex(queueFamilyIndex)
+                    .flags(supportReset ? VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT : 0);
 
             LongBuffer longBuffer = stack.mallocLong(1);
-            checkVulkan(vkCreateCommandPool(device, commandPoolCreateInfo, null, longBuffer), "CommandPool: Failed to create command pool");
+
+            checkVulkan(
+                    vkCreateCommandPool(
+                            context.getDevice().getVkDevice(),
+                            commandPoolCreateInfo,
+                            null,
+                            longBuffer
+                    ),
+                    "[CommandPool]: Failed to create command pool"
+            );
+
             commandPoolHandle = longBuffer.get(0);
         }
     }
@@ -41,7 +49,7 @@ public class CommandPool {
         return commandPoolHandle;
     }
 
-    public void reset(VkDevice device) {
-        vkResetCommandPool(device, commandPoolHandle, 0);
+    public void reset(VulkanContext context) {
+        vkResetCommandPool(context.getDevice().getVkDevice(), commandPoolHandle, 0);
     }
 }

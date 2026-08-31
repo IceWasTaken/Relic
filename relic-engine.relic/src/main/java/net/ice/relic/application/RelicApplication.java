@@ -98,6 +98,8 @@ public abstract class RelicApplication implements ApplicationContext {
 
         Configuration.DEBUG.set(true);
 
+        ImGui.createContext();
+
         curio.init();
         renderer.init();
         textureCache.init();

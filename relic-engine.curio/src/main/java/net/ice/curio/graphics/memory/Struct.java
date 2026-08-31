@@ -37,7 +37,7 @@ public abstract class Struct {
 			this.size = calculateSize();
 			this.stride = calculateStride();
 			this.offsets = generateOffsets();
-			Logger.debug("[Struct]: Created new struct: {}", toString());
+			//Logger.debug("[Struct]: Created new struct: {}", toString());
 			return;
 		}
 
@@ -95,7 +95,7 @@ public abstract class Struct {
 		this.stride = calculateStride();
 		this.offsets = generateOffsets();
 
-		Logger.debug("[Struct]: Created new struct: {}", toString());
+		//Logger.debug("[Struct]: Created new struct: {}", toString());
 	}
 
 	private boolean isMultiple(int multiple, int of) {

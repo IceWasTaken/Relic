@@ -23,7 +23,6 @@ dependencies {
     implementation project(':relic-engine.heirloom')
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
-
     implementation "org.lwjgl:lwjgl"
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
 
@@ -34,6 +33,8 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 
     implementation "org.lwjgl:lwjgl-vulkan"
+    implementation "org.lwjgl:lwjgl-vma"
+    implementation "org.lwjgl:lwjgl-vma::$lwjglNatives"
 
     implementation "org.lwjgl:lwjgl-stb"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"

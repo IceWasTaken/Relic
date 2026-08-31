@@ -12,9 +12,6 @@ public abstract class Renderer implements Lifecycle {
 
     public abstract void resize(int width, int height);
 
-    @Deprecated
-    public abstract void setupData();
-
     protected final RelicApplication application;
 
     protected Renderer(RelicApplication relicApplication) {

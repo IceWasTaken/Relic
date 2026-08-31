@@ -36,6 +36,7 @@ Contains 3 main modules:
     - OpenGL
     - Vulkan
     - STB
+    - VMA
   - ImGui (SpaiR)
   - Tinylog
   - JOML

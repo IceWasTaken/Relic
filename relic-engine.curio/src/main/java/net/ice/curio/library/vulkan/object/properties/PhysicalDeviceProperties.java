@@ -81,5 +81,4 @@ public class PhysicalDeviceProperties {
     public VkPhysicalDeviceProperties2 getDeviceProperties() {
         return deviceProperties;
     }
-
 }

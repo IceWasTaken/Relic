@@ -1,6 +1,6 @@
 package net.ice.curio.library.vulkan.utils;
 
-import net.ice.curio.library.vulkan.object.context.VulkanInstance;
+import net.ice.curio.library.vulkan.object.Instance;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkDebugUtilsMessengerCallbackDataEXT;
 import org.lwjgl.vulkan.VkDebugUtilsMessengerCreateInfoEXT;
@@ -41,7 +41,7 @@ public class DebugUtils {
                 });
     }
 
-    public void init(VulkanInstance instance) {
+    public void init(Instance instance) {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             LongBuffer longBuffer = stack.mallocLong(1);
             checkVulkan(instance.createDebugUtilsMessenger(debugUtilsCreateInfo, longBuffer), CHECK_DEBUG_MESSENGER_CREATION_FAILURE);
@@ -49,7 +49,7 @@ public class DebugUtils {
         }
     }
 
-    public void cleanup(VulkanInstance instance) {
+    public void cleanup(Instance instance) {
         if(debugHandle != 0) {
             instance.destroyDebugUtilsMessenger(debugHandle);
         }

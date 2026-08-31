@@ -16,38 +16,10 @@ import static org.lwjgl.vulkan.VK10.vkEnumerateInstanceLayerProperties;
 
 public class ValidationExtensionUtils {
 
-    private static final List<String> REQUESTED_LAYERS = List.of(
-            "VK_LAYER_KHRONOS_validation"
-    );
 
     private static final List<String> REQUESTED_EXTENSIONS = List.of(
             "VK_EXT_debug_utils"
     );
-
-    public static List<String> getSupportedLayers() {
-        try(MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer layerCountBuffer = stack.callocInt(1);
-            vkEnumerateInstanceLayerProperties(layerCountBuffer, null);
-            int layerCount = layerCountBuffer.get(0);
-
-            Logger.info("ValidationUtils: Found [{}] supported layers.", layerCount);
-
-            VkLayerProperties.Buffer propertiesBuffer = VkLayerProperties.calloc(layerCount, stack);
-            vkEnumerateInstanceLayerProperties(layerCountBuffer, propertiesBuffer);
-
-            List<String> layersToUse = new ArrayList<>();
-            for (int i = 0; i < layerCount; i++) {
-                VkLayerProperties properties = propertiesBuffer.get(i);
-                String layerName = properties.layerNameString();
-                Logger.info("ValidationUtils: Found supported layer: [{}]", layerName);
-                if(REQUESTED_LAYERS.contains(layerName)) {
-                    layersToUse.add(layerName);
-                    Logger.info("ValidationUtils: Using supported layer: [{}]", layerName);
-                }
-            }
-            return layersToUse;
-        }
-    }
 
     public static Set<String> getInstanceExtensions() {
         Set<String> instanceExtensions = new HashSet<>();

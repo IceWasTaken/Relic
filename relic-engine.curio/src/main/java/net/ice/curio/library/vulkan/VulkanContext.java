@@ -6,28 +6,32 @@ import net.ice.curio.graphics.context.GraphicsContextLogger;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.curio.library.vulkan.object.VulkanViewport;
-import net.ice.curio.library.vulkan.object.Device;
-import net.ice.curio.library.vulkan.object.context.PhysicalDevice;
-import net.ice.curio.library.vulkan.object.context.VulkanInstance;
-import net.ice.curio.window.backend.vulkan.Surface;
+import net.ice.curio.library.vulkan.object.*;
+import net.ice.curio.library.vulkan.object.Surface;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
 
 public class VulkanContext extends GraphicsContext {
 
-    private final VulkanInstance instance;
+    public static final int SWAPCHAIN_REQUESTED_IMAGES = 3;
+
+    private final Instance instance;
     private final PhysicalDevice physicalDevice;
     private final Device device;
+    private final MemoryAllocator VMAInstance;
 
     private Surface surface;
+    private SwapChain swapChain;
 
     public VulkanContext(Curio curio) {
         super(curio);
 
-        this.instance = new VulkanInstance(curio.getApplicationProperties());
-        this.physicalDevice = instance.createPhysicalDevice(null);
-        this.device = new Device(physicalDevice);
-        this.surface = new Surface(this, (VulkanWindow) curio.getWindow());
+        this.instance = new Instance(this);
+        this.physicalDevice = PhysicalDevice.pickDevice(this);
+        this.device = new Device(this);
+        this.VMAInstance = new MemoryAllocator(this);
+
+        this.surface = new Surface(this);
+        this.swapChain = new SwapChain(this, SWAPCHAIN_REQUESTED_IMAGES, true);
     }
 
     @Override
@@ -45,15 +49,25 @@ public class VulkanContext extends GraphicsContext {
         return new VulkanViewport(width, height);
     }
 
-
-    public VulkanInstance getInstance() {
+    public Instance getInstance() {
         return instance;
     }
     public PhysicalDevice getPhysicalDevice() {
         return physicalDevice;
     }
-
     public Device getDevice() {
         return device;
+    }
+
+    public MemoryAllocator getVMAInstance() {
+        return VMAInstance;
+    }
+
+    public Surface getSurface() {
+        return surface;
+    }
+
+    public SwapChain getSwapChain() {
+        return swapChain;
     }
 }

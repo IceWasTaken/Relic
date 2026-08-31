@@ -22,7 +22,7 @@ import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
 public class GLSceneRenderer implements Lifecycle {
 
-    private GLPipeline pipeline;
+    private GLPipeline renderPipeline;
     private final GLRenderer glRenderer;
 
     public GLSceneRenderer(GLRenderer glRenderer) {
@@ -35,7 +35,7 @@ public class GLSceneRenderer implements Lifecycle {
         int width = glRenderer.getApplication().getWindow().getWidth();
         int height = glRenderer.getApplication().getWindow().getHeight();
 
-        this.pipeline = new GLPipeline(
+        this.renderPipeline = new GLPipeline(
                 "scene",
                 new GLFramebuffer(
                         GL_TEXTURE_2D,
@@ -68,32 +68,32 @@ public class GLSceneRenderer implements Lifecycle {
                 )
         );
 
-        pipeline.getUniforms().createUniform("projectionMatrix");
-        pipeline.getUniforms().createUniform("viewMatrix");
+        renderPipeline.getUniforms().createUniform("projectionMatrix");
+        renderPipeline.getUniforms().createUniform("viewMatrix");
     }
 
     @Override
     public void render() {
         GLCommandBuffer staticCommandBuffer = glRenderer.getBufferManager().getStaticCommandBuffer();
 
-        pipeline.bindPipeline();
+        renderPipeline.bindPipeline();
 
-        pipeline.getUniforms().setUniform("projectionMatrix", glRenderer.getApplication().getCurrentScene().getMatrix().getProjMatrix());
-        pipeline.getUniforms().setUniform("viewMatrix", glRenderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
+        renderPipeline.getUniforms().setUniform("projectionMatrix", glRenderer.getApplication().getCurrentScene().getMatrix().getProjMatrix());
+        renderPipeline.getUniforms().setUniform("viewMatrix", glRenderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
 
         staticCommandBuffer.bind();
         glRenderer.getBufferManager().getMeshBuffer().bind();
         glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
-        staticCommandBuffer.draw(pipeline);
+        staticCommandBuffer.draw(renderPipeline);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     public void resize(int width, int height) {
-        pipeline.resize(width, height);
+        renderPipeline.resize(width, height);
     }
 
     public GLPipeline getPipeline() {
-        return pipeline;
+        return renderPipeline;
     }
 }

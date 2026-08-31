@@ -47,11 +47,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
         this.postRenderer.resize(width, height);
     }
 
-    @Override
-    public void setupData() {
-
-    }
-
     public GLRenderer(RelicApplication relicApplication) {
         super(relicApplication);
         this.bufferManager = new BufferManager(this);
@@ -70,7 +65,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glEnable(GL_FRAMEBUFFER_SRGB);
-        setupDebugMessageCallback();
+        //setupDebugMessageCallback();
         //SystemInfo.logGLInfo();
 
         this.lightBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());

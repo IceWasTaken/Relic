@@ -20,7 +20,7 @@ import static imgui.flag.ImGuiCond.Always;
 public class DebugGui implements Gui {
 
     private RelicApplication application;
-    private GLRenderer glRenderer;
+    //private GLRenderer glRenderer;
     private ConsoleGui consoleGui;
     private ImageViewer imageViewer;
     private SceneInfoGui sceneInfoGui;
@@ -44,11 +44,11 @@ public class DebugGui implements Gui {
         this.ecsGui = new ECSGui(application);
         this.commandViewer = new CommandViewer(application);
 
-        if(application.getRenderer() instanceof GLRenderer glRenderer) {
-            this.glRenderer = glRenderer;
-        } else {
-            throw new RuntimeException();
-        }
+//        if(application.getRenderer() instanceof GLRenderer glRenderer) {
+//            this.glRenderer = glRenderer;
+//        } else {
+//            throw new RuntimeException();
+//        }
     }
 
     @Override
@@ -95,9 +95,9 @@ public class DebugGui implements Gui {
             ecsGui.drawToggleButton();
             commandViewer.drawToggleButton();
 
-            if(checkbox("Post Rendering", glRenderer.getPostRenderer().shouldRender())) {
-                glRenderer.getPostRenderer().toggleRendering();
-            }
+//            if(checkbox("Post Rendering", glRenderer.getPostRenderer().shouldRender())) {
+//                glRenderer.getPostRenderer().toggleRendering();
+//            }
 
             end();
         }

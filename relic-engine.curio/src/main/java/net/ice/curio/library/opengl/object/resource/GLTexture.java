@@ -34,8 +34,6 @@ public class GLTexture extends Texture {
         int height = bitmap.getHeight();
         int levels = (int) Math.floor(log2(Math.max(width, height))) + 1;
 
-
-
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTextureParameteri(textureID, GL_TEXTURE_MIN_FILTER, format.minFilter);
         glTextureParameteri(textureID, GL_TEXTURE_MAG_FILTER, format.magFilter);
@@ -89,10 +87,6 @@ public class GLTexture extends Texture {
     @Override
     public long getHandle() {
         return textureHandle;
-    }
-
-    public static double log2(double x) {
-        return Math.log(x) / Math.log(2);
     }
 
     public record TextureFormat(
