@@ -5,6 +5,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.tinylog.Logger;
 
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -16,9 +17,10 @@ public final class GLBuffer {
     private final int handle;
     private final long size;
     private final int flags;
-    private ByteBuffer mapping;
 
     private int used;
+
+    private ByteBuffer mapping;
 
     /// [GL Wiki Reference](https://wikis.khronos.org/opengl/Buffer_Object)
     public GLBuffer(long size, int flags) {
@@ -248,6 +250,20 @@ public final class GLBuffer {
     public int getUsed() {
         return used;
     }
+
+    public long getMappingAddress() {
+        if(!mapping.isDirect()) {
+            return 0;
+        }
+
+        try {
+            Field field = ByteBuffer.class.getSuperclass().getDeclaredField("address");
+            field.setAccessible(true);
+            return field.getLong(mapping);
+        } catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
     int getHandle() {
         return handle;

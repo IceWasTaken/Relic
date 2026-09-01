@@ -8,6 +8,7 @@ import net.ice.curio.window.Window;
 import net.ice.heirloom.ApplicationProperties;
 import net.ice.heirloom.register.RegistrationManager;
 import net.ice.relic.Relic;
+import net.ice.relic.agent.RelicAgent;
 import net.ice.relic.core.EngineState;
 import net.ice.relic.common.console.Console;
 import net.ice.relic.common.console.ConsoleItem;
@@ -59,6 +60,8 @@ public abstract class RelicApplication implements ApplicationContext {
     protected RelicApplication(ApplicationProperties info) {
         checkApplicationProperties(info);
         changeState(INITIALIZING);
+
+
 
         this.applicationProperties = info;
 
@@ -205,6 +208,9 @@ public abstract class RelicApplication implements ApplicationContext {
 
         if(properties.debug()) {
             Logger.info("[Relic]: Debugging for application '{}' enabled", properties.applicationName());
+        }
+
+        if(properties.hasArgument("debug-agent")) {
         }
     }
 

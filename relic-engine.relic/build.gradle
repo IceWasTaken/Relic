@@ -45,8 +45,11 @@ dependencies {
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     runtimeOnly "io.github.spair:imgui-java-app:${imguiVersion}"
 
+    implementation "net.bytebuddy:byte-buddy:1.18.12"
+
     implementation 'org.tinylog:tinylog-api:2.7.0'
     implementation 'org.tinylog:tinylog-impl:2.7.0'
+
     implementation 'io.github.classgraph:classgraph:4.8.192'
     implementation "org.joml:joml:${jomlVersion}"
 }
@@ -66,14 +69,45 @@ jar {
     }
 }
 
-
 tasks.named('jar') {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    eachFile { FileCopyDetails details ->
+        if (details.path.startsWith('META-INF/services/')) {
+            details.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+    }
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.register('buildAgent', Jar) {
+    group = 'build'
+    description = 'Generates manifest and builds a ByteBuddy agent'
+
+    archiveClassifier = 'agent'
+
+    manifest {
+        attributes(
+                'Premain-Class': 'net.ice.relic.agent.RelicAgent',
+                'Agent-Class': 'net.ice.relic.agent.RelicAgent',
+                'Can-Redefine-Classes': 'true',
+                'Can-Retransform-Classes': 'true'
+        )
+    }
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    } {
+        exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 tasks.named('distZip') {
     enabled = false

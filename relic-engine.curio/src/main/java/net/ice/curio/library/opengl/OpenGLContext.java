@@ -9,6 +9,7 @@ import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
+import net.ice.curio.system.SystemInfo;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 import org.tinylog.Logger;
@@ -26,6 +27,8 @@ public class OpenGLContext extends GraphicsContext {
     @Override
     public void init() {
         this.capabilities = GL.createCapabilities();
+
+        SystemInfo.logGLInfo();
 
         checkCapability(capabilities.OpenGL46, "OpenGL backend requires an OpenGL 4.6 capable driver & GPU");
         checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
