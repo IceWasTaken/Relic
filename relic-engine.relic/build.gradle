@@ -45,7 +45,7 @@ dependencies {
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     runtimeOnly "io.github.spair:imgui-java-app:${imguiVersion}"
 
-    implementation "net.bytebuddy:byte-buddy:1.18.12"
+    implementation "net.bytebuddy:byte-buddy:1.18.14"
 
     implementation 'org.tinylog:tinylog-api:2.7.0'
     implementation 'org.tinylog:tinylog-impl:2.7.0'
