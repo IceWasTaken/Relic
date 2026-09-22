@@ -2,65 +2,81 @@ package net.ice.curio.library.glfw;
 
 import imgui.ImGui;
 import imgui.ImGuiIO;
-import net.ice.curio.config.RendererConfig;
-import net.ice.curio.config.enums.BackendType;
+import net.ice.curio.Curio;
+import net.ice.curio.input.event.CursorEnterEvent;
+import net.ice.curio.input.event.CursorEvent;
+import net.ice.curio.input.event.KeyEvent;
+import net.ice.curio.input.event.MouseButtonEvent;
 import net.ice.curio.library.glfw.enums.GLFWInitHint;
 import net.ice.curio.library.glfw.enums.GLFWPlatform;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
 import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.events.*;
-import net.ice.heirloom.Lifecycle;
+import net.ice.curio.window.Window;
+import net.ice.curio.window.enums.WindowAttribute;
 import net.ice.heirloom.event.EventManager;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.vulkan.VkInstance;
 import org.tinylog.Logger;
 
 import java.nio.IntBuffer;
-import java.nio.LongBuffer;
 
 import static net.ice.curio.library.glfw.enums.GLFWInitHint.PLATFORM;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFWVulkan.glfwCreateWindowSurface;
+import static org.lwjgl.system.MemoryUtil.memFree;
 
-public final class GLFWWindow implements Lifecycle {
+public class GLFWWindow extends Window {
 
-    private int width = 1280;
-    private int height = 720;
-    private boolean resized = false;
+    protected int width = 1280;
+    protected int height = 720;
 
-    private long monitor;
-    private long windowHandle;
+    protected boolean resized = false;
 
-    private final GLFWWindowProperties windowProperties;
+    protected long monitor;
+    protected long windowHandle;
 
-    private GLFWKeyCallback keyCallback;
-    private GLFWMouseButtonCallback mouseButtonCallback;
-    private GLFWScrollCallback scrollCallback;
-    private GLFWCursorPosCallback mousePosCallback;
-    private GLFWCharCallback charCallback;
+    protected final GLFWWindowProperties windowProperties;
 
-    public GLFWWindow() {
-        this.windowProperties = new GLFWWindowProperties();
+    protected GLFWErrorCallback errorCallback;
+    protected GLFWFramebufferSizeCallback framebufferSizeCallback;
+    protected GLFWKeyCallback keyCallback;
+    protected GLFWMouseButtonCallback mouseButtonCallback;
+    protected GLFWScrollCallback scrollCallback;
+    protected GLFWCursorPosCallback mousePosCallback;
+    protected GLFWCursorEnterCallback cursorEnterCallback;
+    protected GLFWCharCallback charCallback;
+
+    public GLFWWindow(Curio curio) {
+	    super(curio);
+
+		this.windowProperties = new GLFWWindowProperties();
 
         initHint(windowProperties.getGlfwPlatform());
-
-
-        EventManager.execute(new InitHintEvent());
 
         if(!glfwInit()) {
             throw new RuntimeException("GLFW: Failed to initialize GLFW.");
         }
 
+        glfwSetErrorCallback(errorCallback = new GLFWErrorCallback() {
+            @Override
+            public void invoke(int error, long description) {
+                Logger.error("GLFW Error: [{}], [{}]", error, MemoryUtil.memUTF8(description));
+            }
+        });
+
         this.monitor = glfwGetPrimaryMonitor();
 
         glfwDefaultWindowHints();
-        glfwWindowHintString(GLFW_WAYLAND_APP_ID, "net.ice.curio.library.glfw.GLFWWindow");
-        EventManager.execute(new WindowHintEvent(this));
 
-        glfwSetErrorCallback((int errorCode, long msgPtr) -> Logger.error("GLFW Error: [{}], [{}]", errorCode, MemoryUtil.memUTF8(msgPtr)));
+        switch (windowProperties.getGlfwPlatform()) {
+            case WAYLAND -> glfwWindowHintString(GLFW_WAYLAND_APP_ID, "net.ice.curio.library.glfw.GLFWWindow");
+            case X11 -> {
+                glfwWindowHintString(GLFW_X11_CLASS_NAME, "net.ice.curio.library.glfw.GLFWWindow");
+                glfwWindowHintString(GLFW_X11_INSTANCE_NAME, "net.ice.curio.library.glfw.GLFWWindow");
+            }
+        }
 
         this.windowHandle = glfwCreateWindow(width, height, windowProperties.getTitle(), 0, 0);
 
@@ -76,37 +92,51 @@ public final class GLFWWindow implements Lifecycle {
         int h = (glfwGetVideoMode(monitor).height() / 2) + heightBuffer.get() - height / 2;
         setWindowPosition(w, h);
 
+        memFree(widthBuffer);
+        memFree(heightBuffer);
+
+        glfwPollEvents();
+
+        widthBuffer = MemoryUtil.memCallocInt(1);
+        heightBuffer = MemoryUtil.memCallocInt(1);
+        glfwGetFramebufferSize(windowHandle, widthBuffer, heightBuffer);
+        resize(widthBuffer.get(0), heightBuffer.get(0));
+        memFree(widthBuffer);
+        memFree(heightBuffer);
+
+
         setupCallbacks();
     }
 
     @Override
-    public void update() {
+    public void update(float deltaTime) {
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
     }
 
-    @Override
     public void cleanup() {
         glfwFreeCallbacks(windowHandle);
         glfwDestroyWindow(windowHandle);
 
-
         glfwTerminate();
-        glfwSetErrorCallback(null).free();
     }
 
     public void refreshName() {
         glfwSetWindowTitle(windowHandle, windowProperties.getTitle());
     }
 
-
     private void setupCallbacks() {
-        glfwSetFramebufferSizeCallback(windowHandle, (window, width, height) -> resize(width, height));
+        glfwSetFramebufferSizeCallback(windowHandle, framebufferSizeCallback = new  GLFWFramebufferSizeCallback() {
+            @Override
+            public void invoke(long window, int width, int height) {
+                resize(width, height);
+            }
+        });
 
         glfwSetKeyCallback(windowHandle, keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
-                EventManager.execute(new KeyEvent(window, key, scancode, action, mods));
+                EventManager.execute(new KeyEvent(GLFWKey.toKey(key), GLFWKey.toAction(action)));
             }
         });
 
@@ -120,31 +150,39 @@ public final class GLFWWindow implements Lifecycle {
         glfwSetCursorPosCallback(windowHandle, mousePosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
-                EventManager.execute(new CursorEvent(window, xpos, ypos));
+                EventManager.execute(new CursorEvent(xpos, ypos));
             }
         });
 
         glfwSetMouseButtonCallback(windowHandle, mouseButtonCallback = new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
-                EventManager.execute(new MouseButtonEvent(window, button, action, mods));
+                EventManager.execute(new MouseButtonEvent(GLFWKey.toMouseButton(button), GLFWKey.toAction(action)));
             }
         });
 
-        glfwSetCursorEnterCallback(windowHandle, (window, entered) -> EventManager.execute(new CursorEnterEvent(window, entered)));
-
-        glfwSetCharCallback(windowHandle, (handle, c) -> {
-            ImGuiIO io = ImGui.getIO();
-            if (!io.getWantCaptureKeyboard()) {
-                return;
+        glfwSetCursorEnterCallback(windowHandle, cursorEnterCallback = new GLFWCursorEnterCallback() {
+            @Override
+            public void invoke(long window, boolean entered) {
+                EventManager.execute(new CursorEnterEvent(entered));
             }
-            io.addInputCharacter(c);
+        });
+
+        glfwSetCharCallback(windowHandle, charCallback = new GLFWCharCallback() {
+            @Override
+            public void invoke(long window, int c) {
+                ImGuiIO io = ImGui.getIO();
+                if (!io.getWantCaptureKeyboard()) {
+                    return;
+                }
+                io.addInputCharacter(c);
+            }
         });
     }
 
     public void setWindowPosition(int x, int y) {
         if(windowProperties.getGlfwPlatform() == GLFWPlatform.WAYLAND) {
-            Logger.error("GLFW: Tried to set window position on Wayland backend.");
+            Logger.error("[GLFWWindow]: Tried to set window position on Wayland backend.");
             return;
         }
 
@@ -153,12 +191,6 @@ public final class GLFWWindow implements Lifecycle {
 
     public void makeContextCurrent() {
         glfwMakeContextCurrent(windowHandle);
-    }
-
-    public void createWindowSurface(VkInstance vkInstance, LongBuffer handleBuffer) {
-        if(RendererConfig.getBackendType() == BackendType.VULKAN) {
-            glfwCreateWindowSurface(vkInstance, windowHandle, null, handleBuffer);
-        }
     }
 
     public void enableVSync() {
@@ -185,6 +217,11 @@ public final class GLFWWindow implements Lifecycle {
         glfwWindowHint(hint.getGLFWEnum(), value.getGlfwEnum());
     }
 
+    @Override
+    public void attribute(WindowAttribute attribute, int value) {
+        glfwWindowHint(getAttribute(attribute), value);
+    }
+
     public void setWidth(int width) {
         this.resize(width, height);
     }
@@ -207,7 +244,28 @@ public final class GLFWWindow implements Lifecycle {
         return new Vector2i(width, height);
     }
 
-    public boolean isResized() {
+    public Vector2i getWindowSize() {
+        IntBuffer widthBuffer = MemoryUtil.memAllocInt(1);
+        IntBuffer heightBuffer = MemoryUtil.memAllocInt(1);
+        glfwGetWindowSize(windowHandle, widthBuffer, heightBuffer);
+        Vector2i size = new Vector2i(widthBuffer.get(0), heightBuffer.get(0));
+        memFree(widthBuffer);
+        memFree(heightBuffer);
+        return size;
+    }
+
+    public Vector2i getFramebufferSize() {
+        IntBuffer widthBuffer = MemoryUtil.memAllocInt(1);
+        IntBuffer heightBuffer = MemoryUtil.memAllocInt(1);
+        glfwGetFramebufferSize(windowHandle, widthBuffer, heightBuffer);
+        Vector2i size = new Vector2i(widthBuffer.get(0), heightBuffer.get(0));
+        memFree(widthBuffer);
+        memFree(heightBuffer);
+        return size;
+    }
+
+    @Override
+    public boolean shouldResize() {
         if(resized) {
             this.resized = false;
             return true;
@@ -215,7 +273,18 @@ public final class GLFWWindow implements Lifecycle {
         return false;
     }
 
-    public boolean shouldWindowClose() {
+    private static int getAttribute(WindowAttribute attribute) {
+        return switch (attribute) {
+			case CONTEXT_VERSION_MAJOR -> GLFW_CONTEXT_VERSION_MAJOR;
+	        case CONTEXT_VERSION_MINOR -> GLFW_CONTEXT_VERSION_MINOR;
+	        case CONTEXT_PROFILE -> GLFW_OPENGL_PROFILE;
+			case CONTEXT_DEBUG -> GLFW_CONTEXT_DEBUG;
+        };
+    }
+
+
+    @Override
+    public boolean shouldClose() {
         return glfwWindowShouldClose(windowHandle);
     }
 

@@ -75,7 +75,7 @@ public class MeshBuffer implements Lifecycle {
 		mesh.populateBufferWithMesh(staticVertexBuffer);
 		staticIndexBuffer.putInt(mesh.getIndices());
 
-		staticVertexPos += mesh.getVertexPositions().length;
+		staticVertexPos += mesh.getPositions().length;
 		staticIndexPos += mesh.getIndices().length;
 
 		return new Mesh(mesh, currVertexPos, currIndexPos, count);

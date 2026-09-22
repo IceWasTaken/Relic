@@ -1,7 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.application.RelicApplication;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;

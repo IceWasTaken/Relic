@@ -1,5 +1,6 @@
 package net.ice.curio.library.opengl.object.pipeline;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.pipeline.Pipeline;
 import net.ice.curio.graphics.object.pipeline.PrimitiveType;
@@ -40,9 +41,10 @@ public class GLPipeline extends Pipeline {
 	private final Viewport viewport;
 	private final Uniforms uniforms;
 
-	private final Optional<GLFramebuffer> framebuffer;
+	private Optional<GLFramebuffer> framebuffer;
 
 	public GLPipeline(
+			GraphicsContext context,
 			String programPath,
 			GLFramebuffer framebuffer,
 			PrimitiveType primitiveType,
@@ -50,7 +52,7 @@ public class GLPipeline extends Pipeline {
 			DepthState depthState,
 			Viewport viewport
 	){
-		super(primitiveType, rasterizationState, depthState);
+		super(context, primitiveType, rasterizationState, depthState);
 
 		Logger.debug("[Pipeline]: Creating new graphics pipeline");
 
@@ -59,7 +61,7 @@ public class GLPipeline extends Pipeline {
 
 		this.framebuffer = Optional.ofNullable(framebuffer);
 
-		List<GLShader> shaders = GLShader.loadProgram(programPath);
+		List<GLShader> shaders = GLShader.loadProgram(context, programPath);
 		for(GLShader shader : shaders) {
 			if(shader.getShaderHandle() == 0) {
 				Logger.error("[Pipeline] Invalid shader passed to pipeline");
@@ -102,7 +104,7 @@ public class GLPipeline extends Pipeline {
 		framebuffer.ifPresent(GLFramebuffer::clear);
 
 		//VkPipelineRasterizationStateCreateInfo
-		glPolygonMode(cullMode, polygonMode);
+		glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
 		glCullFace(cullMode);
 		glFrontFace(frontFace);
 		glEnableDisable(depthClamp, GL_DEPTH_CLAMP);
@@ -125,7 +127,7 @@ public class GLPipeline extends Pipeline {
 	}
 
 	public void resize(int width, int height) {
-		this.framebuffer.ifPresent((fb) -> fb.resize(width, height));
+		this.framebuffer.ifPresent(glFramebuffer -> this.framebuffer = Optional.of(glFramebuffer.resize(width, height)));
 		this.viewport.resize(width, height);
 	}
 

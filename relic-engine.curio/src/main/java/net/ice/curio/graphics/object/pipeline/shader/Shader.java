@@ -1,10 +1,15 @@
 package net.ice.curio.graphics.object.pipeline.shader;
 
+import net.ice.curio.graphics.context.GraphicsContext;
+
 public abstract class Shader {
 
 	protected final ShaderType type;
 
-	protected Shader(ShaderType type) {
+	protected final GraphicsContext context;
+
+	protected Shader(GraphicsContext context, ShaderType type) {
+		this.context = context;
 		this.type = type;
 	}
 
@@ -20,5 +25,9 @@ public abstract class Shader {
 		}
 
 		throw new RuntimeException("gfdghfdshsdfg");
+	}
+
+	public ShaderType getType() {
+		return type;
 	}
 }

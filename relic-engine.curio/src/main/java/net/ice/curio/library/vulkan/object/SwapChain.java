@@ -200,4 +200,8 @@ public class SwapChain {
 	public ImageView[] getImageViews() {
 		return imageViews;
 	}
+
+	public VkExtent2D getSwapChainExtent() {
+		return swapChainExtent;
+	}
 }

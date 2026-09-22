@@ -5,12 +5,11 @@ import imgui.ImVec2;
 import imgui.type.ImString;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.gui.GuiContext;
 import net.ice.relic.core.gui.drawable.GuiWindow;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static imgui.ImGui.*;

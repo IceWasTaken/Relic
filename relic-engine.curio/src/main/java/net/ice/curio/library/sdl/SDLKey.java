@@ -1,0 +1,158 @@
+package net.ice.curio.library.sdl;
+
+import net.ice.curio.input.enums.Key;
+import net.ice.curio.input.enums.MouseButton;
+
+import static net.ice.curio.input.enums.Key.*;
+import static org.lwjgl.sdl.SDLMouse.*;
+import static org.lwjgl.sdl.SDLScancode.*;
+
+public class SDLKey {
+
+	public static Key toKey(int keycode) {
+		return switch (keycode) {
+			case SDL_SCANCODE_0 -> KEY_0;
+			case SDL_SCANCODE_1 -> KEY_1;
+			case SDL_SCANCODE_2 -> KEY_2;
+			case SDL_SCANCODE_3 -> KEY_3;
+			case SDL_SCANCODE_4 -> KEY_4;
+			case SDL_SCANCODE_5 -> KEY_5;
+			case SDL_SCANCODE_6 -> KEY_6;
+			case SDL_SCANCODE_7 -> KEY_7;
+			case SDL_SCANCODE_8 -> KEY_8;
+			case SDL_SCANCODE_9 -> KEY_9;
+
+			case SDL_SCANCODE_A -> KEY_A;
+			case SDL_SCANCODE_B -> KEY_B;
+			case SDL_SCANCODE_C -> KEY_C;
+			case SDL_SCANCODE_D -> KEY_D;
+			case SDL_SCANCODE_E -> KEY_E;
+			case SDL_SCANCODE_F -> KEY_F;
+			case SDL_SCANCODE_G -> KEY_G;
+			case SDL_SCANCODE_H -> KEY_H;
+			case SDL_SCANCODE_I -> KEY_I;
+			case SDL_SCANCODE_J -> KEY_J;
+			case SDL_SCANCODE_K -> KEY_K;
+			case SDL_SCANCODE_L -> KEY_L;
+			case SDL_SCANCODE_M -> KEY_M;
+			case SDL_SCANCODE_N -> KEY_N;
+			case SDL_SCANCODE_O -> KEY_O;
+			case SDL_SCANCODE_P -> KEY_P;
+			case SDL_SCANCODE_Q -> KEY_Q;
+			case SDL_SCANCODE_R -> KEY_R;
+			case SDL_SCANCODE_S -> KEY_S;
+			case SDL_SCANCODE_T -> KEY_T;
+			case SDL_SCANCODE_U -> KEY_U;
+			case SDL_SCANCODE_V -> KEY_V;
+			case SDL_SCANCODE_W -> KEY_W;
+			case SDL_SCANCODE_X -> KEY_X;
+			case SDL_SCANCODE_Y -> KEY_Y;
+			case SDL_SCANCODE_Z -> KEY_Z;
+
+			case SDL_SCANCODE_GRAVE -> KEY_GRAVE_ACCENT;
+
+			case SDL_SCANCODE_MINUS -> KEY_MINUS;
+			case SDL_SCANCODE_EQUALS -> KEY_EQUAL;
+
+			case SDL_SCANCODE_LEFTBRACKET -> KEY_LEFT_BRACKET;
+			case SDL_SCANCODE_RIGHTBRACKET -> KEY_RIGHT_BRACKET;
+			case SDL_SCANCODE_BACKSLASH -> KEY_BACKSLASH;
+
+			case SDL_SCANCODE_SEMICOLON -> KEY_SEMICOLON;
+			case SDL_SCANCODE_APOSTROPHE -> KEY_APOSTROPHE;
+
+			case SDL_SCANCODE_COMMA -> KEY_COMMA;
+			case SDL_SCANCODE_PERIOD -> KEY_PERIOD;
+			case SDL_SCANCODE_SLASH -> KEY_SLASH;
+
+			case SDL_SCANCODE_SPACE -> KEY_SPACE;
+
+			case SDL_SCANCODE_LEFT -> KEY_LEFT;
+			case SDL_SCANCODE_UP -> KEY_UP;
+			case SDL_SCANCODE_DOWN -> KEY_DOWN;
+			case SDL_SCANCODE_RIGHT -> KEY_RIGHT;
+
+			case SDL_SCANCODE_ESCAPE -> KEY_ESCAPE;
+			case SDL_SCANCODE_BACKSPACE -> KEY_BACKSPACE;
+			case SDL_SCANCODE_TAB -> KEY_TAB;
+			case SDL_SCANCODE_RETURN -> KEY_ENTER;
+
+			case SDL_SCANCODE_CAPSLOCK -> KEY_CAPS_LOCK;
+			case SDL_SCANCODE_SCROLLLOCK -> KEY_SCROLL_LOCK;
+			case SDL_SCANCODE_NUMLOCKCLEAR -> KEY_NUM_LOCK;
+			case SDL_SCANCODE_PRINTSCREEN -> KEY_PRINT_SCREEN;
+
+			case SDL_SCANCODE_DELETE -> KEY_DELETE;
+			case SDL_SCANCODE_PAGEUP -> KEY_PAGE_UP;
+			case SDL_SCANCODE_PAGEDOWN -> KEY_PAGE_DOWN;
+			case SDL_SCANCODE_HOME -> KEY_HOME;
+			case SDL_SCANCODE_END -> KEY_END;
+			case SDL_SCANCODE_INSERT -> KEY_INSERT;
+			case SDL_SCANCODE_PAUSE -> KEY_PAUSE;
+			case SDL_SCANCODE_MENU -> KEY_MENU;
+
+			case SDL_SCANCODE_LGUI -> KEY_LEFT_SUPER;
+			case SDL_SCANCODE_RGUI -> KEY_RIGHT_SUPER;
+			case SDL_SCANCODE_LSHIFT -> KEY_LEFT_SHIFT;
+			case SDL_SCANCODE_RSHIFT -> KEY_RIGHT_SHIFT;
+			case SDL_SCANCODE_LCTRL -> KEY_LEFT_CONTROL;
+			case SDL_SCANCODE_RCTRL -> KEY_RIGHT_CONTROL;
+			case SDL_SCANCODE_LALT -> KEY_LEFT_ALT;
+			case SDL_SCANCODE_RALT -> KEY_RIGHT_ALT;
+
+			case SDL_SCANCODE_F1 -> KEY_F1;
+			case SDL_SCANCODE_F2 -> KEY_F2;
+			case SDL_SCANCODE_F3 -> KEY_F3;
+			case SDL_SCANCODE_F4 -> KEY_F4;
+			case SDL_SCANCODE_F5 -> KEY_F5;
+			case SDL_SCANCODE_F6 -> KEY_F6;
+			case SDL_SCANCODE_F7 -> KEY_F7;
+			case SDL_SCANCODE_F8 -> KEY_F8;
+			case SDL_SCANCODE_F9 -> KEY_F9;
+			case SDL_SCANCODE_F10 -> KEY_F10;
+			case SDL_SCANCODE_F11 -> KEY_F11;
+			case SDL_SCANCODE_F12 -> KEY_F12;
+			case SDL_SCANCODE_F13 -> KEY_F13;
+			case SDL_SCANCODE_F14 -> KEY_F14;
+			case SDL_SCANCODE_F15 -> KEY_F15;
+			case SDL_SCANCODE_F16 -> KEY_F16;
+			case SDL_SCANCODE_F17 -> KEY_F17;
+			case SDL_SCANCODE_F18 -> KEY_F18;
+			case SDL_SCANCODE_F19 -> KEY_F19;
+			case SDL_SCANCODE_F20 -> KEY_F20;
+			case SDL_SCANCODE_F21 -> KEY_F21;
+			case SDL_SCANCODE_F22 -> KEY_F22;
+			case SDL_SCANCODE_F23 -> KEY_F23;
+			case SDL_SCANCODE_F24 -> KEY_F24;
+
+			case SDL_SCANCODE_KP_0 -> KEY_KEYPAD_0;
+			case SDL_SCANCODE_KP_1 -> KEY_KEYPAD_1;
+			case SDL_SCANCODE_KP_2 -> KEY_KEYPAD_2;
+			case SDL_SCANCODE_KP_3 -> KEY_KEYPAD_3;
+			case SDL_SCANCODE_KP_4 -> KEY_KEYPAD_4;
+			case SDL_SCANCODE_KP_5 -> KEY_KEYPAD_5;
+			case SDL_SCANCODE_KP_6 -> KEY_KEYPAD_6;
+			case SDL_SCANCODE_KP_7 -> KEY_KEYPAD_7;
+			case SDL_SCANCODE_KP_8 -> KEY_KEYPAD_8;
+			case SDL_SCANCODE_KP_9 -> KEY_KEYPAD_9;
+			case SDL_SCANCODE_KP_PERIOD -> KEY_KEYPAD_DECIMAL;
+			case SDL_SCANCODE_KP_DIVIDE -> KEY_KEYPAD_DIVIDE;
+			case SDL_SCANCODE_KP_MULTIPLY -> KEY_KEYPAD_MULTIPLY;
+			case SDL_SCANCODE_KP_MINUS -> KEY_KEYPAD_SUBTRACT;
+			case SDL_SCANCODE_KP_PLUS -> KEY_KEYPAD_ADD;
+			case SDL_SCANCODE_KP_ENTER -> KEY_KEYPAD_ENTER;
+			case SDL_SCANCODE_KP_EQUALS -> KEY_KEYPAD_EQUAL;
+
+			default -> KEY_UNKNOWN_1;
+		};
+	}
+
+	public static MouseButton toMouseButton(int button) {
+		return switch(button) {
+			case SDL_BUTTON_LEFT -> MouseButton.BUTTON_LEFT;
+			case SDL_BUTTON_MIDDLE ->  MouseButton.BUTTON_MIDDLE;
+			case SDL_BUTTON_RIGHT ->  MouseButton.BUTTON_RIGHT;
+			default -> null;
+		};
+	}
+}

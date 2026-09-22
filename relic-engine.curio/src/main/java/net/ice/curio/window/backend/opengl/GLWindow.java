@@ -1,29 +1,37 @@
 package net.ice.curio.window.backend.opengl;
 
+import net.ice.curio.Curio;
+import net.ice.curio.library.glfw.GLFWWindow;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
 import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.events.WindowHintEvent;
 import net.ice.curio.window.Window;
 import net.ice.heirloom.event.EventListener;
+import net.ice.heirloom.event.EventManager;
 
-public class GLWindow extends Window {
+import java.awt.event.WindowEvent;
 
-    public GLWindow() {
+public class GLWindow extends GLFWWindow {
+
+    public GLWindow(Curio curio) {
+        super(curio);
     }
 
-    @Override
+
     public void init() {
-        window.init();
-        window.makeContextCurrent();
-        window.enableVSync();
+        makeContextCurrent();
+        enableVSync();
     }
 
-    @EventListener
-    public void setupWindowHints(WindowHintEvent event) {
-        event.windowHint(GLFWWindowHint.VISIBLE, true);
-        event.windowHint(GLFWWindowHint.CONTEXT_VERSION_MAJOR, 4);
-        event.windowHint(GLFWWindowHint.CONTEXT_VERSION_MINOR, 6);
-        event.windowHint(GLFWWindowHint.OPENGL_PROFILE, GLFWWindowHintValues.OPENGL_CORE_PROFILE);
-        event.windowHint(GLFWWindowHint.OPENGL_DEBUG_CONTEXT, true);
+    protected void setupInitHints() {
+
     }
+
+    protected void setupWindowHints() {
+        windowHint(GLFWWindowHint.VISIBLE, true);
+        windowHint(GLFWWindowHint.OPENGL_PROFILE, GLFWWindowHintValues.OPENGL_CORE_PROFILE);
+        windowHint(GLFWWindowHint.SCALE_TO_MONITOR, true);
+    }
+
+
 }

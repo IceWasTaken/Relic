@@ -1,22 +1,11 @@
 package net.ice.curio.library.opengl.object.resource;
 
 import net.ice.curio.graphics.object.resource.Texture;
-import net.ice.curio.library.opengl.wrapper.enums.texture.ImageFormat;
-import net.ice.curio.library.opengl.wrapper.enums.texture.TextureType;
-import net.ice.curio.library.opengl.wrapper.enums.texture.parameter.FilteringParameter;
-import net.ice.curio.library.opengl.wrapper.enums.texture.parameter.WrapParameter;
 import net.ice.curio.library.stb.Bitmap;
 import org.tinylog.Logger;
 
-import java.nio.ByteBuffer;
-
-import static net.ice.curio.library.opengl.wrapper.enums.texture.TextureType.TEXTURE_2D;
-import static net.ice.curio.library.opengl.wrapper.enums.texture.parameter.FilteringParameter.*;
-import static net.ice.curio.library.opengl.wrapper.enums.texture.parameter.WrapParameter.REPEAT;
 import static org.lwjgl.opengl.ARBBindlessTexture.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
-import static org.lwjgl.opengl.GL14.GL_TEXTURE_COMPARE_MODE;
 import static org.lwjgl.opengl.GL45.*;
 
 public class GLTexture extends Texture {
@@ -24,30 +13,26 @@ public class GLTexture extends Texture {
     private final int textureID;
     private final long textureHandle;
 
-    public GLTexture(TextureFormat format, Bitmap bitmap) {
+    public GLTexture(GLSampler sampler, Bitmap bitmap) {
         super(bitmap);
 
         while(glGetError() != GL_NO_ERROR);
 
-        this.textureID = glCreateTextures(format.type);
+
+        this.textureID = glCreateTextures(GL_TEXTURE_2D);
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         int levels = (int) Math.floor(log2(Math.max(width, height))) + 1;
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTextureParameteri(textureID, GL_TEXTURE_MIN_FILTER, format.minFilter);
-        glTextureParameteri(textureID, GL_TEXTURE_MAG_FILTER, format.magFilter);
-        glTextureParameteri(textureID, GL_TEXTURE_WRAP_S, format.wrapS);
-        glTextureParameteri(textureID, GL_TEXTURE_WRAP_T, format.wrapT);
-        glTextureParameteri(textureID, GL_TEXTURE_WRAP_R, format.wrapR);
 
-        glTextureStorage2D(textureID, levels, format.format, width, height);
+        glTextureStorage2D(textureID, levels, GL_RGBA8, width, height);
         glTextureSubImage2D(textureID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getData());
         glGenerateTextureMipmap(textureID);
 
         bitmap.cleanup();
 
-        this.textureHandle = glGetTextureHandleARB(textureID);
+        this.textureHandle = glGetTextureSamplerHandleARB(textureID, sampler.getHandle());
         if (textureHandle == 0L) {
             Logger.error("[GLTexture]: Failed to get bindless handle for texture.");
             return;
@@ -59,8 +44,9 @@ public class GLTexture extends Texture {
             Logger.error("[GLTexture]: Texture handle not resident: {}");
         }
 
-        if(glGetError() != GL_NO_ERROR) {
-            throw new RuntimeException("[GLTexture]: Encountered error while creating texture");
+        int error;
+        if((error = glGetError()) != GL_NO_ERROR) {
+            throw new RuntimeException("[GLTexture]: Encountered error while creating texture: " + error);
         }
     }
 
@@ -98,4 +84,5 @@ public class GLTexture extends Texture {
             int minFilter,
             int magFilter
     ) {}
+
 }

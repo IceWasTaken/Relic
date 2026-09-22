@@ -3,6 +3,7 @@ package net.ice.curio.library.vulkan.object;
 import net.ice.curio.graphics.object.resource.Image;
 import net.ice.curio.library.vulkan.VulkanContext;
 
+import net.ice.curio.library.vulkan.utils.VulkanUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.vma.VmaAllocationCreateInfo;
@@ -16,7 +17,7 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public final class VulkanImage extends Image {
 
-    //private final int format;
+    private final int format;
 
     private final long vkImage;
     private final long allocation;
@@ -24,7 +25,7 @@ public final class VulkanImage extends Image {
     public VulkanImage(VulkanContext vulkanContext, ImageInfo imageInfo) {
 	    super(vulkanContext, imageInfo);
 
-        //this.format = getFormat(imageInfo.getImageFormat());
+        this.format = VulkanUtils.getFormat(imageInfo.getImageFormat());
 
 		try(MemoryStack stack = MemoryStack.stackPush()) {
 
@@ -32,7 +33,7 @@ public final class VulkanImage extends Image {
             VkImageCreateInfo imageCreateInfo = VkImageCreateInfo.calloc(stack)
                     .sType$Default()
                     .imageType(getImageType(imageType))
-                    //.format(getFormat(imageInfo.getImageFormat()))
+                    .format(VulkanUtils.getFormat(imageInfo.getImageFormat()))
                     .extent(ex -> ex.width(width).height(height).depth(1))
                     .mipLevels(mipmapLevels)
                     .arrayLayers(imageInfo.getLayers())
@@ -69,13 +70,13 @@ public final class VulkanImage extends Image {
 
 
     public void cleanup(VulkanContext vulkanContext) {
-        //vulkanContext.getVMAInstance().destroyImage(vkImage, allocation);
+        //vulkanContext.getVMAInstance().(vkImage, allocation);
         super.cleanup();
     }
 
-//    public int getFormat() {
-//        return format;
-//    }
+    public int getFormat() {
+        return format;
+    }
 
     long getVkImage() {
         return vkImage;

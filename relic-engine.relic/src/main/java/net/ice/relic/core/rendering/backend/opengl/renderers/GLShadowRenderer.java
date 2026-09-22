@@ -35,6 +35,7 @@ public class GLShadowRenderer implements Lifecycle {
     @Override
     public void init() {
         this.pipeline = new GLPipeline(
+                glRenderer.getApplication().getCurio().getGraphicsContext(),
                 "shadow",
                 null,
                 PrimitiveType.TRIANGLE,

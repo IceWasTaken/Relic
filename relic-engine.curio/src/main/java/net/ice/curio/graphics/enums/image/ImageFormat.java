@@ -4,8 +4,8 @@ package net.ice.curio.graphics.enums.image;
 public enum ImageFormat {
 
     RGBA8,
-
     //???????
-    BGRA8
+    BGRA8,
 
-}
+    DEPTH_16_UNSIGNED_NORMALIZED
+    }

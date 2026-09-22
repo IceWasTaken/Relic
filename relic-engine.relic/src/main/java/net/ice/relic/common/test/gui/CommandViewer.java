@@ -1,6 +1,6 @@
 package net.ice.relic.common.test.gui;
 
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.gui.GuiContext;
 import net.ice.relic.core.gui.drawable.GuiWindow;
 

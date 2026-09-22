@@ -3,6 +3,13 @@ package net.ice.curio.input;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.flag.ImGuiKey;
+import net.ice.curio.input.enums.Key;
+import net.ice.curio.input.enums.Action;
+import net.ice.curio.input.enums.MouseButton;
+import net.ice.curio.input.event.CursorEnterEvent;
+import net.ice.curio.input.event.CursorEvent;
+import net.ice.curio.input.event.KeyEvent;
+import net.ice.curio.input.event.MouseButtonEvent;
 import net.ice.curio.library.glfw.events.*;
 import net.ice.heirloom.event.EventListener;
 import net.ice.heirloom.event.EventManager;
@@ -11,14 +18,12 @@ import org.joml.Vector2f;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.lwjgl.glfw.GLFW.*;
-
 public class Input {
 
     private static boolean inWindow = false;
 
-    private static final Set<Integer> keysDown = new HashSet<>();
-    private static final Set<Integer> mouseButtonsDown = new HashSet<>();
+    private static final Set<Key> keysDown = new HashSet<>();
+    private static final Set<MouseButton> mouseButtonsDown = new HashSet<>();
 
     private static final Vector2f scroll = new Vector2f();
     private static final Vector2f mouseDelta = new Vector2f();
@@ -49,24 +54,25 @@ public class Input {
         }
         prevMousePosition.x = mousePosition.x;
         prevMousePosition.y = mousePosition.y;
+
     }
 
     @EventListener
     public static void onKeyEvent(KeyEvent keyEvent) {
-        if(keyEvent.getAction() == GLFW_PRESS) {
-            keysDown.add(keyEvent.getKey());
-        } else if(keyEvent.getAction() == GLFW_RELEASE) {
-            keysDown.remove(keyEvent.getKey());
+        if(keyEvent.action() == Action.PRESS) {
+            keysDown.add(keyEvent.key());
+        } else if(keyEvent.action() == Action.RELEASE) {
+            keysDown.remove(keyEvent.key());
         }
 
         ImGuiIO io = ImGui.getIO();
         if (!io.getWantCaptureKeyboard()) {
             return;
         }
-        if (keyEvent.getAction() == GLFW_PRESS) {
-            io.addKeyEvent(getImKey(keyEvent.getKey()), true);
-        } else if (keyEvent.getAction() == GLFW_RELEASE) {
-            io.addKeyEvent(getImKey(keyEvent.getKey()), false);
+        if (keyEvent.action() == Action.PRESS) {
+            io.addKeyEvent(getImKey(keyEvent.key()), true);
+        } else if (keyEvent.action() == Action.RELEASE) {
+            io.addKeyEvent(getImKey(keyEvent.key()), false);
         }
     }
 
@@ -78,25 +84,25 @@ public class Input {
 
     @EventListener
     public static void onCursorEvent(CursorEvent event) {
-        mousePosition.x = (float) event.getXpos();
-        mousePosition.y = (float) event.getYpos();
+        mousePosition.x = (float) event.xpos();
+        mousePosition.y = (float) event.ypos();
     }
 
     @EventListener
     public static void onMouseButtonEvent(MouseButtonEvent event) {
-        if(event.getAction() == GLFW_PRESS) {
-            mouseButtonsDown.add(event.getButton());
-        } else if(event.getAction() == GLFW_RELEASE) {
-            mouseButtonsDown.remove(event.getButton());
+        if(event.action() == Action.PRESS) {
+            mouseButtonsDown.add(event.button());
+        } else if(event.action() == Action.RELEASE) {
+            mouseButtonsDown.remove(event.button());
         }
     }
 
     @EventListener
     public static void onCursorEnter(CursorEnterEvent event) {
-        inWindow = event.isEntered();
+        inWindow = event.entered();
     }
 
-    public static boolean isKeyDown(int key) {
+    public static boolean isKeyDown(Key key) {
         return keysDown.contains(key);
     }
 
@@ -104,7 +110,7 @@ public class Input {
         return mousePosition;
     }
 
-    public Set<Integer> getMouseButtonsDown() {
+    public Set<MouseButton> getMouseButtonsDown() {
         return mouseButtonsDown;
     }
 
@@ -120,113 +126,113 @@ public class Input {
         EventManager.addListener(Input.class);
     }
 
-    public static int getImKey(int key) {
+    public static int getImKey(Key key) {
         return switch (key) {
-            case GLFW_KEY_TAB -> ImGuiKey.Tab;
-            case GLFW_KEY_LEFT -> ImGuiKey.LeftArrow;
-            case GLFW_KEY_RIGHT -> ImGuiKey.RightArrow;
-            case GLFW_KEY_UP -> ImGuiKey.UpArrow;
-            case GLFW_KEY_DOWN -> ImGuiKey.DownArrow;
-            case GLFW_KEY_PAGE_UP -> ImGuiKey.PageUp;
-            case GLFW_KEY_PAGE_DOWN -> ImGuiKey.PageDown;
-            case GLFW_KEY_HOME -> ImGuiKey.Home;
-            case GLFW_KEY_END -> ImGuiKey.End;
-            case GLFW_KEY_INSERT -> ImGuiKey.Insert;
-            case GLFW_KEY_DELETE -> ImGuiKey.Delete;
-            case GLFW_KEY_BACKSPACE -> ImGuiKey.Backspace;
-            case GLFW_KEY_SPACE -> ImGuiKey.Space;
-            case GLFW_KEY_ENTER -> ImGuiKey.Enter;
-            case GLFW_KEY_ESCAPE -> ImGuiKey.Escape;
-            case GLFW_KEY_APOSTROPHE -> ImGuiKey.Apostrophe;
-            case GLFW_KEY_COMMA -> ImGuiKey.Comma;
-            case GLFW_KEY_MINUS -> ImGuiKey.Minus;
-            case GLFW_KEY_PERIOD -> ImGuiKey.Period;
-            case GLFW_KEY_SLASH -> ImGuiKey.Slash;
-            case GLFW_KEY_SEMICOLON -> ImGuiKey.Semicolon;
-            case GLFW_KEY_EQUAL -> ImGuiKey.Equal;
-            case GLFW_KEY_LEFT_BRACKET -> ImGuiKey.LeftBracket;
-            case GLFW_KEY_BACKSLASH -> ImGuiKey.Backslash;
-            case GLFW_KEY_RIGHT_BRACKET -> ImGuiKey.RightBracket;
-            case GLFW_KEY_GRAVE_ACCENT -> ImGuiKey.GraveAccent;
-            case GLFW_KEY_CAPS_LOCK -> ImGuiKey.CapsLock;
-            case GLFW_KEY_SCROLL_LOCK -> ImGuiKey.ScrollLock;
-            case GLFW_KEY_NUM_LOCK -> ImGuiKey.NumLock;
-            case GLFW_KEY_PRINT_SCREEN -> ImGuiKey.PrintScreen;
-            case GLFW_KEY_PAUSE -> ImGuiKey.Pause;
-            case GLFW_KEY_KP_0 -> ImGuiKey.Keypad0;
-            case GLFW_KEY_KP_1 -> ImGuiKey.Keypad1;
-            case GLFW_KEY_KP_2 -> ImGuiKey.Keypad2;
-            case GLFW_KEY_KP_3 -> ImGuiKey.Keypad3;
-            case GLFW_KEY_KP_4 -> ImGuiKey.Keypad4;
-            case GLFW_KEY_KP_5 -> ImGuiKey.Keypad5;
-            case GLFW_KEY_KP_6 -> ImGuiKey.Keypad6;
-            case GLFW_KEY_KP_7 -> ImGuiKey.Keypad7;
-            case GLFW_KEY_KP_8 -> ImGuiKey.Keypad8;
-            case GLFW_KEY_KP_9 -> ImGuiKey.Keypad9;
-            case GLFW_KEY_KP_DECIMAL -> ImGuiKey.KeypadDecimal;
-            case GLFW_KEY_KP_DIVIDE -> ImGuiKey.KeypadDivide;
-            case GLFW_KEY_KP_MULTIPLY -> ImGuiKey.KeypadMultiply;
-            case GLFW_KEY_KP_SUBTRACT -> ImGuiKey.KeypadSubtract;
-            case GLFW_KEY_KP_ADD -> ImGuiKey.KeypadAdd;
-            case GLFW_KEY_KP_ENTER -> ImGuiKey.KeypadEnter;
-            case GLFW_KEY_KP_EQUAL -> ImGuiKey.KeypadEqual;
-            case GLFW_KEY_LEFT_SHIFT -> ImGuiKey.LeftShift;
-            case GLFW_KEY_LEFT_CONTROL -> ImGuiKey.LeftCtrl;
-            case GLFW_KEY_LEFT_ALT -> ImGuiKey.LeftAlt;
-            case GLFW_KEY_LEFT_SUPER -> ImGuiKey.LeftSuper;
-            case GLFW_KEY_RIGHT_SHIFT -> ImGuiKey.RightShift;
-            case GLFW_KEY_RIGHT_CONTROL -> ImGuiKey.RightCtrl;
-            case GLFW_KEY_RIGHT_ALT -> ImGuiKey.RightAlt;
-            case GLFW_KEY_RIGHT_SUPER -> ImGuiKey.RightSuper;
-            case GLFW_KEY_MENU -> ImGuiKey.Menu;
-            case GLFW_KEY_0 -> ImGuiKey._0;
-            case GLFW_KEY_1 -> ImGuiKey._1;
-            case GLFW_KEY_2 -> ImGuiKey._2;
-            case GLFW_KEY_3 -> ImGuiKey._3;
-            case GLFW_KEY_4 -> ImGuiKey._4;
-            case GLFW_KEY_5 -> ImGuiKey._5;
-            case GLFW_KEY_6 -> ImGuiKey._6;
-            case GLFW_KEY_7 -> ImGuiKey._7;
-            case GLFW_KEY_8 -> ImGuiKey._8;
-            case GLFW_KEY_9 -> ImGuiKey._9;
-            case GLFW_KEY_A -> ImGuiKey.A;
-            case GLFW_KEY_B -> ImGuiKey.B;
-            case GLFW_KEY_C -> ImGuiKey.C;
-            case GLFW_KEY_D -> ImGuiKey.D;
-            case GLFW_KEY_E -> ImGuiKey.E;
-            case GLFW_KEY_F -> ImGuiKey.F;
-            case GLFW_KEY_G -> ImGuiKey.G;
-            case GLFW_KEY_H -> ImGuiKey.H;
-            case GLFW_KEY_I -> ImGuiKey.I;
-            case GLFW_KEY_J -> ImGuiKey.J;
-            case GLFW_KEY_K -> ImGuiKey.K;
-            case GLFW_KEY_L -> ImGuiKey.L;
-            case GLFW_KEY_M -> ImGuiKey.M;
-            case GLFW_KEY_N -> ImGuiKey.N;
-            case GLFW_KEY_O -> ImGuiKey.O;
-            case GLFW_KEY_P -> ImGuiKey.P;
-            case GLFW_KEY_Q -> ImGuiKey.Q;
-            case GLFW_KEY_R -> ImGuiKey.R;
-            case GLFW_KEY_S -> ImGuiKey.S;
-            case GLFW_KEY_T -> ImGuiKey.T;
-            case GLFW_KEY_U -> ImGuiKey.U;
-            case GLFW_KEY_V -> ImGuiKey.V;
-            case GLFW_KEY_W -> ImGuiKey.W;
-            case GLFW_KEY_X -> ImGuiKey.X;
-            case GLFW_KEY_Y -> ImGuiKey.Y;
-            case GLFW_KEY_Z -> ImGuiKey.Z;
-            case GLFW_KEY_F1 -> ImGuiKey.F1;
-            case GLFW_KEY_F2 -> ImGuiKey.F2;
-            case GLFW_KEY_F3 -> ImGuiKey.F3;
-            case GLFW_KEY_F4 -> ImGuiKey.F4;
-            case GLFW_KEY_F5 -> ImGuiKey.F5;
-            case GLFW_KEY_F6 -> ImGuiKey.F6;
-            case GLFW_KEY_F7 -> ImGuiKey.F7;
-            case GLFW_KEY_F8 -> ImGuiKey.F8;
-            case GLFW_KEY_F9 -> ImGuiKey.F9;
-            case GLFW_KEY_F10 -> ImGuiKey.F10;
-            case GLFW_KEY_F11 -> ImGuiKey.F11;
-            case GLFW_KEY_F12 -> ImGuiKey.F12;
+            case KEY_TAB -> ImGuiKey.Tab;
+            case KEY_LEFT -> ImGuiKey.LeftArrow;
+            case KEY_RIGHT -> ImGuiKey.RightArrow;
+            case KEY_UP -> ImGuiKey.UpArrow;
+            case KEY_DOWN -> ImGuiKey.DownArrow;
+            case KEY_PAGE_UP -> ImGuiKey.PageUp;
+            case KEY_PAGE_DOWN -> ImGuiKey.PageDown;
+            case KEY_HOME -> ImGuiKey.Home;
+            case KEY_END -> ImGuiKey.End;
+            case KEY_INSERT -> ImGuiKey.Insert;
+            case KEY_DELETE -> ImGuiKey.Delete;
+            case KEY_BACKSPACE -> ImGuiKey.Backspace;
+            case KEY_SPACE -> ImGuiKey.Space;
+            case KEY_ENTER -> ImGuiKey.Enter;
+            case KEY_ESCAPE -> ImGuiKey.Escape;
+            case KEY_APOSTROPHE -> ImGuiKey.Apostrophe;
+            case KEY_COMMA -> ImGuiKey.Comma;
+            case KEY_MINUS -> ImGuiKey.Minus;
+            case KEY_PERIOD -> ImGuiKey.Period;
+            case KEY_SLASH -> ImGuiKey.Slash;
+            case KEY_SEMICOLON -> ImGuiKey.Semicolon;
+            case KEY_EQUAL -> ImGuiKey.Equal;
+            case KEY_LEFT_BRACKET -> ImGuiKey.LeftBracket;
+            case KEY_BACKSLASH -> ImGuiKey.Backslash;
+            case KEY_RIGHT_BRACKET -> ImGuiKey.RightBracket;
+            case KEY_GRAVE_ACCENT -> ImGuiKey.GraveAccent;
+            case KEY_CAPS_LOCK -> ImGuiKey.CapsLock;
+            case KEY_SCROLL_LOCK -> ImGuiKey.ScrollLock;
+            case KEY_NUM_LOCK -> ImGuiKey.NumLock;
+            case KEY_PRINT_SCREEN -> ImGuiKey.PrintScreen;
+            case KEY_PAUSE -> ImGuiKey.Pause;
+            case KEY_KEYPAD_0 -> ImGuiKey.Keypad0;
+            case KEY_KEYPAD_1 -> ImGuiKey.Keypad1;
+            case KEY_KEYPAD_2 -> ImGuiKey.Keypad2;
+            case KEY_KEYPAD_3 -> ImGuiKey.Keypad3;
+            case KEY_KEYPAD_4 -> ImGuiKey.Keypad4;
+            case KEY_KEYPAD_5 -> ImGuiKey.Keypad5;
+            case KEY_KEYPAD_6 -> ImGuiKey.Keypad6;
+            case KEY_KEYPAD_7 -> ImGuiKey.Keypad7;
+            case KEY_KEYPAD_8 -> ImGuiKey.Keypad8;
+            case KEY_KEYPAD_9 -> ImGuiKey.Keypad9;
+            case KEY_KEYPAD_DECIMAL -> ImGuiKey.KeypadDecimal;
+            case KEY_KEYPAD_DIVIDE -> ImGuiKey.KeypadDivide;
+            case KEY_KEYPAD_MULTIPLY -> ImGuiKey.KeypadMultiply;
+            case KEY_KEYPAD_SUBTRACT -> ImGuiKey.KeypadSubtract;
+            case KEY_KEYPAD_ADD -> ImGuiKey.KeypadAdd;
+            case KEY_KEYPAD_ENTER -> ImGuiKey.KeypadEnter;
+            case KEY_KEYPAD_EQUAL -> ImGuiKey.KeypadEqual;
+            case KEY_LEFT_SHIFT -> ImGuiKey.LeftShift;
+            case KEY_LEFT_CONTROL -> ImGuiKey.LeftCtrl;
+            case KEY_LEFT_ALT -> ImGuiKey.LeftAlt;
+            case KEY_LEFT_SUPER -> ImGuiKey.LeftSuper;
+            case KEY_RIGHT_SHIFT -> ImGuiKey.RightShift;
+            case KEY_RIGHT_CONTROL -> ImGuiKey.RightCtrl;
+            case KEY_RIGHT_ALT -> ImGuiKey.RightAlt;
+            case KEY_RIGHT_SUPER -> ImGuiKey.RightSuper;
+            case KEY_MENU -> ImGuiKey.Menu;
+            case KEY_0 -> ImGuiKey._0;
+            case KEY_1 -> ImGuiKey._1;
+            case KEY_2 -> ImGuiKey._2;
+            case KEY_3 -> ImGuiKey._3;
+            case KEY_4 -> ImGuiKey._4;
+            case KEY_5 -> ImGuiKey._5;
+            case KEY_6 -> ImGuiKey._6;
+            case KEY_7 -> ImGuiKey._7;
+            case KEY_8 -> ImGuiKey._8;
+            case KEY_9 -> ImGuiKey._9;
+            case KEY_A -> ImGuiKey.A;
+            case KEY_B -> ImGuiKey.B;
+            case KEY_C -> ImGuiKey.C;
+            case KEY_D -> ImGuiKey.D;
+            case KEY_E -> ImGuiKey.E;
+            case KEY_F -> ImGuiKey.F;
+            case KEY_G -> ImGuiKey.G;
+            case KEY_H -> ImGuiKey.H;
+            case KEY_I -> ImGuiKey.I;
+            case KEY_J -> ImGuiKey.J;
+            case KEY_K -> ImGuiKey.K;
+            case KEY_L -> ImGuiKey.L;
+            case KEY_M -> ImGuiKey.M;
+            case KEY_N -> ImGuiKey.N;
+            case KEY_O -> ImGuiKey.O;
+            case KEY_P -> ImGuiKey.P;
+            case KEY_Q -> ImGuiKey.Q;
+            case KEY_R -> ImGuiKey.R;
+            case KEY_S -> ImGuiKey.S;
+            case KEY_T -> ImGuiKey.T;
+            case KEY_U -> ImGuiKey.U;
+            case KEY_V -> ImGuiKey.V;
+            case KEY_W -> ImGuiKey.W;
+            case KEY_X -> ImGuiKey.X;
+            case KEY_Y -> ImGuiKey.Y;
+            case KEY_Z -> ImGuiKey.Z;
+            case KEY_F1 -> ImGuiKey.F1;
+            case KEY_F2 -> ImGuiKey.F2;
+            case KEY_F3 -> ImGuiKey.F3;
+            case KEY_F4 -> ImGuiKey.F4;
+            case KEY_F5 -> ImGuiKey.F5;
+            case KEY_F6 -> ImGuiKey.F6;
+            case KEY_F7 -> ImGuiKey.F7;
+            case KEY_F8 -> ImGuiKey.F8;
+            case KEY_F9 -> ImGuiKey.F9;
+            case KEY_F10 -> ImGuiKey.F10;
+            case KEY_F11 -> ImGuiKey.F11;
+            case KEY_F12 -> ImGuiKey.F12;
             default -> ImGuiKey.None;
         };
     }

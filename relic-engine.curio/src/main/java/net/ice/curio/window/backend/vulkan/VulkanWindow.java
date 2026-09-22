@@ -1,5 +1,7 @@
 package net.ice.curio.window.backend.vulkan;
 
+import net.ice.curio.Curio;
+import net.ice.curio.library.glfw.GLFWWindow;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
 import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.events.WindowHintEvent;
@@ -12,11 +14,14 @@ import org.lwjgl.vulkan.VkInstance;
 
 import java.nio.LongBuffer;
 
-public class VulkanWindow extends Window {
+import static org.lwjgl.glfw.GLFWVulkan.glfwCreateWindowSurface;
 
-    public VulkanWindow() {
+public class VulkanWindow extends GLFWWindow {
 
-    }
+    public VulkanWindow(Curio curio) {
+	    super(curio);
+
+	}
 
     public static PointerBuffer getExtensions() {
         PointerBuffer glfwExtensions = GLFWVulkan.glfwGetRequiredInstanceExtensions();
@@ -26,20 +31,22 @@ public class VulkanWindow extends Window {
         return glfwExtensions;
     }
 
-    @Override
     public void init() {
-        window.init();
     }
 
     public void createSurface(VkInstance instance, LongBuffer buffer) {
-        window.createWindowSurface(instance, buffer);
+        glfwCreateWindowSurface(instance, windowHandle, null, buffer);
     }
 
+    protected void setupInitHints() {
 
-    @EventListener
-    public static void setupWindowHints(WindowHintEvent event) {
-        event.windowHint(GLFWWindowHint.CLIENT_API, GLFWWindowHintValues.NO_API);
     }
+
+    protected void setupWindowHints() {
+        windowHint(GLFWWindowHint.CLIENT_API, GLFWWindowHintValues.NO_API);
+
+    }
+
 
 //    @Override
 //    public void resize(int width, int height) {
@@ -54,9 +61,5 @@ public class VulkanWindow extends Window {
     @Override
     public void update(float deltaTime) {
 
-    }
-
-    static {
-        EventManager.addListener(VulkanWindow.class);
     }
 }

@@ -10,6 +10,7 @@ import net.ice.relic.core.rendering.backend.opengl.buffer.*;
 import org.tinylog.Logger;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class BufferManager implements Lifecycle {
 
@@ -60,8 +61,7 @@ public class BufferManager implements Lifecycle {
 	public void update() {
 		if(!entityLoadingQueue.isEmpty()) {
 			Entity entity = entityLoadingQueue.pollFirst();
-
-			Logger.debug("[BufferManager]: Loading entity {}", entity.getName());
+			long start = System.nanoTime();
 
 			Model model;
 			if((model = entity.getComponent(ModelComponent.class).getModel()) != null) {
@@ -71,6 +71,8 @@ public class BufferManager implements Lifecycle {
 				}
 				loadedModelInfos.get(model).newInstance();
 			}
+
+			Logger.debug("[BufferManager]: Entity '{}' took {}ms to load", entity.getName(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
 		}
 
 		staticCommandBuffer.update();

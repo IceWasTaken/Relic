@@ -4,7 +4,7 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import net.ice.heirloom.register.autoregister.AutoRegister;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 
 import java.lang.reflect.InvocationTargetException;
 

@@ -1,11 +1,11 @@
 package net.ice.relic.core.rendering.backend.vulkan;
 
-import net.ice.curio.graphics.CommandBuffer;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.library.vulkan.object.*;
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.rendering.backend.Renderer;
+import net.ice.relic.core.rendering.backend.vulkan.renderers.VulkanSceneRenderer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkCommandBufferSubmitInfo;
 import org.lwjgl.vulkan.VkSemaphoreSubmitInfo;
@@ -25,6 +25,8 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
 
     private final Queue.GraphicsEnabledQueue graphicsEnabledQueue;
     private final Queue.PresentationQueue presentationQueue;
+
+    private final VulkanSceneRenderer sceneRenderer;
 
     private int currentFrame;
 
@@ -55,7 +57,7 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
             renderCompleteSemaphores[i] = new Semaphore(context);
         }
 
-
+        this.sceneRenderer = new VulkanSceneRenderer(context);
     }
 
     @Override
@@ -75,6 +77,9 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
             return;
         }
 
+        sceneRenderer.render();
+
+        //end recording
         commandBuffers[currentFrame].endRecording();
 
         //submit commands

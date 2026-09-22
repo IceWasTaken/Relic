@@ -1,7 +1,7 @@
 package net.ice.relic.core.gui.drawable;
 
 import imgui.type.ImBoolean;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.gui.GuiContext;
 
 import static imgui.ImGui.*;

@@ -1,6 +1,6 @@
 package net.ice.relic.core.gui;
 
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 
 public interface Gui {
 

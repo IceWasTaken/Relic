@@ -7,9 +7,12 @@ import net.ice.curio.graphics.exception.UnsupportedGraphicsContextException;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.object.GLViewport;
+import net.ice.curio.library.opengl.object.resource.GLSampler;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.system.SystemInfo;
+import net.ice.curio.window.Window;
+import net.ice.curio.window.enums.WindowAttribute;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 import org.tinylog.Logger;
@@ -23,6 +26,7 @@ public class OpenGLContext extends GraphicsContext {
     public OpenGLContext(Curio curio) {
         super(curio);
     }
+
 
     @Override
     public void init() {
@@ -44,6 +48,15 @@ public class OpenGLContext extends GraphicsContext {
     }
 
     @Override
+    protected void setupWindowAttributes(Window window) {
+        //window.attribute(WindowAttribute.CONTEXT_PROFILE, );
+        window.attribute(WindowAttribute.CONTEXT_VERSION_MAJOR, 4);
+        window.attribute(WindowAttribute.CONTEXT_VERSION_MINOR, 5);
+        window.attribute(WindowAttribute.CONTEXT_DEBUG, true);
+    }
+
+
+    @Override
     public GraphicsContextLogger createContextLogger() {
         return new OpenGLContextLogger();
     }
@@ -56,17 +69,13 @@ public class OpenGLContext extends GraphicsContext {
     @Override
     public Texture createTexture(Bitmap bitmap) {
         return new GLTexture(
-                new GLTexture.TextureFormat(
-                        GL_TEXTURE_2D,
-                        GL_RGBA8,
-                        GL_REPEAT,
-                        GL_REPEAT,
-                        GL_REPEAT,
-                        GL_LINEAR_MIPMAP_LINEAR,
-                        GL_NEAREST
-                ),
+                new GLSampler(GLSampler.SamplerFormat.TRILINEAR_FILTERING),
                 bitmap
         );
+    }
+
+    public void clearErrors() {
+        while(glGetError() != GL_NO_ERROR);
     }
 
     private void checkCapability(boolean capability, String msg) {

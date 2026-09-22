@@ -20,6 +20,11 @@ public class RegistrationManager {
         registries.put(type, registry);
     }
 
+    public <T extends Registerable<T, R>, R extends Registry<T>> void closeRegistry(Class<T> type) {
+        Logger.debug("[RegistrationManager]: Closed registry for '{}'", type.getCanonicalName());
+        registries.remove(type);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void register(String root) {
         try(ScanResult scanResult = new ClassGraph().enableClassInfo().enableAnnotationInfo().acceptPackages(root).scan()) {

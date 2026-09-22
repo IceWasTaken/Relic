@@ -1,0 +1,27 @@
+QMenu, QMenu:item, QPushButton {
+    border-radius: 0px;
+    border: 1px solid #3C3F41;
+    background-color: #3C3F41;
+    color: #FFFFFF;
+    text-align: left;
+}
+
+QMenu:separator {
+    background-color: #747a7e;
+    border-radius: 0px;
+
+}
+
+QMenu:item:selected,
+QMenu:hover, QPushButton:hover,
+QMenu:pressed,QPushButton:pressed,
+QMenu:focus, QPushButton:focus {
+    background-color: #3875D6;
+}
+
+QMenu#file:right-arrow {
+    position: relative;
+    right: 8px;
+}
+
+

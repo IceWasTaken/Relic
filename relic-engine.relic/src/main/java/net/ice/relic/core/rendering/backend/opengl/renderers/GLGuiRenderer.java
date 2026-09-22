@@ -1,13 +1,13 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
-import imgui.ImDrawData;
-import imgui.ImFontAtlas;
-import imgui.ImGui;
-import imgui.ImGuiIO;
+import imgui.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.type.ImInt;
+import net.ice.curio.library.glfw.GLFWWindow;
+import net.ice.curio.library.opengl.object.resource.GLSampler;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
+import net.ice.curio.window.Window;
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.event.EventManager;
 import net.ice.relic.core.gui.Gui;
@@ -16,6 +16,7 @@ import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.GuiMesh;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 import java.nio.ByteBuffer;
 
@@ -137,16 +138,8 @@ public class GLGuiRenderer implements Lifecycle {
         ImInt height = new ImInt();
         ByteBuffer buf = fontAtlas.getTexDataAsRGBA32(width, height);
         texture = new GLTexture(
-                new GLTexture.TextureFormat(
-                        GL_TEXTURE_2D,
-                        GL_RGBA8,
-                        GL_REPEAT,
-                        GL_REPEAT,
-                        GL_REPEAT,
-                        GL_NEAREST,
-                        GL_NEAREST
-                ),
-                new Bitmap(width.get(), height.get(), 4,  buf)
+                new GLSampler(GLSampler.SamplerFormat.UI),
+                new Bitmap(width.get(), height.get(), 4, buf)
         );
         guiMesh = new GuiMesh();
     }
@@ -154,9 +147,8 @@ public class GLGuiRenderer implements Lifecycle {
 
 
     public void onResize(int width, int height) {
-        ImGuiIO imGuiIO = ImGui.getIO();
-        imGuiIO.setDisplaySize(width, height);
-        buildFontAtlas();
+        ImGuiIO io = ImGui.getIO();
+        io.setDisplaySize(width, height);
     }
 
 }

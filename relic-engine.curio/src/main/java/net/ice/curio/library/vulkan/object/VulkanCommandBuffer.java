@@ -1,16 +1,19 @@
 package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.graphics.CommandBuffer;
+import net.ice.curio.graphics.object.pipeline.Pipeline;
 import net.ice.curio.library.vulkan.VulkanContext;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
 
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK13.vkCmdBeginRendering;
 
 public class VulkanCommandBuffer extends CommandBuffer {
 
@@ -125,6 +128,26 @@ public class VulkanCommandBuffer extends CommandBuffer {
     public VkCommandBufferSubmitInfo.Buffer generateSubmitInfo(MemoryStack stack) {
         return VkCommandBufferSubmitInfo.calloc(1, stack).sType$Default().commandBuffer(vkCommandBuffer);
     }
+
+    public void cmdBeginRendering(VkRenderingInfo renderingInfo) {
+        vkCmdBeginRendering(vkCommandBuffer, renderingInfo);
+    }
+
+    public void cmdBindPipeline(VkPipeline pipeline) {
+        vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getVkPipeline());
+    }
+    public void cmdSetViewport(VkViewport.Buffer viewport) {
+        vkCmdSetViewport(vkCommandBuffer, 0, viewport);
+    }
+
+    public void cmdSetScissor(VkRect2D.Buffer rect2D) {
+        vkCmdSetScissor(vkCommandBuffer, 0, rect2D);
+    }
+
+    public void cmdPushConstants(ByteBuffer constants, VkPipeline pipeline, int stage, int offset) {
+        vkCmdPushConstants(vkCommandBuffer, pipeline.getVkPipelineLayout(), stage, offset, constants);
+    }
+
 
     VkCommandBuffer getVkCommandBuffer() {
         return vkCommandBuffer;

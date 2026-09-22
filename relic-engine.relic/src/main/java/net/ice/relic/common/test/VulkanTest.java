@@ -1,8 +1,11 @@
 package net.ice.relic.common.test;
 
-import net.ice.heirloom.ApplicationProperties;
+import net.ice.curio.config.RendererConfig;
+import net.ice.curio.config.enums.BackendType;
+import net.ice.heirloom.application.Application;
+import net.ice.heirloom.application.ApplicationProperties;
 import net.ice.heirloom.Version;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.common.test.scene.VulkanScene;
 import net.ice.relic.core.scene.light.Light;
 
@@ -13,6 +16,8 @@ public class VulkanTest extends RelicApplication {
     private float lightAngle = 270;
 
     protected VulkanTest(String[] arguments) {
+        RendererConfig.setBackendType(BackendType.VULKAN);
+
         super(new ApplicationProperties(
                 "Relic Application Test",
                 new Version(0, 0, 1),
@@ -46,8 +51,4 @@ public class VulkanTest extends RelicApplication {
     protected void cleanup(RelicApplication application) {
 
     }
-
-
-
-
 }

@@ -7,6 +7,7 @@ import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.opengl.OpenGLContext;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.VulkanContext;
+import net.ice.curio.window.Window;
 import net.ice.heirloom.Lifecycle;
 
 public abstract class GraphicsContext implements Lifecycle {
@@ -19,6 +20,8 @@ public abstract class GraphicsContext implements Lifecycle {
     protected GraphicsContext(Curio curio) {
         this.curio = curio;
     }
+
+    protected abstract void setupWindowAttributes(Window window);
 
     protected abstract GraphicsContextLogger createContextLogger();
 

@@ -2,13 +2,12 @@ package net.ice.relic.core.scene;
 
 import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.Colors;
-import net.ice.relic.application.RelicApplication;
+import net.ice.heirloom.event.EventManager;
+import net.ice.relic.RelicApplication;
+import net.ice.relic.common.events.EntityEvent;
 import net.ice.relic.core.ProjectionMatrix;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.gui.Gui;
-import net.ice.relic.core.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.BufferManager;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
 import net.ice.relic.core.scene.light.AmbientLight;
 import net.ice.relic.core.scene.light.Light;
@@ -16,40 +15,36 @@ import org.joml.Vector3f;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class Scene implements Lifecycle {
 
-    protected final Entity sceneRoot;
-
     protected final String name;
+
+    protected final Entity sceneRoot;
+    protected final List<Entity> entities;
 
     protected final List<Light> lights;
     protected final AmbientLight ambientLight;
 
-    private final List<Entity> entities;
-
     protected final Camera camera;
     protected final ProjectionMatrix matrix;
 
+    protected final ModelLoader modelLoader;
+    protected final RelicApplication application;
+
     private Gui GUI;
-
-    private boolean initialized;
-
-    protected ModelLoader modelLoader;
-    protected RelicApplication application;
 
     protected abstract void sceneInit();
     protected abstract void sceneUpdate(float deltaTime);
     protected abstract void sceneDestroy();
 
     public Scene(String name, RelicApplication application) {
+        this.application = application;
+
         this.sceneRoot = Entity.newEntity("sceneroot");
 
         this.name = name;
-        this.application = application;
         this.modelLoader = new ModelLoader(application.getTextureCache(), application.getMaterialCache(), application.getModelCache());
         this.camera = new Camera();
         this.matrix = new ProjectionMatrix(application);
@@ -62,46 +57,33 @@ public abstract class Scene implements Lifecycle {
 
     @Override
     public void init() {
-        if (initialized) {
-            Logger.error("[Scene] Initialization called while already initialized");
-            return;
-        }
-
         sceneInit();
 
         Logger.info("[Scene] Loaded scene: {}", name);
-        initialized = true;
-
-
     }
 
     @Override
     public void cleanup() {
-        if (!initialized) {
-            Logger.error("[Scene] Cleanup called while not initialized");
-            return;
-        }
-
         entities.clear();
     }
 
     @Override
     public void update(float deltaTime) {
-        matrix.update();
         sceneUpdate(deltaTime);
     }
 
     public void removeEntity(Entity entity) {
-        entities.remove(entity);
-    }
+        EventManager.execute(new EntityEvent.onEntityDelete(entity));
 
-    public void removeEntity(int i) {
-        entities.remove(i);
+        entities.remove(entity);
     }
 
     public Entity createEntity(String name) {
         Entity entity = sceneRoot.newChild(name);
         entities.add(entity);
+
+        EventManager.execute(new EntityEvent.onEntityCreate(entity));
+
         return entity;
     }
 
@@ -154,9 +136,6 @@ public abstract class Scene implements Lifecycle {
         return sceneRoot;
     }
 
-    public void setApplication(RelicApplication application) {
-        this.application = application;
-    }
 
     public RelicApplication getApplication() {
         return application;

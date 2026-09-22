@@ -1,6 +1,6 @@
 package net.ice.relic.core;
 
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import org.joml.Matrix4f;
 
 public class ProjectionMatrix {
@@ -11,18 +11,11 @@ public class ProjectionMatrix {
 
     private static boolean shouldResize = false;
 
-    private final RelicApplication application;
     private final Matrix4f projectionMatrix;
 
     public ProjectionMatrix(RelicApplication application) {
-        this.application = application;
-
         projectionMatrix = new Matrix4f();
         updateProjMatrix(application.getWindow().getWidth(), application.getWindow().getHeight());
-    }
-
-    public void update() {
-        //updateProjMatrix(application.getWindow().getWidth(), application.getWindow().getHeight());
     }
 
     public Matrix4f getProjMatrix() {

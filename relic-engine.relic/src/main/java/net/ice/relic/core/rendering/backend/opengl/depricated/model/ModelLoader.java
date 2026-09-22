@@ -14,7 +14,9 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 import org.tinylog.Logger;
 
+import java.io.File;
 import java.util.*;
+import java.util.concurrent.*;
 
 import static net.ice.relic.common.util.AssimpUtil.*;
 import static net.ice.relic.core.model.material.Material.processMaterial;
@@ -27,6 +29,8 @@ public class ModelLoader {
             aiProcess_GenBoundingBoxes;
 
     public static final int MAX_BONES = 150;
+
+    private static long modelLoadStartTime;
 
     private final TextureCache textureCache;
     private final MaterialCache materialCache;
@@ -143,6 +147,8 @@ public class ModelLoader {
     }
 
     public Model loadModel(Resource resource, int flags) {
+        modelLoadStartTime = System.nanoTime();
+
         Logger.debug("[ModelLoader] Loading Model: {}", resource.getAsPath());
         AIScene aiScene = aiImportFile(resource.getAsPath(), flags);
 
@@ -159,24 +165,43 @@ public class ModelLoader {
 
         PointerBuffer aiMeshes = aiScene.mMeshes();
 
-        List<Material> materialList = new ArrayList<>();
+        List<Material> materials = new ArrayList<>();
         List<MeshData> meshDataList = new ArrayList<>();
         List<Bone> boneList = new ArrayList<>();
 
-        for (int i = 0; i < numMaterials; i++) {
-            AIMaterial aiMaterial = AIMaterial.createSafe(aiScene.mMaterials().get(i));
+        List<Future<Material>> materialFutureList = new ArrayList<>();
+        try(ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (int i = 0; i < numMaterials; i++) {
+                final int id = i;
+                materialFutureList.add(executor.submit(() ->
+                        processMaterial(
+                                AIMaterial.createSafe(aiScene.mMaterials().get(id)),
+                                resource
+                        )
+                ));
 
-            Material material = processMaterial(aiMaterial, resource, textureCache);
-            materialCache.addMaterial(material);
-            materialList.add(material);
+            }
         }
 
-        for (int i = 0; i < numMeshes; i++) {
+		for (Future<Material> materialFuture : materialFutureList) {
+            try {
+                Material material = materialFuture.get();
+
+                materialCache.addMaterial(material);
+                materials.add(material);
+                material.createTextures(textureCache);
+			} catch (ExecutionException | InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+
+		}
+
+		for (int i = 0; i < numMeshes; i++) {
             AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
             MeshData meshData = processMesh(aiMesh, boneList);
             int materialIdx = aiMesh.mMaterialIndex();
-            if (materialIdx >= 0 && materialIdx < materialList.size()) {
-                meshData.setMaterialIndex(materialList.get(materialIdx).getMaterialIndex());
+            if (materialIdx >= 0 && materialIdx < materials.size()) {
+                meshData.setMaterialIndex(materials.get(materialIdx).getMaterialIndex());
             } else {
                 meshData.setMaterialIndex(MaterialCache.DEFAULT_MATERIAL_INDEX);
             }
@@ -193,14 +218,24 @@ public class ModelLoader {
 
         aiReleaseImport(aiScene);
 
-        Model model = new Model(resource.getFromFileSystem().getName(), meshDataList, animations);
+        Model model = new Model(getNameWithoutExtension(resource.getFromFileSystem()), meshDataList, animations);
 
         modelCache.addModel(model);
 
-        Logger.info("[ModelLoader] Loaded Model: {}", resource.getFromFileSystem().getName());
+        Logger.info("[ModelLoader] Loaded Model '{}' in {}ms", resource.getFromFileSystem().getName(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - modelLoadStartTime));
         return model;
     }
 
+    private static String getNameWithoutExtension(File file) {
+        String name = file.getName();
+        int lastDot = name.lastIndexOf('.');
+
+        if (lastDot == -1 || lastDot == 0) {
+            return name;
+        }
+
+        return name.substring(0, lastDot);
+    }
 
 
     private static List<Animation> processAnimations(AIScene aiScene, List<Bone> boneList, Node rootNode, Matrix4f globalInverseTransformation) {
