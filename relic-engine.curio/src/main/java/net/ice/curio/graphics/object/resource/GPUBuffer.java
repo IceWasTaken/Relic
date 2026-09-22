@@ -7,9 +7,7 @@ import net.ice.curio.graphics.enums.BufferUsage;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 
-/// What it sounds like. An area of GPU memory that can be written to. <p>
-/// OpenGL implementation: {@link net.ice.curio.library.opengl.object.resource.GLGPUBuffer} <p>
-/// Vulkan implementation: {@link net.ice.curio.library.vulkan.object.resource.VulkanGPUBuffer} <p>
+
 public abstract class GPUBuffer {
 
     protected final long size;

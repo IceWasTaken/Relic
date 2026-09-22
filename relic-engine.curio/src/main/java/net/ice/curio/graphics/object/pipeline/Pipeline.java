@@ -1,5 +1,6 @@
 package net.ice.curio.graphics.object.pipeline;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.pipeline.depth.DepthState;
 import net.ice.curio.graphics.object.pipeline.raster.CullMode;
 import net.ice.curio.graphics.object.pipeline.raster.FrontFace;
@@ -22,13 +23,17 @@ public abstract class Pipeline {
     protected final RasterizationState rasterizationState;
     protected final DepthState depthState;
 
+    protected final GraphicsContext context;
+
     public abstract void bindPipeline();
 
     protected Pipeline(
+            GraphicsContext context,
             PrimitiveType primitiveType,
             RasterizationState rasterizationState,
             DepthState depthState
     ) {
+        this.context = context;
         this.primitiveType = primitiveType;
         this.rasterizationState = rasterizationState;
         this.depthState = depthState;

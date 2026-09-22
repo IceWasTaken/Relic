@@ -6,12 +6,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class TransformComponent extends Component {
-
-	public static final List<TransformComponent> COMPONENTS = new ArrayList<>();
 
 	@Editable
 	private Vector3f position = new Vector3f(0, 0, 0);
@@ -24,9 +19,7 @@ public class TransformComponent extends Component {
 
 	private Matrix4f transformationMatrix = new Matrix4f();
 
-	public TransformComponent() {
-		COMPONENTS.add(this);
-	}
+	public TransformComponent() {}
 
 	@Override
 	public void update() {

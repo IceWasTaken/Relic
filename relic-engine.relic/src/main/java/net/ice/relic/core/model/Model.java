@@ -10,9 +10,10 @@ import java.util.List;
 public class Model {
 
     private final String id;
-    private List<Animation> animations;
-    private List<Entity> entities;
     private List<MeshData> meshData;
+    private List<Animation> animations;
+
+    private List<Entity> entities;
     private ModelInfo modelInfo;
 
     public Model(String id, List<MeshData> meshData, List<Animation> animations) {

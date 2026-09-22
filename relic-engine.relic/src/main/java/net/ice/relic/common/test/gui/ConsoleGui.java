@@ -11,7 +11,7 @@ import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.common.console.CommandContext;
 import net.ice.relic.common.console.Console;
 import net.ice.relic.common.console.ConsoleItem;

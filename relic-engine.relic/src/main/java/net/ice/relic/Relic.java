@@ -1,7 +1,6 @@
 package net.ice.relic;
 
 import net.ice.heirloom.Version;
-import net.ice.relic.application.RelicApplication;
 
 public final class Relic {
 

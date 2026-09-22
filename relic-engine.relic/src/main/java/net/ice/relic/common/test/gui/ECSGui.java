@@ -1,7 +1,6 @@
 package net.ice.relic.common.test.gui;
 
-import imgui.type.ImFloat;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.ecs.component.Component;
 import net.ice.relic.core.ecs.component.Editable;
 import net.ice.relic.core.ecs.entity.Entity;

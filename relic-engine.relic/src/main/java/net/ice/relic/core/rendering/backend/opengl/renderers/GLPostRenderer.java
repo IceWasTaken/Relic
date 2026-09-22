@@ -43,21 +43,20 @@ public class GLPostRenderer implements Lifecycle {
 
 	@Override
 	public void render() {
-		if(enabled) {
-			shaderProgram.bind();
-			Scene scene = renderer.getApplication().getCurrentScene();
-
-			viewport.bind();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			renderer.getLightBuffer().bindTextures(0);
-			uniforms.setUniform("inputSampler", 0);
-
-			quadMesh.getMeshVAO().bind();
-			glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
-
-			shaderProgram.unbind();
-		}
+//		if(enabled) {
+//			shaderProgram.bind();
+//			Scene scene = renderer.getApplication().getCurrentScene();
+//
+//			viewport.bind();
+//			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//			uniforms.setUniform("inputSampler", 0);
+//
+//			quadMesh.getMeshVAO().bind();
+//			glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
+//
+//			shaderProgram.unbind();
+//		}
 
 	}
 

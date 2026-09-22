@@ -1,4 +1,4 @@
-2026-07-04 04:32:59 [main] net.ice.relic.application.RelicApplication.changeState()
+2026-07-04 04:32:59 [main] net.ice.relic.RelicApplication.changeState()
 INFO: Application state changed to: INITIALIZING
 2026-07-04 04:32:59 [main] net.ice.heirloom.event.EventManager.lambda$addListener$0()
 INFO: EventManager: Added new listener: [setupWindowHints]

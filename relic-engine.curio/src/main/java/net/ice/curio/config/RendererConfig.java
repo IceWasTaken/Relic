@@ -2,6 +2,7 @@ package net.ice.curio.config;
 
 import net.ice.curio.config.enums.BackendType;
 import net.ice.curio.config.enums.GraphicsQuality;
+import net.ice.curio.config.enums.WindowBackend;
 import net.ice.heirloom.config.ConfigBase;
 
 public class RendererConfig extends ConfigBase {
@@ -20,6 +21,7 @@ public class RendererConfig extends ConfigBase {
     private static GraphicsQuality shadowQuality = GraphicsQuality.LOW;
     private static GraphicsQuality lightingQuality = GraphicsQuality.LOW;
     private static BackendType backendType = BackendType.OPENGL;
+    private static WindowBackend windowBackend = WindowBackend.SDL;
 
     public RendererConfig() {
         super(fileName);
@@ -111,5 +113,12 @@ public class RendererConfig extends ConfigBase {
     }
     public static void setBackendType(BackendType value) {
         backendType = value;
+    }
+
+    public static WindowBackend getWindowBackend() {
+        return windowBackend;
+    }
+    public static void setWindowBackend(WindowBackend windowBackend) {
+        RendererConfig.windowBackend = windowBackend;
     }
 }

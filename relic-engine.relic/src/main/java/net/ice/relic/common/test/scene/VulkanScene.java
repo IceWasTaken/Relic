@@ -1,6 +1,6 @@
 package net.ice.relic.common.test.scene;
 
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.scene.Scene;
 
 public class VulkanScene extends Scene {

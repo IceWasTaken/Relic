@@ -6,6 +6,8 @@ import net.ice.curio.graphics.enums.image.ImageFormat;
 import net.ice.curio.graphics.enums.image.ImageType;
 import net.ice.curio.graphics.exception.GraphicsCallResultException;
 import net.ice.curio.graphics.exception.OutOfGraphicsMemoryException;
+import net.ice.heirloom.color.RGBColor;
+import org.lwjgl.vulkan.VkClearColorValue;
 
 import static net.ice.curio.graphics.enums.image.ImageFormat.RGBA8;
 import static org.lwjgl.vulkan.VK10.*;
@@ -16,6 +18,7 @@ public class VulkanUtils {
         return switch(format) {
             case RGBA8 -> VK_FORMAT_R8G8B8A8_SRGB;
 			case BGRA8 -> VK_FORMAT_B8G8R8A8_SRGB;
+			case DEPTH_16_UNSIGNED_NORMALIZED -> VK_FORMAT_D16_UNORM;
         };
     }
 
@@ -39,6 +42,29 @@ public class VulkanUtils {
         if(RendererConfig.getBackendType() != BackendType.VULKAN) {
             throw new RuntimeException("Rendering type not Vulkan");
         }
+    }
+
+    public static void clearColor(VkClearColorValue vkColor, RGBColor color) {
+        vkColor.float32(0, color.red());
+        vkColor.float32(1, color.green());
+        vkColor.float32(2, color.blue());
+        vkColor.float32(3, color.alpha());
+    }
+
+    public static void clearColor(VkClearColorValue vkColor) {
+        vkColor.float32(0, 0);
+        vkColor.float32(1, 0);
+        vkColor.float32(2, 0);
+        vkColor.float32(3, 1);
+    }
+
+    public static void clearDepth(VkClearColorValue vkColor, float depth) {
+        vkColor.float32(0, depth);
+    }
+
+    //reverse Z
+    public static void clearDepth(VkClearColorValue vkColor) {
+        vkColor.float32(0, 0);
     }
 
     public static void checkVulkan(int vkResult, String message) {

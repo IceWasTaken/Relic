@@ -20,7 +20,7 @@ public class Timer {
         lastTime = System.nanoTime();
     }
 
-    public void updateTime() {
+    public void newFrame() {
         long currentTime = System.nanoTime();
         deltaTime = (currentTime - lastTime) * 1E-9f;
         deltaTime = deltaTime * scale;

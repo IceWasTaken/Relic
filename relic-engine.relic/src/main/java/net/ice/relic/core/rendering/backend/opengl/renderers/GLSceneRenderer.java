@@ -36,6 +36,7 @@ public class GLSceneRenderer implements Lifecycle {
         int height = glRenderer.getApplication().getWindow().getHeight();
 
         this.renderPipeline = new GLPipeline(
+                glRenderer.getApplication().getCurio().getGraphicsContext(),
                 "scene",
                 new GLFramebuffer(
                         GL_TEXTURE_2D,

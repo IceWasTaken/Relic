@@ -4,20 +4,20 @@ import net.ice.curio.library.opengl.object.GLBuffer;
 
 public class MeshData {
 
-    private final float[] vertexPositions;
+    private final float[] positions;
     private final float[] normals;
     private final float[] tangents;
     private final float[] bitangents;
-    private final float[] weights;
     private final float[] textureCoords;
-
     private final int[] indices;
+
+    private final float[] weights;
     private final int[] boneIndices;
 
     private int materialIndex;
 
     public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
-        this.vertexPositions = vertices;
+        this.positions = vertices;
         this.normals = normals;
         this.tangents = tangents;
         this.bitangents = bitangents;
@@ -33,7 +33,7 @@ public class MeshData {
     }
 
     public int getMeshSize() {
-        int vertexSize = vertexPositions.length;
+        int vertexSize = positions.length;
         int normalsSize = normals.length * 3;
         int textureCoordsSize = textureCoords.length;
 
@@ -45,13 +45,13 @@ public class MeshData {
     }
 
     public void populateBufferWithMesh(GLBuffer meshesBuffer) {
-        int rows = vertexPositions.length / 3;
+        int rows = positions.length / 3;
         for (int row = 0; row < rows; row++) {
             int startPos = row * 3;
             int startTextCoord = row * 2;
-            meshesBuffer.putFloat(vertexPositions[startPos]);
-            meshesBuffer.putFloat(vertexPositions[startPos + 1]);
-            meshesBuffer.putFloat(vertexPositions[startPos + 2]);
+            meshesBuffer.putFloat(positions[startPos]);
+            meshesBuffer.putFloat(positions[startPos + 1]);
+            meshesBuffer.putFloat(positions[startPos + 2]);
             meshesBuffer.putFloat(normals[startPos]);
             meshesBuffer.putFloat(normals[startPos + 1]);
             meshesBuffer.putFloat(normals[startPos + 2]);
@@ -66,8 +66,24 @@ public class MeshData {
         }
     }
 
-    public float[] getVertexPositions() {
-        return vertexPositions;
+    public float[] getPositions() {
+        return positions;
+    }
+
+    public float[] getNormals() {
+        return normals;
+    }
+
+    public float[] getTangents() {
+        return tangents;
+    }
+
+    public float[] getBitangents() {
+        return bitangents;
+    }
+
+    public float[] getTextureCoords() {
+        return textureCoords;
     }
 
     public void setMaterialIndex(int materialIndex) {

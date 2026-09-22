@@ -8,6 +8,7 @@ import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.object.*;
 import net.ice.curio.library.vulkan.object.Surface;
+import net.ice.curio.window.Window;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
 
 public class VulkanContext extends GraphicsContext {
@@ -17,6 +18,7 @@ public class VulkanContext extends GraphicsContext {
     private final Instance instance;
     private final PhysicalDevice physicalDevice;
     private final Device device;
+    private final PipelineCache pipelineCache;
     private final MemoryAllocator VMAInstance;
 
     private Surface surface;
@@ -32,6 +34,12 @@ public class VulkanContext extends GraphicsContext {
 
         this.surface = new Surface(this);
         this.swapChain = new SwapChain(this, SWAPCHAIN_REQUESTED_IMAGES, true);
+        this.pipelineCache = new PipelineCache(this);
+    }
+
+    @Override
+    protected void setupWindowAttributes(Window window) {
+
     }
 
     @Override
@@ -69,5 +77,9 @@ public class VulkanContext extends GraphicsContext {
 
     public SwapChain getSwapChain() {
         return swapChain;
+    }
+
+    public PipelineCache getPipelineCache() {
+        return pipelineCache;
     }
 }

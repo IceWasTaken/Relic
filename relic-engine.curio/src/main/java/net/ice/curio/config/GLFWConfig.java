@@ -2,13 +2,14 @@ package net.ice.curio.config;
 
 import net.ice.heirloom.config.ConfigBase;
 
+@Deprecated
 public class GLFWConfig extends ConfigBase {
 
     private static final String fileName = "glfwConfig.properties";
 
     private static GLFWConfig instance;
 
-    private static boolean glfwUseX11 = true;
+    private static boolean glfwUseX11 = false;
 
     public GLFWConfig() {
         super(fileName);

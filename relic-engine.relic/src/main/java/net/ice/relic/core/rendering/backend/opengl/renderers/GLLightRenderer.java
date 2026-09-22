@@ -50,6 +50,7 @@ public class GLLightRenderer implements Lifecycle {
         int height = glRenderer.getApplication().getWindow().getHeight();
 
         this.pipeline = new GLPipeline(
+                glRenderer.getApplication().getCurio().getGraphicsContext(),
                 "lights",
                 null,
                 PrimitiveType.TRIANGLE,

@@ -7,7 +7,6 @@ import java.util.List;
 
 public class RenderableComponent extends Component {
 
-	public static final List<RenderableComponent> COMPONENTS = new ArrayList<>();
 
 	@Override
 	public void update() {

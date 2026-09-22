@@ -6,13 +6,7 @@ import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.heirloom.event.Event;
 import net.ice.heirloom.event.EventRegistry;
 
-public class WindowHintEvent implements Event {
-
-    private final GLFWWindow window;
-
-    public WindowHintEvent(GLFWWindow window) {
-        this.window = window;
-    }
+public record WindowHintEvent(GLFWWindow window) implements Event {
 
     public void windowHint(GLFWWindowHint hint, boolean value) {
         window.windowHint(hint, value);
@@ -24,10 +18,6 @@ public class WindowHintEvent implements Event {
 
     public void windowHint(GLFWWindowHint hint, int value) {
         window.windowHint(hint, value);
-    }
-
-    public GLFWWindow getWindow() {
-        return window;
     }
 
     @Override

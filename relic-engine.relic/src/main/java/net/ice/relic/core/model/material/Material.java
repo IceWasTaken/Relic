@@ -31,6 +31,10 @@ public class Material {
 
     private int materialIndex;
 
+    private Resource albedoMapResource;
+    private Resource normalMapResource;
+    private Resource roughnessMapResource;
+
     private Texture albedoMap;
     private Texture normalMap;
     private Texture roughnessMap;
@@ -47,7 +51,7 @@ public class Material {
         return materialFactors.getOrDefault(factor, 0f);
     }
 
-    public static Material processMaterial(AIMaterial aiMaterial, Resource resource, TextureCache textureCache) {
+    public static Material processMaterial(AIMaterial aiMaterial, Resource resource) {
         Material material = new Material();
         Map<MaterialColor, RGBColor> materialColors = material.getMaterialColors();
         Map<MaterialFactor, Float> materialFactors = material.getMaterialFactors();
@@ -77,22 +81,29 @@ public class Material {
 
             materialFactors.put(MaterialFactor.REFLECTANCE, getFloatArray(aiMaterial, AI_MATKEY_SHININESS_STRENGTH));
 
-            material.albedoMap = getTextureMap(stack, aiMaterial, textureCache, resource, aiTextureType_DIFFUSE);
-            material.normalMap = getTextureMap(stack, aiMaterial, textureCache, resource, aiTextureType_NORMALS);
-            material.roughnessMap = getTextureMap(stack, aiMaterial, textureCache, resource, aiTextureType_GLTF_METALLIC_ROUGHNESS);
+            material.albedoMapResource = getTextureMap(stack, aiMaterial, resource, aiTextureType_DIFFUSE);
+            material.normalMapResource = getTextureMap(stack, aiMaterial, resource, aiTextureType_NORMALS);
+            material.roughnessMapResource = getTextureMap(stack, aiMaterial, resource, aiTextureType_GLTF_METALLIC_ROUGHNESS);
 
             return material;
         }
     }
 
-    private static Texture getTextureMap(MemoryStack stack, AIMaterial aiMaterial, TextureCache textureCache, Resource resource, int mapType) {
+    private static Resource getTextureMap(MemoryStack stack, AIMaterial aiMaterial, Resource resource, int mapType) {
         AIString aiTexturePath = AIString.calloc(stack);
         aiGetMaterialTexture(aiMaterial, mapType, 0, aiTexturePath, (IntBuffer) null, null, null, null, null, null);
         String texturePath = aiTexturePath.dataString();
         if(!texturePath.isEmpty()) {
-            return textureCache.createTexture(Resource.getResource(resource.getNamespace(), "assets/textures/" + new File(texturePath).getName()));
+            return Resource.getResource(resource.getNamespace(), "assets/textures/" + new File(texturePath).getName());
+        } else {
+            return Resource.EMPTY;
         }
-        return null;
+    }
+
+    public void createTextures(TextureCache textureCache) {
+        this.albedoMap = albedoMapResource != Resource.EMPTY ? textureCache.createTexture(albedoMapResource) : null;
+        this.normalMap = normalMapResource != Resource.EMPTY ? textureCache.createTexture(normalMapResource) : null;
+        this.roughnessMap = roughnessMapResource != Resource.EMPTY ? textureCache.createTexture(roughnessMapResource) : null;
     }
 
     private Map<MaterialColor, RGBColor> getMaterialColors() {
@@ -128,6 +139,18 @@ public class Material {
     }
     public long getRoughnessHandle() {
         return roughnessMap != null ? roughnessMap.getHandle() : 0L;
+    }
+
+    public Texture getAlbedoMap() {
+        return albedoMap;
+    }
+
+    public Texture getNormalMap() {
+        return normalMap;
+    }
+
+    public Texture getRoughnessMap() {
+        return roughnessMap;
     }
 
     public static class MaterialStruct extends Struct {

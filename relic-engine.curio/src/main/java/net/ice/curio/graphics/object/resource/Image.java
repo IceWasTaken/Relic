@@ -41,6 +41,7 @@ public abstract class Image implements Lifecycle {
 
         public ImageInfo() {
             this.imageFormat = ImageFormat.RGBA8;
+            this.imageType = ImageType.IMAGE_2D;
             this.mipmapLevels = 1;
             this.sampleCount = 1;
             this.layers = 1;

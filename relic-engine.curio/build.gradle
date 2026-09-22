@@ -29,12 +29,18 @@ dependencies {
     implementation "org.lwjgl:lwjgl-glfw"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
 
+    implementation "org.lwjgl:lwjgl-sdl"
+    implementation "org.lwjgl:lwjgl-sdl::$lwjglNatives"
+
     implementation "org.lwjgl:lwjgl-opengl"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
 
     implementation "org.lwjgl:lwjgl-vulkan"
     implementation "org.lwjgl:lwjgl-vma"
     implementation "org.lwjgl:lwjgl-vma::$lwjglNatives"
+
+    implementation "org.lwjgl:lwjgl-shaderc"
+    runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
 
     implementation "org.lwjgl:lwjgl-stb"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"

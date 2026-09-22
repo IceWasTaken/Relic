@@ -1,16 +1,18 @@
 package net.ice.curio.library.vulkan.object;
 
+import net.ice.curio.graphics.CommandBuffer;
 import net.ice.curio.graphics.enums.image.ImageFormat;
 import net.ice.curio.graphics.enums.image.ImageType;
 import net.ice.curio.graphics.object.resource.Image;
 import net.ice.curio.library.vulkan.VulkanContext;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.VkImageViewCreateInfo;
+import org.lwjgl.vulkan.*;
 
 import java.nio.LongBuffer;
 
 import static net.ice.curio.library.vulkan.utils.VulkanUtils.*;
 import static org.lwjgl.vulkan.VK10.*;
+import static org.lwjgl.vulkan.VK13.vkCmdPipelineBarrier2;
 
 public class ImageView {
 
@@ -70,6 +72,61 @@ public class ImageView {
 		}
 	}
 
+	public void imageBarrier(
+			MemoryStack stack,
+			VulkanCommandBuffer commandBuffer,
+			int oldLayout,
+			int newLayout,
+			long srcStage,
+			long dstStage,
+			long srcAccess,
+			long dstAccess
+	) {
+		VkImageMemoryBarrier2.Buffer imgBarrier = VkImageMemoryBarrier2.calloc(1, stack)
+				.sType$Default()
+				.oldLayout(oldLayout)
+				.newLayout(newLayout)
+				.srcStageMask(srcStage)
+				.dstStageMask(dstStage)
+				.srcAccessMask(srcAccess)
+				.dstStageMask(dstAccess)
+				.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+				.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+				.subresourceRange(range -> range
+						.aspectMask(aspectMask)
+						.baseMipLevel(0)
+						.levelCount(VK_REMAINING_MIP_LEVELS)
+						.baseArrayLayer(0)
+						.layerCount(VK_REMAINING_ARRAY_LAYERS))
+				.image(vkImage);
+
+		VkDependencyInfo dependencyInfo = VkDependencyInfo.calloc(stack)
+				.sType$Default()
+				.pImageMemoryBarriers(imgBarrier);
+
+		vkCmdPipelineBarrier2(commandBuffer.getVkCommandBuffer(), dependencyInfo);
+	}
+
+	public VkRenderingAttachmentInfo.Buffer createAttachmentInfo(
+			int layout,
+			int loadOp,
+			int storeOp,
+			VkClearValue clearValue
+	) {
+		return VkRenderingAttachmentInfo.calloc(1)
+				.sType$Default()
+				.imageView(vkImageView)
+				.imageLayout(layout)
+				.loadOp(loadOp)
+				.storeOp(storeOp)
+				.clearValue(clearValue);
+
+	}
+
+	public void cleanup(VulkanContext vulkanContext) {
+
+	}
+
 	public int getAspectMask() {
 		return aspectMask;
 	}
@@ -85,7 +142,6 @@ public class ImageView {
 	long getVkImageView() {
 		return vkImageView;
 	}
-
 
 	public static class ImageViewData {
 

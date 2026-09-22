@@ -3,7 +3,7 @@ package net.ice.curio.library.vulkan.object;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.library.vulkan.enums.PhysicalDeviceType;
 import net.ice.curio.library.vulkan.object.properties.PhysicalDeviceProperties;
-import net.ice.heirloom.ApplicationProperties;
+import net.ice.heirloom.application.ApplicationProperties;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;

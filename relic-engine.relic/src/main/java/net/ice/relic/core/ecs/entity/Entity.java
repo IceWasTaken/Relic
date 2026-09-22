@@ -1,5 +1,7 @@
 package net.ice.relic.core.ecs.entity;
 
+import net.ice.heirloom.event.EventManager;
+import net.ice.relic.common.events.EntityEvent;
 import net.ice.relic.core.ecs.component.Component;
 
 import java.util.*;
@@ -39,7 +41,7 @@ public class Entity {
     }
 
     protected Entity(Entity parent) {
-        this(UUID.randomUUID().toString(), null);
+        this(UUID.randomUUID().toString(), parent);
     }
 
     protected Entity() {
@@ -49,7 +51,11 @@ public class Entity {
     public Entity newChild(String name) {
         Entity entity = new Entity(name, this);
         children.add(entity);
-		return entity;
+
+        EventManager.execute(new EntityEvent.onEntityCreate(entity));
+        entityModifyHook();
+
+        return entity;
     }
 
     public int getID() {
@@ -62,6 +68,9 @@ public class Entity {
             resizeArray(id);
         }
         components[id] = component;
+
+        entityModifyHook();
+
         return this;
     }
 
@@ -70,6 +79,9 @@ public class Entity {
         if(components[id] != null) {
             components[id] = null;
         }
+
+        entityModifyHook();
+
         return this;
     }
 
@@ -87,6 +99,10 @@ public class Entity {
         components = newArray;
     }
 
+    private void entityModifyHook() {
+        EventManager.execute(new EntityEvent.onEntityModify(this));
+    }
+
     public List<Entity> getChildren() {
         return children;
     }
@@ -97,6 +113,10 @@ public class Entity {
 
     public String getName() {
         return name;
+    }
+
+    public Optional<Entity> getParent() {
+        return parent;
     }
 }
 

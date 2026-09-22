@@ -2,7 +2,8 @@ package net.ice.curio;
 
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.window.Window;
-import net.ice.heirloom.ApplicationProperties;
+import net.ice.heirloom.application.Application;
+import net.ice.heirloom.application.ApplicationProperties;
 import net.ice.heirloom.Lifecycle;
 
 public class Curio implements Lifecycle {
@@ -10,18 +11,17 @@ public class Curio implements Lifecycle {
     private final Window window;
     private final GraphicsContext graphicsContext;
 
-    private final ApplicationProperties applicationProperties;
+    private final Application application;
 
-    public Curio(ApplicationProperties applicationProperties) {
-        this.applicationProperties = applicationProperties;
+    public Curio(Application application) {
+        this.application = application;
 
-        this.window = Window.getBackend();
+        this.window = Window.getWindowContext(this);
         this.graphicsContext = GraphicsContext.getGraphicsContext(this);
     }
 
     @Override
     public void init() {
-        window.init();
         graphicsContext.init();
     }
 
@@ -34,6 +34,6 @@ public class Curio implements Lifecycle {
     }
 
     public ApplicationProperties getApplicationProperties() {
-        return applicationProperties;
+        return application.getProperties();
     }
 }

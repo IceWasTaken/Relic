@@ -1,55 +1,45 @@
 package net.ice.curio.window;
 
+import net.ice.curio.Curio;
 import net.ice.curio.config.RendererConfig;
 import net.ice.curio.library.glfw.GLFWWindow;
+import net.ice.curio.library.sdl.video.SDLWindow;
 import net.ice.curio.window.backend.opengl.GLWindow;
 import net.ice.curio.window.backend.vulkan.VulkanWindow;
-import net.ice.heirloom.Lifecycle;
-import org.joml.Vector2i;
+import net.ice.curio.window.enums.WindowAttribute;
 
-public abstract class Window implements Lifecycle {
+public abstract class Window {
 
-    protected final GLFWWindow window;
+    protected Curio curio;
+    protected static Window INSTANCE;
 
-    protected Window() {
-        this.window = new GLFWWindow();
+    public abstract int getWidth();
+    public abstract int getHeight();
+    public abstract boolean shouldClose();
+    public abstract boolean shouldResize();
+
+    public abstract void attribute(WindowAttribute attribute, int value);
+    public void attribute(WindowAttribute attribute, boolean value) {
+        this.attribute(attribute, value ? 1 : 0);
     }
 
-    public static Window getBackend() {
-        return switch (RendererConfig.getBackendType()) {
-            case OPENGL -> new GLWindow();
-            case VULKAN -> new VulkanWindow();
+    public abstract void update(float deltaTime);
+
+    protected Window(Curio curio) {
+        this.curio = curio;
+    }
+
+    public static Window getWindowContext(Curio curio) {
+        return switch (RendererConfig.getWindowBackend()) {
+	        case GLFW -> new GLFWWindow(curio);
+	        case SDL -> new SDLWindow(curio);
         };
     }
 
-    @Override
-    public void update(float deltaTime) {
-        window.update();
-    }
 
-    public void resize(Vector2i size) {
-        window.resize(size.x, size.y);
-    }
-    public void resize(int x, int y) {
-        window.resize(x, y);
-    }
 
-    public boolean shouldClose() {
-        return window.shouldWindowClose();
-    }
 
-    public int getWidth() {
-        return window.getWidth();
-    }
-    public int getHeight() {
-        return window.getHeight();
-    }
-    public Vector2i getSize() {
-        return window.getSize();
-    }
 
-    public GLFWWindow getWindow() {
-        return window;
-    }
+
 
 }

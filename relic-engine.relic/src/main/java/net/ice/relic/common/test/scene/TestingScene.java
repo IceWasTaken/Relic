@@ -1,9 +1,10 @@
 package net.ice.relic.common.test.scene;
 
 import net.ice.curio.input.Input;
+import net.ice.curio.input.enums.Key;
 import net.ice.heirloom.color.Colors;
 import net.ice.heirloom.io.resource.Resource;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.common.test.gui.DebugGui;
 import net.ice.relic.core.ecs.component.components.TransformComponent;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
@@ -30,7 +31,7 @@ public class TestingScene extends Scene {
     @Override
     protected void sceneInit() {
 
-        Model scarabModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/scarab/scarab.dae"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
+        //Model scarabModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/scarab/scarab.dae"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
         Model sponzaModel = getModelLoader().loadModel(Resource.getResource("relic", "assets/models/sponza/Sponza.gltf"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
         Model companionCube = getModelLoader().loadModel(Resource.getResourceFromString("relic:assets/models/CompanionCubes/EDITOR_companion_cube.obj"), ModelLoader.DEFAULT_FLAGS | aiProcess_PreTransformVertices);
 
@@ -63,10 +64,10 @@ public class TestingScene extends Scene {
 
     @Override
     protected void sceneUpdate(float deltaTime) {
-        if(Input.isKeyDown(GLFW_KEY_N)) {
+        if(Input.isKeyDown(Key.KEY_N)) {
             Random random = new Random();
 
-            Model companionCube = getApplication().getModelCache().getModel("EDITOR_companion_cube.obj");
+            Model companionCube = getApplication().getModelCache().getModel("EDITOR_companion_cube");
 
             Entity cube = createEntity("cube" + lastCubeCount);
             cube.addComponent(

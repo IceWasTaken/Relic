@@ -1,7 +1,7 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
 import net.ice.heirloom.Lifecycle;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.ecs.entity.Entity;
 
 import net.ice.relic.core.rendering.backend.Renderer;
@@ -21,7 +21,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
     public static final Vector2i SHADOW_MAP_SIZE = new Vector2i(4096);
 
     private ShadowBuffer shadowBuffer;
-    private SwapBuffer lightBuffer;
     private SwapBuffer swapBuffer;
 
     private final BufferManager bufferManager;
@@ -37,7 +36,8 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     @Override
     public void resize(int width, int height) {
-        this.lightBuffer = new SwapBuffer(width, height);
+        glViewport(0, 0, width, height);
+
         this.swapBuffer = new SwapBuffer(width, height);
 
         this.guiRenderer.onResize(width, height);
@@ -68,7 +68,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
         //setupDebugMessageCallback();
         //SystemInfo.logGLInfo();
 
-        this.lightBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.swapBuffer = new SwapBuffer(application.getWindow().getWidth(), application.getWindow().getHeight());
         this.shadowBuffer = new ShadowBuffer();
 
@@ -93,10 +92,7 @@ public class GLRenderer extends Renderer implements Lifecycle {
         sceneRenderer.render();
         shadowRenderer.render();
 
-        //lightBuffer.bind();
         lightRenderer.render();
-        //lightBuffer.unbind();
-
 
         //postRenderer.render();
 
@@ -118,10 +114,6 @@ public class GLRenderer extends Renderer implements Lifecycle {
 
     public SwapBuffer getSwapBuffer() {
         return swapBuffer;
-    }
-
-    public SwapBuffer getLightBuffer() {
-        return lightBuffer;
     }
 
     public RelicApplication getApplication() {

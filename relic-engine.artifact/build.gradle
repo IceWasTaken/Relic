@@ -1,0 +1,45 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+String lwjglNatives = "";
+
+if(Os.isFamily(Os.FAMILY_WINDOWS)) {
+    lwjglNatives = "natives-windows";
+} else if (Os.isFamily(Os.FAMILY_UNIX)) {
+    lwjglNatives = "natives-linux";
+}
+
+group = 'net.ice.artifact'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':relic-engine.heirloom')
+    implementation project(':relic-engine.curio')
+    implementation project(':relic-engine.relic')
+
+    implementation 'io.qtjambi:qtjambi:6.11.1'
+    runtimeOnly 'io.qtjambi:qtjambi-native-linux-x64:6.11.1'
+
+    implementation 'io.qtjambi:qtjambi-openglwidgets:6.8.9'
+    implementation 'io.qtjambi:qtjambi-openglwidgets-native-linux-x64:6.8.9'
+
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+
+    implementation "org.lwjgl:lwjgl-opengl"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+}
+
+test {
+    useJUnitPlatform()
+}

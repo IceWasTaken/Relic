@@ -2,17 +2,12 @@ package net.ice.relic.common.test.gui;
 
 import imgui.ImGui;
 import imgui.ImGuiIO;
-import imgui.ImGuiTextFilter;
 import imgui.type.ImBoolean;
 import net.ice.curio.input.Input;
-import net.ice.relic.application.RelicApplication;
+import net.ice.relic.RelicApplication;
 import net.ice.relic.core.gui.Gui;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static imgui.ImGui.*;
 import static imgui.flag.ImGuiCond.Always;
