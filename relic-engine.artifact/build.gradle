@@ -25,8 +25,8 @@ dependencies {
     implementation project(':relic-engine.curio')
     implementation project(':relic-engine.relic')
 
-    implementation 'io.qtjambi:qtjambi:6.11.1'
-    runtimeOnly 'io.qtjambi:qtjambi-native-linux-x64:6.11.1'
+    implementation 'io.qtjambi:qtjambi:6.11.2'
+    runtimeOnly 'io.qtjambi:qtjambi-native-linux-x64:6.11.2'
 
     implementation 'io.qtjambi:qtjambi-openglwidgets:6.8.9'
     implementation 'io.qtjambi:qtjambi-openglwidgets-native-linux-x64:6.8.9'
