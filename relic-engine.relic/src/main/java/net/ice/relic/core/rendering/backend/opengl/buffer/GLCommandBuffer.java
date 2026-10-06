@@ -8,9 +8,9 @@ import net.ice.relic.core.model.mesh.Mesh;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.opengl.ARBMultiDrawIndirect.glMultiDrawElementsIndirect;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL40.GL_DRAW_INDIRECT_BUFFER;
-import static org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect;
 
 public class GLCommandBuffer extends Buffer {
 

@@ -12,27 +12,32 @@ import net.ice.curio.library.glfw.enums.GLFWPlatform;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
 import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.events.*;
+import net.ice.curio.system.memory.Vector2iBuffer;
 import net.ice.curio.window.Window;
 import net.ice.curio.window.enums.WindowAttribute;
 import net.ice.heirloom.event.EventManager;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.vulkan.VkInstance;
 import org.tinylog.Logger;
 
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 
 import static net.ice.curio.library.glfw.enums.GLFWInitHint.PLATFORM;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFWVulkan.glfwCreateWindowSurface;
 import static org.lwjgl.system.MemoryUtil.memFree;
 
 public class GLFWWindow extends Window {
 
-    protected int width = 1280;
-    protected int height = 720;
+    protected Vector2i windowSize = new Vector2i(1280, 720);
+    protected Vector2i framebufferSize = new Vector2i(0, 0);
 
-    protected boolean resized = false;
+    protected boolean windowResized = false;
+    protected boolean framebufferResized = false;
 
     protected long monitor;
     protected long windowHandle;
@@ -47,6 +52,7 @@ public class GLFWWindow extends Window {
     protected GLFWCursorPosCallback mousePosCallback;
     protected GLFWCursorEnterCallback cursorEnterCallback;
     protected GLFWCharCallback charCallback;
+    protected GLFWWindowSizeCallback sizeCallback;
 
     public GLFWWindow(Curio curio) {
 	    super(curio);
@@ -78,32 +84,24 @@ public class GLFWWindow extends Window {
             }
         }
 
-        this.windowHandle = glfwCreateWindow(width, height, windowProperties.getTitle(), 0, 0);
+        this.windowHandle = glfwCreateWindow(windowSize.x, windowSize.y, windowProperties.getTitle(), 0, 0);
 
         if(windowHandle == 0) {
             glfwTerminate();
             throw new RuntimeException("GLFW: Failed to create window.");
         }
 
-        IntBuffer widthBuffer = MemoryUtil.memCallocInt(1);
-        IntBuffer heightBuffer = MemoryUtil.memCallocInt(1);
-        glfwGetMonitorPos(monitor, widthBuffer, heightBuffer);
-        int w = glfwGetVideoMode(monitor).width() / 2 + widthBuffer.get() - width / 2;
-        int h = (glfwGetVideoMode(monitor).height() / 2) + heightBuffer.get() - height / 2;
-        setWindowPosition(w, h);
+        glfwMakeContextCurrent(windowHandle);
 
-        memFree(widthBuffer);
-        memFree(heightBuffer);
+        Vector2i monitorPos = getMonitorPos();
+        int w = glfwGetVideoMode(monitor).width() / 2 + monitorPos.x() - windowSize.x() / 2;
+        int h = glfwGetVideoMode(monitor).height() / 2 + monitorPos.y() - windowSize.y() / 2;
+        setWindowPosition(w, h);
 
         glfwPollEvents();
 
-        widthBuffer = MemoryUtil.memCallocInt(1);
-        heightBuffer = MemoryUtil.memCallocInt(1);
-        glfwGetFramebufferSize(windowHandle, widthBuffer, heightBuffer);
-        resize(widthBuffer.get(0), heightBuffer.get(0));
-        memFree(widthBuffer);
-        memFree(heightBuffer);
-
+        updateWindowSize();
+        updateFramebufferSize();
 
         setupCallbacks();
     }
@@ -112,6 +110,11 @@ public class GLFWWindow extends Window {
     public void update(float deltaTime) {
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
+    }
+
+    @Override
+    public void createContext() {
+        glfwMakeContextCurrent(windowHandle);
     }
 
     public void cleanup() {
@@ -129,7 +132,14 @@ public class GLFWWindow extends Window {
         glfwSetFramebufferSizeCallback(windowHandle, framebufferSizeCallback = new  GLFWFramebufferSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
-                resize(width, height);
+                resizeFramebuffer(width, height);
+            }
+        });
+
+        glfwSetWindowSizeCallback(windowHandle, sizeCallback = new GLFWWindowSizeCallback() {
+            @Override
+            public void invoke(long window, int width, int height) {
+                resizeWindow(width, height);
             }
         });
 
@@ -222,55 +232,68 @@ public class GLFWWindow extends Window {
         glfwWindowHint(getAttribute(attribute), value);
     }
 
-    public void setWidth(int width) {
-        this.resize(width, height);
-    }
-    public void setHeight(int height) {
-        this.resize(width, height);
-    }
-    public void resize(int width, int height) {
-        this.width = width;
-        this.height = height;
-        this.resized = true;
+    @Override
+    public void createSurface(VkInstance instance, LongBuffer buffer) {
+        glfwCreateWindowSurface(instance, windowHandle, null, buffer);
     }
 
-    public int getWidth() {
-        return width;
-    }
-    public int getHeight() {
-        return height;
-    }
-    public Vector2i getSize() {
-        return new Vector2i(width, height);
+    public void resizeWindow(int width, int height) {
+        this.windowSize.set(width, height);
+        this.windowResized = true;
     }
 
-    public Vector2i getWindowSize() {
-        IntBuffer widthBuffer = MemoryUtil.memAllocInt(1);
-        IntBuffer heightBuffer = MemoryUtil.memAllocInt(1);
-        glfwGetWindowSize(windowHandle, widthBuffer, heightBuffer);
-        Vector2i size = new Vector2i(widthBuffer.get(0), heightBuffer.get(0));
-        memFree(widthBuffer);
-        memFree(heightBuffer);
-        return size;
-    }
-
-    public Vector2i getFramebufferSize() {
-        IntBuffer widthBuffer = MemoryUtil.memAllocInt(1);
-        IntBuffer heightBuffer = MemoryUtil.memAllocInt(1);
-        glfwGetFramebufferSize(windowHandle, widthBuffer, heightBuffer);
-        Vector2i size = new Vector2i(widthBuffer.get(0), heightBuffer.get(0));
-        memFree(widthBuffer);
-        memFree(heightBuffer);
-        return size;
+    public void resizeFramebuffer(int width, int height) {
+        this.framebufferSize.set(width, height);
+        this.framebufferResized = true;
     }
 
     @Override
-    public boolean shouldResize() {
-        if(resized) {
-            this.resized = false;
+    public Vector2i getWindowSize() {
+        return windowSize;
+    }
+
+    @Override
+    public Vector2i getFramebufferSize() {
+        return framebufferSize;
+    }
+
+    @Override
+    public boolean shouldResizeWindow() {
+        if (windowResized) {
+            this.windowResized = false;
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean shouldResizeFramebuffer() {
+        if(framebufferResized) {
+            this.framebufferResized = false;
+            return true;
+        }
+        return false;
+    }
+
+    public Vector2i updateWindowSize() {
+        try(Vector2iBuffer buffer = new Vector2iBuffer()) {
+            GLFW.glfwGetWindowSize(windowHandle, buffer);
+            return buffer.get(windowSize);
+        }
+    }
+
+    public Vector2i updateFramebufferSize() {
+        try(Vector2iBuffer buffer = new Vector2iBuffer()) {
+            GLFW.glfwGetFramebufferSize(windowHandle, buffer);
+            return buffer.get(framebufferSize);
+        }
+    }
+
+    public Vector2i getMonitorPos() {
+        try(Vector2iBuffer buffer = new Vector2iBuffer()) {
+            GLFW.glfwGetMonitorPos(windowHandle, buffer);
+            return buffer.get();
+        }
     }
 
     private static int getAttribute(WindowAttribute attribute) {

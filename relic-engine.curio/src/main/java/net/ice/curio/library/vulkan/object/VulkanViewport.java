@@ -26,7 +26,6 @@ public class VulkanViewport extends Viewport {
 		allocateViewport(width, height);
 	}
 
-	@Override
 	public void cleanup() {
 		if(vkViewport != null) {
 			MemoryUtil.memFree(vkViewport);

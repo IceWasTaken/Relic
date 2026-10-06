@@ -36,7 +36,7 @@ public record HSLColor(float hue, float saturation, float luminance) {
 		float b;
 
 		if (S == 0) {
-			//grayscale color
+			//hey jimmy, get me a color with nuthin' (grayscale)
 			r = g = b = L;
 		} else {
 			float max = L < 0.5f ? L * (1.0f + S) : L + S - (L * S);
@@ -54,6 +54,8 @@ public record HSLColor(float hue, float saturation, float luminance) {
 		return new RGBColor(r, g, b);
 	}
 
+	//i have forgotten how this works
+	//all i know is that it works and i will not be touching it
 	private float hueToRGB(float min, float max, float H) {
 		if (!(0.0f < H && H < 1.0f)) {
 			H = Math.abs(1 - Math.abs(H));

@@ -1,11 +1,8 @@
 package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.library.vulkan.VulkanContext;
-import net.ice.curio.window.backend.vulkan.VulkanWindow;
-import net.ice.heirloom.Lifecycle;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.KHRSurface;
-import org.lwjgl.vulkan.VkPhysicalDevice;
 import org.lwjgl.vulkan.VkSurfaceCapabilitiesKHR;
 import org.lwjgl.vulkan.VkSurfaceFormatKHR;
 import org.tinylog.Logger;
@@ -16,7 +13,7 @@ import java.nio.LongBuffer;
 import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
 import static org.lwjgl.vulkan.VK10.VK_FORMAT_B8G8R8A8_SRGB;
 
-public class Surface implements Lifecycle {
+public class Surface {
 
     private VkSurfaceCapabilitiesKHR surfaceCapabilities;
     private SurfaceFormat surfaceFormat;
@@ -26,7 +23,7 @@ public class Surface implements Lifecycle {
         Logger.info("[Surface]: Creating surface");
         try(MemoryStack stack = MemoryStack.stackPush()) {
             LongBuffer surface = stack.mallocLong(1);
-            ((VulkanWindow) context.getCurio().getWindow()).createSurface(context.getInstance().getVkInstance(), surface);
+            context.getCurio().getWindow().createSurface(context.getInstance().getVkInstance(), surface);
 
             this.vkSurface = surface.get(0);
 
@@ -90,7 +87,6 @@ public class Surface implements Lifecycle {
         return new SurfaceFormat(format, colorSpace);
     }
 
-    @Override
     public void cleanup() {
         Logger.info("Vulkan: Destroying surface");
         surfaceCapabilities.free();

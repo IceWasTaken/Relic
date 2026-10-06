@@ -1,5 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.pipeline.PrimitiveType;
 import net.ice.curio.graphics.object.pipeline.depth.CompareFunction;
 import net.ice.curio.graphics.object.pipeline.depth.DepthState;
@@ -9,7 +10,6 @@ import net.ice.curio.graphics.object.pipeline.raster.PolygonMode;
 import net.ice.curio.graphics.object.pipeline.raster.RasterizationState;
 import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.pipeline.GLPipeline;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.Shadows;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.buffer.GLCommandBuffer;
@@ -17,25 +17,27 @@ import net.ice.relic.core.rendering.backend.opengl.buffer.GLCommandBuffer;
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30C.glBindFramebuffer;
+import static org.lwjgl.opengl.GL42C.GL_COMMAND_BARRIER_BIT;
+import static org.lwjgl.opengl.GL42C.glMemoryBarrier;
 
-public class GLShadowRenderer implements Lifecycle {
+public class GLShadowRenderer {
 
-    private final GLRenderer glRenderer;
+    private final GraphicsContext context;
 
     private GLPipeline pipeline;
     private Shadows shadows;
 
 
-    public GLShadowRenderer(GLRenderer glRenderer) {
-        this.glRenderer = glRenderer;
+    public GLShadowRenderer(GraphicsContext context) {
+        this.context = context;
         this.shadows =  new Shadows();
     }
 
-    @Override
     public void init() {
         this.pipeline = new GLPipeline(
-                glRenderer.getApplication().getCurio().getGraphicsContext(),
+                context,
                 "shadow",
                 null,
                 PrimitiveType.TRIANGLE,
@@ -69,15 +71,14 @@ public class GLShadowRenderer implements Lifecycle {
 
     }
 
-    @Override
-    public void render() {
-        GLCommandBuffer staticCommandBuffer = glRenderer.getBufferManager().getStaticCommandBuffer();
+    public void render(GLRenderer renderer) {
+        GLCommandBuffer staticCommandBuffer = renderer.getBufferManager().getStaticCommandBuffer();
         pipeline.bindPipeline();
-        shadows.update(glRenderer.getApplication().getCurrentScene());
+        shadows.update(renderer.getApplication().getCurrentScene());
 
         glClearColor(1.f, 1.f, 0f, 0f);
-        glRenderer.getShadowBuffer().bindFramebuffer();
-        glRenderer.getShadowBuffer().clear();
+        renderer.getShadowBuffer().bindFramebuffer();
+        renderer.getShadowBuffer().clear();
 
         for (int i = 0; i < Shadows.SHADOW_MAP_COUNT; i++) {
             Matrix4f shadowData = shadows.getShadowData().get(i).getProjViewMatrix();
@@ -85,7 +86,7 @@ public class GLShadowRenderer implements Lifecycle {
         }
 
         staticCommandBuffer.bind();
-        glRenderer.getBufferManager().getMeshBuffer().bind();
+        renderer.getBufferManager().getMeshBuffer().bind();
         glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
         staticCommandBuffer.draw(pipeline);
 

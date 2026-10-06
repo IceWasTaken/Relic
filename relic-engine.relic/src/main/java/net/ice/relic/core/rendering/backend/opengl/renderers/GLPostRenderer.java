@@ -1,16 +1,12 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.graphics.object.Viewport;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.QuadMesh;
-import net.ice.relic.core.scene.Scene;
 
-import static org.lwjgl.opengl.GL11.*;
-
-public class GLPostRenderer implements Lifecycle {
+public class GLPostRenderer {
 
 	private GLShaderProgram shaderProgram;
 	private Uniforms uniforms;
@@ -24,12 +20,10 @@ public class GLPostRenderer implements Lifecycle {
 	public GLPostRenderer(GLRenderer renderer) {
 		this.renderer = renderer;
 		this.viewport = renderer.getApplication().getCurio().getGraphicsContext().createViewport(
-				renderer.getApplication().getWindow().getWidth(),
-				renderer.getApplication().getWindow().getHeight()
+				renderer.getApplication().getWindow().getFramebufferSize()
 		);
 	}
 
-	@Override
 	public void init() {
 		this.shaderProgram = new GLShaderProgram("post");
 
@@ -40,8 +34,6 @@ public class GLPostRenderer implements Lifecycle {
 
 		this.quadMesh = new QuadMesh();
 	}
-
-	@Override
 	public void render() {
 //		if(enabled) {
 //			shaderProgram.bind();

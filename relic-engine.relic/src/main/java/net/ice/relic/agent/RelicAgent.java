@@ -14,17 +14,18 @@ public class RelicAgent {
 		Logger.debug("[RelicAgent]: Starting Relic with debugging agent");
 
 		new AgentBuilder.Default()
-				// 1. Intercept your application methods
-				.type(ElementMatchers.nameStartsWith("net.ice"))
+				.type(ElementMatchers.nameStartsWith("org.lwjgl.sdl"))
 				.transform((builder, typeDescription, classLoader, module, protectionDomain) ->
-						builder.visit(Advice.to(MethodCallAdvice.class).on(ElementMatchers.isMethod()))
+						builder.visit(Advice.to(MethodCallAdvice.class)
+								.on(ElementMatchers.isMethod()
+										.and(ElementMatchers.isPublic())
+										.and(ElementMatchers.not(ElementMatchers.isNative()))
+										.and(ElementMatchers.not(ElementMatchers.nameContains("getLibrary")))
+										.and(ElementMatchers.not(ElementMatchers.nameContains("nSDL")))
+								)
+						)
 				)
-				// 2. Intercept JDK ByteBuffer methods (requires ignoring default exclusions)
 				.ignore(ElementMatchers.none())
-				.type(ElementMatchers.isSubTypeOf(java.nio.Buffer.class))
-				.transform((builder, typeDescription, classLoader, module, protectionDomain) ->
-						builder.visit(Advice.to(ByteBufferAdvice.class).on(ElementMatchers.named("put")))
-				)
 				.installOn(inst);
 	}
 
@@ -32,16 +33,6 @@ public class RelicAgent {
 		@Advice.OnMethodEnter
 		public static void enter(@Advice.Origin String method, @Advice.AllArguments Object[] args) {
 			System.out.println("[Method Call] " + method + " called with args: " + Arrays.toString(args));
-		}
-	}
-
-	public static class ByteBufferAdvice {
-		@Advice.OnMethodEnter
-		public static void enter(@Advice.Origin String method, @Advice.AllArguments Object[] args, @Advice.This Object byteBuffer) {
-			System.out.println("[ByteBuffer Alert] .put() called on " + byteBuffer.getClass().getName());
-			if (args.length > 0) {
-				System.out.println("  -> Data being written: " + Arrays.toString(args));
-			}
 		}
 	}
 }

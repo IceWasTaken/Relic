@@ -71,7 +71,6 @@ public final class VulkanImage extends Image {
 
     public void cleanup(VulkanContext vulkanContext) {
         //vulkanContext.getVMAInstance().(vkImage, allocation);
-        super.cleanup();
     }
 
     public int getFormat() {

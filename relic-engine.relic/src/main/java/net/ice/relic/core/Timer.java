@@ -1,22 +1,19 @@
 package net.ice.relic.core;
 
-import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Queue;
 
-@Deprecated
 public class Timer {
 
-    private long startTime;
     private long lastTime;
     private float deltaTime;
 
     private int scale = 0;
 
-    private final Deque<Double> frameTimestamps = new ArrayDeque<>();
-    private final double fpsWindowSize = 5.0;
+    private final Queue<Double> frameTimes = new LinkedList<>();
 
     public void init() {
-        startTime = System.nanoTime();
         lastTime = System.nanoTime();
     }
 
@@ -26,17 +23,26 @@ public class Timer {
         deltaTime = deltaTime * scale;
         lastTime = currentTime;
 
-        double nowSeconds = currentTime * 1E-9;
-        frameTimestamps.addLast(nowSeconds);
-        while (!frameTimestamps.isEmpty() && nowSeconds - frameTimestamps.getFirst() > fpsWindowSize) {
-            frameTimestamps.removeFirst();
-        }
+        frameTimes.add(currentTime * 1E-9);
     }
 
-    public double getAverageFrameTimes() {
-        if (frameTimestamps.size() < 2) return 0.0;
-        double duration = frameTimestamps.getLast() - frameTimestamps.getFirst();
-        return duration > 0.0 ? frameTimestamps.size() / duration : 0.0;
+    public double getAverageFrameTime() {
+        while(!frameTimes.isEmpty() && (lastTime - frameTimes.peek() > 5000)) {
+            frameTimes.poll();
+        }
+
+        int count = frameTimes.size();
+        if(count <= 1) {
+            return 0;
+        }
+
+        long timeSpanMs = (long) (lastTime - frameTimes.peek());
+
+        if(timeSpanMs <= 0) {
+            return count;
+        }
+
+        return ((double) count / timeSpanMs) * 1000;
     }
 
     public float getDeltaTime() {

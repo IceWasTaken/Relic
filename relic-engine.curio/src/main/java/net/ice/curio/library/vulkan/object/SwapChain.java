@@ -2,6 +2,7 @@ package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.window.Window;
+import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.vulkan.*;
@@ -141,12 +142,12 @@ public class SwapChain {
 		VkExtent2D result = VkExtent2D.calloc();
 		if(surfaceCapabilities.currentExtent().width() == 0xFFFF_FFFF) {
 			//undefined
-			Window window = context.getCurio().getWindow();
+			Vector2i framebufferSize = context.getCurio().getWindow().getFramebufferSize();
 
-			int width = Math.min(window.getWidth(), surfaceCapabilities.maxImageExtent().width());
+			int width = Math.min(framebufferSize.x, surfaceCapabilities.maxImageExtent().width());
 			width = Math.max(width, surfaceCapabilities.minImageExtent().width());
 
-			int height = Math.min(window.getHeight(), surfaceCapabilities.maxImageExtent().height());
+			int height = Math.min(framebufferSize.y, surfaceCapabilities.maxImageExtent().height());
 			height = Math.max(height, surfaceCapabilities.minImageExtent().height());
 
 			result.width(width);

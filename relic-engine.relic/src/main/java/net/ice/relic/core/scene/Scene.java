@@ -1,6 +1,5 @@
 package net.ice.relic.core.scene;
 
-import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.Colors;
 import net.ice.heirloom.event.EventManager;
 import net.ice.relic.RelicApplication;
@@ -17,7 +16,7 @@ import org.tinylog.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Scene implements Lifecycle {
+public abstract class Scene {
 
     protected final String name;
 
@@ -55,19 +54,16 @@ public abstract class Scene implements Lifecycle {
         lights.add(new Light(new Vector3f(0, -1.0f,0), true, 8, Colors.WHITE.getRGBColor()));
     }
 
-    @Override
     public void init() {
         sceneInit();
 
         Logger.info("[Scene] Loaded scene: {}", name);
     }
 
-    @Override
     public void cleanup() {
         entities.clear();
     }
 
-    @Override
     public void update(float deltaTime) {
         sceneUpdate(deltaTime);
     }

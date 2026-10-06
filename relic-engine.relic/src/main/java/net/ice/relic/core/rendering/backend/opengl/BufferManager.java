@@ -1,6 +1,5 @@
 package net.ice.relic.core.rendering.backend.opengl;
 
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.mesh.Mesh;
@@ -12,19 +11,18 @@ import org.tinylog.Logger;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class BufferManager implements Lifecycle {
+public class BufferManager {
 
 	private final InstanceBuffer instanceBuffer;
 	private final GLCommandBuffer staticCommandBuffer;
 	private final GLCommandBuffer animatedCommandBuffer;
-	private final MaterialMapBuffer materialMapBuffer;
 	private final SceneInfoBuffer sceneInfoBuffer;
 	private final MeshBuffer meshBuffer;
 
 	private static final Deque<Entity> entityLoadingQueue = new ArrayDeque<>();
 
 	private final Set<Model> loadedModels = new LinkedHashSet<>();
-	private final Map<Model, LoadedModelInfo> loadedModelInfos = new HashMap<>();
+	private final Map<Model, BufferedModel> loadedModelInfos = new HashMap<>();
 
 	private final GLRenderer glRenderer;
 
@@ -33,17 +31,14 @@ public class BufferManager implements Lifecycle {
 		this.instanceBuffer = new InstanceBuffer(this);
 		this.staticCommandBuffer = new GLCommandBuffer();
 		this.animatedCommandBuffer = new GLCommandBuffer();
-		this.materialMapBuffer = new MaterialMapBuffer();
 		this.sceneInfoBuffer = new SceneInfoBuffer();
 		this.meshBuffer = new MeshBuffer();
 	}
 
-	@Override
 	public void init() {
 		instanceBuffer.init();
 		staticCommandBuffer.init();
 		animatedCommandBuffer.init();
-		materialMapBuffer.init();
 		sceneInfoBuffer.init();
 		meshBuffer.init();
 	}
@@ -52,12 +47,11 @@ public class BufferManager implements Lifecycle {
 		instanceBuffer.sync();
 		staticCommandBuffer.sync();
 		animatedCommandBuffer.sync();
-		materialMapBuffer.sync();
+		//materialMapBuffer.sync();
 		sceneInfoBuffer.sync();
 		meshBuffer.sync();
 	}
 
-	@Override
 	public void update() {
 		if(!entityLoadingQueue.isEmpty()) {
 			Entity entity = entityLoadingQueue.pollFirst();
@@ -72,16 +66,20 @@ public class BufferManager implements Lifecycle {
 				loadedModelInfos.get(model).newInstance();
 			}
 
-			Logger.debug("[BufferManager]: Entity '{}' took {}ms to load", entity.getName(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
+			long time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+			if(time <= 0) {
+				Logger.debug("[BufferManager]: Entity '{}' took <{}ms to load", entity.getName(), time);
+			} else {
+				Logger.debug("[BufferManager]: Entity '{}' took {}ms to load", entity.getName(), time);
+			}
 		}
 
 		staticCommandBuffer.update();
 		sceneInfoBuffer.update(glRenderer.getApplication().getCurrentScene());
-		instanceBuffer.update();
-		materialMapBuffer.update(glRenderer.getApplication().getMaterialCache());
+		instanceBuffer.update(glRenderer.getApplication().getMaterialCache());
 	}
 
-	private LoadedModelInfo loadModel(Model model) {
+	private BufferedModel loadModel(Model model) {
 		List<MeshData> meshes = model.getMeshData();
 		List<Mesh> bufferedMeshes = new ArrayList<>();
 
@@ -91,7 +89,7 @@ public class BufferManager implements Lifecycle {
 
 		loadedModels.add(model);
 
-		return new LoadedModelInfo(staticCommandBuffer, bufferedMeshes);
+		return new BufferedModel(staticCommandBuffer, bufferedMeshes);
 	}
 
 	public void loadEntity(Entity entity) {
@@ -110,10 +108,10 @@ public class BufferManager implements Lifecycle {
 		return loadedModels;
 	}
 
-	public static class LoadedModelInfo {
+	public static class BufferedModel {
 		private final List<GLCommandBuffer.DrawCommand> drawCommands;
 
-		public LoadedModelInfo(GLCommandBuffer commandBuffer, List<Mesh> meshes) {
+		public BufferedModel(GLCommandBuffer commandBuffer, List<Mesh> meshes) {
 			this.drawCommands = new ArrayList<>();
 
 			for (Mesh meshInfo : meshes) {

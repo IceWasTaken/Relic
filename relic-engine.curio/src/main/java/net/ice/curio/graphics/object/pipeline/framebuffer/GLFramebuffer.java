@@ -1,10 +1,13 @@
 package net.ice.curio.graphics.object.pipeline.framebuffer;
 
+import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
 
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.ARBDirectStateAccess.*;
+import static org.lwjgl.opengl.GL30C.*;
+import static org.lwjgl.opengl.GL32C.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
 
 public class GLFramebuffer {
 
@@ -15,7 +18,11 @@ public class GLFramebuffer {
 	private final int handle;
 	private final int target;
 
-	public GLFramebuffer(int target, int width, int height, int texCount, int format) {
+	public GLFramebuffer(Vector2i size, int target, int texCount, int format) {
+		this(size.x, size.y, target, texCount, format);
+	}
+
+	public GLFramebuffer(int width, int height, int target, int texCount, int format) {
 		this.textures = new int[texCount];
 		this.handle = glCreateFramebuffers();
 		this.format = format;
@@ -71,7 +78,7 @@ public class GLFramebuffer {
 
 	public GLFramebuffer resize(int width, int height) {
 		cleanup();
-		return new GLFramebuffer(target, width, height, textures.length, format);
+		return new GLFramebuffer(width, height, target, textures.length, format);
 	}
 
 	public void assertComplete() {

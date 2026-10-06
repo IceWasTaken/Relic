@@ -1,6 +1,5 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
-import net.ice.heirloom.Lifecycle;
 import net.ice.curio.graphics.object.pipeline.shader.ShaderType;
 import org.tinylog.Logger;
 
@@ -9,10 +8,13 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static org.lwjgl.opengl.GL43.*;
+import static org.lwjgl.opengl.ARBComputeShader.GL_COMPUTE_SHADER;
+import static org.lwjgl.opengl.GL20C.*;
+import static org.lwjgl.opengl.GL32C.GL_GEOMETRY_SHADER;
+
 
 @Deprecated
-public class GLShader implements Lifecycle {
+public class GLShader {
 
     private final int shaderID;
     private final ShaderType type;
@@ -75,7 +77,6 @@ public class GLShader implements Lifecycle {
         };
     }
 
-    @Override
     public void cleanup() {
         glDeleteShader(shaderID);
     }

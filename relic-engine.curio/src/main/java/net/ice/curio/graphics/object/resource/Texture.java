@@ -1,15 +1,15 @@
 package net.ice.curio.graphics.object.resource;
 
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.heirloom.Lifecycle;
 
-public abstract class Texture implements Lifecycle {
+public abstract class Texture {
 
     protected final int width;
     protected final int height;
 
     protected final Bitmap image;
 
+    public abstract void cleanup();
     public abstract long getHandle();
 
     protected Texture(Bitmap image) {

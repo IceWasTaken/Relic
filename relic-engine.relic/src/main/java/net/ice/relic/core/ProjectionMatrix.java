@@ -15,7 +15,7 @@ public class ProjectionMatrix {
 
     public ProjectionMatrix(RelicApplication application) {
         projectionMatrix = new Matrix4f();
-        updateProjMatrix(application.getWindow().getWidth(), application.getWindow().getHeight());
+        updateProjMatrix(application.getWindow().getFramebufferSize().x, application.getWindow().getFramebufferSize().y);
     }
 
     public Matrix4f getProjMatrix() {

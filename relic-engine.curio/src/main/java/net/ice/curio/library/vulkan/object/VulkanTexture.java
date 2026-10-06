@@ -75,4 +75,9 @@ public class VulkanTexture extends Texture {
     public long getHandle() {
         return 0;
     }
+
+    @Override
+    public void cleanup() {
+
+    }
 }

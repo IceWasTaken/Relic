@@ -5,7 +5,7 @@ import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.ARBDirectStateAccess.*;
 
 public class ShadowBuffer {
 

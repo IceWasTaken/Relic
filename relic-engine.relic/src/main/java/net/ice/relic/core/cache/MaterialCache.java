@@ -14,15 +14,11 @@ public class MaterialCache {
 
     public MaterialCache() {
         materialList = new ArrayList<>();
-        Material defaultMaterial = new Material();
-        defaultMaterial.setMaterialIndex(DEFAULT_MATERIAL_INDEX);
-        //defaultMaterial.setTexturePath("resources/textures/default.png");
-        materialList.add(defaultMaterial);
     }
 
     public void addMaterial(Material material) {
         materialList.add(material);
-        material.setMaterialIndex(materialList.size() - 1);
+        material.setMaterialIndex(materialList.indexOf(material));
     }
 
     public Material getMaterial(int idx) {

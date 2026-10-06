@@ -1,11 +1,12 @@
 package net.ice.relic.core.rendering.backend.vulkan;
 
+import net.ice.curio.Curio;
+import net.ice.curio.graphics.Renderer;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.library.vulkan.object.*;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.RelicApplication;
-import net.ice.relic.core.rendering.backend.Renderer;
 import net.ice.relic.core.rendering.backend.vulkan.renderers.VulkanSceneRenderer;
+import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkCommandBufferSubmitInfo;
 import org.lwjgl.vulkan.VkSemaphoreSubmitInfo;
@@ -13,7 +14,7 @@ import org.lwjgl.vulkan.VkSemaphoreSubmitInfo;
 import static org.lwjgl.vulkan.VK13.VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT;
 import static org.lwjgl.vulkan.VK13.VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-public class VulkanRenderer extends Renderer implements Lifecycle {
+public class VulkanRenderer extends Renderer {
 
     public static final int FRAMES_IN_FLIGHT = 2;
 
@@ -30,10 +31,10 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
 
     private int currentFrame;
 
-    public VulkanRenderer(RelicApplication relicApplication) {
-        super(relicApplication);
+    public VulkanRenderer(Curio curio) {
+        super(curio);
 
-        VulkanContext context = (VulkanContext) relicApplication.getCurio().getGraphicsContext();
+        VulkanContext context = (VulkanContext) graphicsContext;
 
         this.currentFrame = 0;
 
@@ -61,8 +62,12 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
     }
 
     @Override
+    public void init() {
+
+    }
+
     public void render() {
-        VulkanContext context = (VulkanContext) application.getCurio().getGraphicsContext();
+        VulkanContext context = (VulkanContext) graphicsContext;
 
         SwapChain swapChain = context.getSwapChain();
 
@@ -77,7 +82,7 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
             return;
         }
 
-        sceneRenderer.render();
+        //sceneRenderer.render();
 
         //end recording
         commandBuffers[currentFrame].endRecording();
@@ -87,12 +92,9 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
             Fence fence = fences[currentFrame];
             fence.reset(context);
 
-            VkCommandBufferSubmitInfo.Buffer commands =
-                    commandBuffers[currentFrame].generateSubmitInfo(stack);
-            VkSemaphoreSubmitInfo.Buffer waitSemaphores =
-                    presentationCompleteSemaphores[currentFrame].generateSubmitInfo(stack, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
-            VkSemaphoreSubmitInfo.Buffer signalSemaphores =
-                    renderCompleteSemaphores[imageIndex].generateSubmitInfo(stack, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT);
+            VkCommandBufferSubmitInfo.Buffer commands = commandBuffers[currentFrame].generateSubmitInfo(stack);
+            VkSemaphoreSubmitInfo.Buffer waitSemaphores = presentationCompleteSemaphores[currentFrame].generateSubmitInfo(stack, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+            VkSemaphoreSubmitInfo.Buffer signalSemaphores = renderCompleteSemaphores[imageIndex].generateSubmitInfo(stack, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT);
 
             graphicsEnabledQueue.submit(commands, waitSemaphores, signalSemaphores, fence);
         }
@@ -103,7 +105,18 @@ public class VulkanRenderer extends Renderer implements Lifecycle {
     }
 
     @Override
-    public void resize(int width, int height) {
+    public void destroy() {
 
     }
+
+    @Override
+    public void resizeWindow(Vector2i size) {
+
+    }
+
+    @Override
+    public void resizeFramebuffer(Vector2i size) {
+
+    }
+
 }

@@ -3,12 +3,11 @@ package net.ice.relic.core.rendering.backend.opengl.renderers;
 import imgui.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.type.ImInt;
-import net.ice.curio.library.glfw.GLFWWindow;
-import net.ice.curio.library.opengl.object.resource.GLSampler;
+import net.ice.curio.graphics.context.GraphicsContext;
+import net.ice.curio.library.opengl.OpenGLContext;
+import net.ice.curio.library.opengl.object.resource.GLSamplers;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
-import net.ice.curio.window.Window;
-import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.event.EventManager;
 import net.ice.relic.core.gui.Gui;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
@@ -22,13 +21,13 @@ import java.nio.ByteBuffer;
 
 import static imgui.flag.ImGuiBackendFlags.HasMouseCursors;
 import static imgui.flag.ImGuiConfigFlags.*;
+import static org.lwjgl.opengl.ARBDirectStateAccess.glBindTextureUnit;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
-import static org.lwjgl.opengl.GL45.glBindTextureUnit;
 
-public class GLGuiRenderer implements Lifecycle {
+public class GLGuiRenderer {
 
     private GLShaderProgram shaderProgram;
     private GuiMesh guiMesh;
@@ -36,16 +35,15 @@ public class GLGuiRenderer implements Lifecycle {
     private GLTexture texture;
     private Uniforms uniforms;
 
-    private final GLRenderer glRenderer;
+    private final OpenGLContext context;
 
     private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
 
-    public GLGuiRenderer(GLRenderer renderer) {
-        this.glRenderer = renderer;
+    public GLGuiRenderer(GraphicsContext context) {
+        this.context = (OpenGLContext) context;
     }
 
-    @Override
     public void init() {
         this.shaderProgram = new GLShaderProgram("gui");
 
@@ -68,16 +66,16 @@ public class GLGuiRenderer implements Lifecycle {
         imGuiIO.addConfigFlags(DockingEnable);
         imGuiIO.addConfigFlags(ViewportsEnable);
 
-        imGuiIO.setDisplaySize(glRenderer.getApplication().getWindow().getWidth(), glRenderer.getApplication().getWindow().getHeight());
+        imGuiIO.setDisplaySize(context.getCurio().getWindow().getWindowSize().x, context.getCurio().getWindow().getWindowSize().y);
+        imGuiIO.setDisplayFramebufferScale(context.getCurio().getWindow().getFramebufferSize().x, context.getCurio().getWindow().getFramebufferSize().y);
 
         buildFontAtlas();
 
         imGuiGl3.init("version 330 core");
     }
 
-    @Override
-    public void render() {
-        Gui guiInstance = glRenderer.getApplication().getCurrentScene().getGUI();
+    public void render(GLRenderer renderer) {
+        Gui guiInstance = renderer.getApplication().getCurrentScene().getGUI();
         if(guiInstance == null) {
             return;
         }
@@ -138,17 +136,20 @@ public class GLGuiRenderer implements Lifecycle {
         ImInt height = new ImInt();
         ByteBuffer buf = fontAtlas.getTexDataAsRGBA32(width, height);
         texture = new GLTexture(
-                new GLSampler(GLSampler.SamplerFormat.UI),
+                context.getSamplers().SAMPLER_UI,
                 new Bitmap(width.get(), height.get(), 4, buf)
         );
         guiMesh = new GuiMesh();
     }
 
+    public void onWindowResize(Vector2i size) {
+        ImGui.getIO().setDisplaySize(size.x, size.y);
+    }
 
-
-    public void onResize(int width, int height) {
-        ImGuiIO io = ImGui.getIO();
-        io.setDisplaySize(width, height);
+    public void onFramebufferResize(Vector2i size) {
+        float width = (float) size.x / context.getCurio().getWindow().getWindowSize().x;
+        float height = (float) size.y / context.getCurio().getWindow().getWindowSize().y;
+        ImGui.getIO().setDisplayFramebufferScale(width, height);
     }
 
 }

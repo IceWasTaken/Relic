@@ -9,7 +9,6 @@ import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.object.*;
 import net.ice.curio.library.vulkan.object.Surface;
 import net.ice.curio.window.Window;
-import net.ice.curio.window.backend.vulkan.VulkanWindow;
 
 public class VulkanContext extends GraphicsContext {
 
@@ -38,7 +37,12 @@ public class VulkanContext extends GraphicsContext {
     }
 
     @Override
-    protected void setupWindowAttributes(Window window) {
+    public void init() {
+
+    }
+
+    @Override
+    public void setupWindowAttributes(Window window) {
 
     }
 

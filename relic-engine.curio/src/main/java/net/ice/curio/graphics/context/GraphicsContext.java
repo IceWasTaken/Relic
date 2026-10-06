@@ -8,25 +8,31 @@ import net.ice.curio.library.opengl.OpenGLContext;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.window.Window;
-import net.ice.heirloom.Lifecycle;
+import org.joml.Vector2i;
 
-public abstract class GraphicsContext implements Lifecycle {
+public abstract class GraphicsContext {
 
     protected Curio curio;
     protected GraphicsContextLogger graphicsContextLogger;
 
     protected static GraphicsContext INSTANCE;
 
+    public abstract void init();
+
     protected GraphicsContext(Curio curio) {
         this.curio = curio;
     }
 
-    protected abstract void setupWindowAttributes(Window window);
+    public abstract Viewport createViewport(int width, int height);
+    public Viewport createViewport(Vector2i size) {
+        return createViewport(size.x, size.y);
+    }
+
+    public abstract void setupWindowAttributes(Window window);
 
     protected abstract GraphicsContextLogger createContextLogger();
 
     public abstract Texture createTexture(Bitmap bitmap);
-    public abstract Viewport createViewport(int width, int height);
 
     public static GraphicsContext getGraphicsContext(Curio curio) {
 

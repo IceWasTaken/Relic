@@ -3,6 +3,8 @@ package net.ice.relic;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import net.ice.curio.Curio;
+import net.ice.curio.config.RendererConfig;
+import net.ice.curio.graphics.Renderer;
 import net.ice.curio.input.Input;
 import net.ice.curio.input.enums.MouseButton;
 import net.ice.curio.window.Window;
@@ -18,7 +20,8 @@ import net.ice.relic.core.Timer;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
-import net.ice.relic.core.rendering.backend.Renderer;
+import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.vulkan.VulkanRenderer;
 import net.ice.relic.core.scene.Scene;
 import org.joml.Vector2f;
 import org.tinylog.Logger;
@@ -64,14 +67,11 @@ public abstract class RelicApplication extends Application {
         this.registrationManager = new RegistrationManager();
 
         this.curio = new Curio(this);
-        this.renderer = Renderer.getRendererType(this);
+        this.renderer = getRendererType(this);
 
         this.modelCache = new ModelCache();
         this.textureCache = new TextureCache(curio.getGraphicsContext());
         this.materialCache = new MaterialCache();
-
-//        curio.getWindow().getWindowProperties().setTitle(info.applicationName());
-//        curio.getWindow().refreshName();
     }
 
     public void run() {
@@ -116,8 +116,11 @@ public abstract class RelicApplication extends Application {
             clock.newFrame();
 
             if(currentScene != null) {
-                if(getWindow().shouldResize()) {
-                    renderer.resize(getWindow().getWidth(), getWindow().getHeight());
+                if(getWindow().shouldResizeWindow()) {
+                    renderer.resizeWindow(getWindow().getWindowSize());
+                }
+                if(getWindow().shouldResizeFramebuffer()) {
+                    renderer.resizeFramebuffer(getWindow().getFramebufferSize());
                 }
 
                 this.currentScene.update(clock.getDeltaTime());
@@ -243,6 +246,14 @@ public abstract class RelicApplication extends Application {
         } catch (Exception e) {
             Logger.error("[Relic]: Error while attempting to delete old crash files:", e);
         }
+
+    }
+
+    private Renderer getRendererType(RelicApplication application) {
+            return switch(RendererConfig.getBackendType()) {
+                case VULKAN -> new VulkanRenderer(curio);
+                case OPENGL -> new GLRenderer(curio, application);
+            };
 
     }
 

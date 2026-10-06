@@ -1,11 +1,12 @@
 package net.ice.curio.library.opengl.object;
 
 import net.ice.curio.graphics.object.Viewport;
+import org.joml.Vector2i;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.ARBClipControl.*;
+import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL20.GL_LOWER_LEFT;
 import static org.lwjgl.opengl.GL41.glClearDepthf;
-import static org.lwjgl.opengl.GL45.*;
 
 public class GLViewport extends Viewport {
 
@@ -34,6 +35,17 @@ public class GLViewport extends Viewport {
 			this.zFar = MIN_DEPTH;
 			this.depth = GL_NEGATIVE_ONE_TO_ONE;
 		}
+	}
+
+	public GLViewport(int x, int y, Vector2i wh, boolean reverseZ) {
+		this(x, y, wh.x, wh.y, reverseZ);
+	}
+	public GLViewport(Vector2i xy, int width, int height, boolean reverseZ) {
+		this(xy.x, xy.y, width, height, reverseZ);
+	}
+
+	public GLViewport(Vector2i xy, Vector2i wh, boolean reverseZ) {
+		this(xy.x, xy.y, wh.x, wh.y, reverseZ);
 	}
 
 	@Override

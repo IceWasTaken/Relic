@@ -4,11 +4,10 @@ import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.enums.image.ImageFormat;
 import net.ice.curio.graphics.enums.image.ImageType;
 import net.ice.curio.graphics.enums.image.ImageUsage;
-import net.ice.heirloom.Lifecycle;
 
 import java.util.EnumSet;
 
-public abstract class Image implements Lifecycle {
+public abstract class Image {
 
     protected final int width;
     protected final int height;

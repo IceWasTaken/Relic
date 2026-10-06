@@ -4,7 +4,7 @@ import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import static org.lwjgl.opengl.ARBBindlessTexture.glProgramUniformHandleui64ARB;
-import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opengl.GL41.*;
 
 public class Uniforms {
 

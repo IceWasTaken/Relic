@@ -6,4 +6,13 @@ public record RasterizationState(
 		CullMode cullMode,
 		boolean clampDepth,
 		float lineWidth
-) {}
+) {
+
+	public static RasterizationState DEFAULT = new RasterizationState(
+			PolygonMode.FILL,
+			FrontFace.COUNTER_CLOCKWISE,
+			CullMode.BACK,
+			true,
+			1.0f
+	);
+}

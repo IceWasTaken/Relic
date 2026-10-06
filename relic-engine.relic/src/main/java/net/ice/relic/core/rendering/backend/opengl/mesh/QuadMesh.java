@@ -5,7 +5,8 @@ import net.ice.curio.library.opengl.object.GLBuffer;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.GL30C.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL30C.glBindVertexArray;
 
 public class QuadMesh {
 

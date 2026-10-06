@@ -4,17 +4,16 @@ import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_COHERENT_BIT;
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.ARBShaderStorageBufferObject.GL_SHADER_STORAGE_BUFFER;
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
-import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
-import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
-public class GLAnimationRenderer implements Lifecycle {
+public class GLAnimationRenderer{
 
 	private GLShaderProgram shaderProgram;
 	private GLBuffer drawParameterBuffer;
@@ -38,7 +37,6 @@ public class GLAnimationRenderer implements Lifecycle {
 		this.matrix4fStruct = new Struct.GenericMatrix4fStruct(StructType.STD430);
 	}
 
-	@Override
 	public void init() {
 		this.shaderProgram = new GLShaderProgram("animation");
 
@@ -50,7 +48,6 @@ public class GLAnimationRenderer implements Lifecycle {
 		).bind(GL_SHADER_STORAGE_BUFFER, 4);
 	}
 
-	@Override
 	public void render() {
 		shaderProgram.bind();
 

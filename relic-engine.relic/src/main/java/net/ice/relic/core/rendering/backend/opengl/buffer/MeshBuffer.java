@@ -4,17 +4,16 @@ import net.ice.curio.graphics.memory.Fence;
 import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.model.mesh.Mesh;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_COHERENT_BIT;
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_PERSISTENT_BIT;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
-import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
 
-public class MeshBuffer implements Lifecycle {
+public class MeshBuffer {
 
 	private int staticVertexPos = 0;
 	private int staticIndexPos = 0;
@@ -35,7 +34,6 @@ public class MeshBuffer implements Lifecycle {
 
 	public MeshBuffer() {}
 
-	@Override
 	public void init() {
 		this.staticArrayObject = new VertexArrayObject();
 		this.animatedArrayObject = new VertexArrayObject();

@@ -5,18 +5,17 @@ import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.curio.library.opengl.object.GLFence;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.scene.Scene;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.tinylog.Logger;
 
-import static org.lwjgl.opengl.GL30.GL_MAP_WRITE_BIT;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
-import static org.lwjgl.opengl.GL44.GL_MAP_COHERENT_BIT;
-import static org.lwjgl.opengl.GL44.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_COHERENT_BIT;
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.ARBShaderStorageBufferObject.GL_SHADER_STORAGE_BUFFER;
+import static org.lwjgl.opengl.GL30C.GL_MAP_WRITE_BIT;
 
-public class SceneInfoBuffer implements Lifecycle {
+public class SceneInfoBuffer {
 
 	private final Struct sceneInfoStruct;
 
@@ -32,7 +31,6 @@ public class SceneInfoBuffer implements Lifecycle {
 		};
 	}
 
-	@Override
 	public void init() {
 		if(sceneInfoBuffer != null) {
 			sceneInfoBuffer.cleanup();

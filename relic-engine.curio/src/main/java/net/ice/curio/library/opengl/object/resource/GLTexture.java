@@ -6,14 +6,14 @@ import org.tinylog.Logger;
 
 import static org.lwjgl.opengl.ARBBindlessTexture.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.ARBDirectStateAccess.*;
 
 public class GLTexture extends Texture {
 
     private final int textureID;
     private final long textureHandle;
 
-    public GLTexture(GLSampler sampler, Bitmap bitmap) {
+    public GLTexture(GLSamplers.GLSampler sampler, Bitmap bitmap) {
         super(bitmap);
 
         while(glGetError() != GL_NO_ERROR);
@@ -58,7 +58,6 @@ public class GLTexture extends Texture {
         glBindTextureUnit(pos, 0);
     }
 
-    @Override
     public void cleanup() {
         if (textureHandle != 0L) {
             glMakeTextureHandleNonResidentARB(textureHandle);

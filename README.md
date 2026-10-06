@@ -27,16 +27,19 @@ Contains 3 main modules:
   - Tinylog
   - Classgraph
   - JOML
+  - ByteBuddy (JVM Agent)
   
 
 ### Curio 
   - Heirloom
   - LWJGL
     - GLFW
+    - SDL
     - OpenGL
     - Vulkan
-    - STB
     - VMA
+    - shaderc
+    - STB
   - ImGui (SpaiR)
   - Tinylog
   - JOML
@@ -47,9 +50,17 @@ Contains 3 main modules:
   - JOML
   - Tinylog
 
-### OpenGL 4.6
+### OpenGL 4.2
 - Support for GL_ARB_bindless_texture
 - Support for GL_ARB_gpu_shader_int64
+- Support for GL_ARB_texture_filter_anisotropic (Core in OpenGL 4.6)
+- Support for GL_ARB_direct_state_access (Core in OpenGL 4.5)
+- Support for GL_ARB_clip_control (Core in OpenGL 4.5)
+- Support for GL_ARB_buffer_storage (Core in OpenGL 4.4)
+- Support for GL_ARB_compute_shader (Core in OpenGL 4.3)
+- Support for GL_ARB_shader_storage_buffer_object (Core in OpenGL 4.3)
+- Support for GL_ARB_framebuffer_no_attachments (Core in OpenGL 4.3)
+- Support for GL_ARB_multi_draw_indirect (Core in OpenGL 4.3)
 - Support for either GL_NVX_gpu_memory_info or GL_ATI_meminfo (optional)
 ### Vulkan 1.3+
 - Support for VK_KHR_swapchain
@@ -69,6 +80,9 @@ Just me. icewastaken_ on discord.
 
 ## Version History
 
+* 0.6.2+
+  * See CHANGELOG.md
+    
 * 0.6.1
   * Separated Relic, Heirloom, Curio into different modules
 * 0.6

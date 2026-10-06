@@ -13,16 +13,16 @@ import java.util.Map;
 
 public class RegistrationManager {
 
-    private final Map<Class<?>, Registry<?>> registries = new HashMap<>();
+    private final Map<Class<?>, Registry<?>> openRegistries = new HashMap<>();
 
     public <T extends Registerable<T, R>, R extends Registry<T>> void openRegistry(Class<T> type, R registry) {
         Logger.debug("[RegistrationManager]: Opened new registry for '{}'", type.getCanonicalName());
-        registries.put(type, registry);
+        openRegistries.put(type, registry);
     }
 
     public <T extends Registerable<T, R>, R extends Registry<T>> void closeRegistry(Class<T> type) {
         Logger.debug("[RegistrationManager]: Closed registry for '{}'", type.getCanonicalName());
-        registries.remove(type);
+        openRegistries.remove(type);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -40,7 +40,7 @@ public class RegistrationManager {
                         return;
                     }
 
-                    Registry registry = registries.get(targetInterface);
+                    Registry registry = openRegistries.get(targetInterface);
                     if (registry == null) {
                         Logger.error("[RegistrationManager]: No active registry found for [{}]", targetInterface.getName());
                         return;
@@ -55,7 +55,7 @@ public class RegistrationManager {
                     return;
                 }
             }
-        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

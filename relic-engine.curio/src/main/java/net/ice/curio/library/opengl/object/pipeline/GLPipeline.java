@@ -8,7 +8,9 @@ import net.ice.curio.graphics.object.pipeline.depth.CompareFunction;
 import net.ice.curio.graphics.object.pipeline.depth.DepthState;
 import net.ice.curio.graphics.object.pipeline.framebuffer.GLFramebuffer;
 import net.ice.curio.graphics.object.pipeline.raster.RasterizationState;
+import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.Uniforms;
+import org.joml.Vector2i;
 import org.tinylog.Logger;
 
 import java.util.List;
@@ -92,6 +94,22 @@ public class GLPipeline extends Pipeline {
 		this.depthCompareFunction = getCompareFunction(depthState.compareFunction());
 		this.depthBoundTest = depthState.enableDepthBoundTest();
 		this.stencilTest = depthState.enableStencilTest();
+	}
+
+	public GLPipeline(GraphicsContext context, String programPath, GLFramebuffer framebuffer, boolean reverseZ) {
+		this(
+				context,
+				programPath,
+				framebuffer,
+				PrimitiveType.TRIANGLE,
+				RasterizationState.DEFAULT,
+				DepthState.DEFAULT,
+				new GLViewport(
+						new Vector2i(0),
+						context.getCurio().getWindow().getFramebufferSize(),
+						reverseZ
+				)
+		);
 	}
 
 	@Override

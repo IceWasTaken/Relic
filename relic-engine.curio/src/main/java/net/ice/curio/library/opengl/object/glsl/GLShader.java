@@ -3,11 +3,11 @@ package net.ice.curio.library.opengl.object.glsl;
 import net.ice.curio.graphics.enums.ShaderStage;
 import net.ice.curio.graphics.shader.Shader;
 
+import static org.lwjgl.opengl.ARBComputeShader.GL_COMPUTE_SHADER;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 import static org.lwjgl.opengl.GL40.GL_TESS_CONTROL_SHADER;
 import static org.lwjgl.opengl.GL40.GL_TESS_EVALUATION_SHADER;
-import static org.lwjgl.opengl.GL43.GL_COMPUTE_SHADER;
 
 public final class GLShader extends Shader {
 

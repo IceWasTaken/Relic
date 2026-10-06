@@ -1,8 +1,8 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.color.RGBColor;
 import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
@@ -12,14 +12,12 @@ import net.ice.relic.core.scene.light.Light;
 import net.ice.relic.core.scene.primitives.threed.LineCube;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.system.MemoryUtil;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL45.*;
-import static org.lwjgl.system.MemoryUtil.memFree;
+import static org.lwjgl.opengl.GL30C.GL_MAP_WRITE_BIT;
 
-public class GLDebugRenderer implements Lifecycle {
+public class GLDebugRenderer {
 
 	private GLShaderProgram shaderProgram;
 	private Uniforms uniforms;
@@ -32,15 +30,14 @@ public class GLDebugRenderer implements Lifecycle {
 	private static RGBColor notVisibleColor = new RGBColor(78, 59, 255);
 	private static RGBColor visibleColor = notVisibleColor.lighter();
 
-	private final GLRenderer glRenderer;
+	private final GraphicsContext context;
 
 	private final LineCube lineCube = new LineCube();
 
-	public GLDebugRenderer(GLRenderer glRenderer) {
-		this.glRenderer = glRenderer;
+	public GLDebugRenderer(GraphicsContext context) {
+		this.context = context;
 	}
 
-	@Override
 	public void init() {
 		this.vertexArrayObject = new VertexArrayObject();
 		this.vertexBuffer = new GLBuffer(lineCube.getVertices().length * 4L, GL_MAP_WRITE_BIT);
@@ -75,10 +72,9 @@ public class GLDebugRenderer implements Lifecycle {
 		indexBuffer.unmap();
 	}
 
-	@Override
-	public void render() {
+	public void render(GLRenderer renderer) {
 		shaderProgram.bind();
-		Scene scene = glRenderer.getApplication().getCurrentScene();
+		Scene scene = renderer.getApplication().getCurrentScene();
 
 		uniforms.setUniform("viewMatrix", scene.getCamera().getViewMatrix());
 		uniforms.setUniform("projectionMatrix", scene.getMatrix().getProjMatrix());

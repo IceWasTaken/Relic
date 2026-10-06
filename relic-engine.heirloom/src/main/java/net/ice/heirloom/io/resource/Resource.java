@@ -59,6 +59,7 @@ public class Resource {
     }
 
     //fix later
+    //i indeed did NOT fix this later
     public File getFromJar() {
         try {
             return new File(Resource.class.getClassLoader().getResource(getAsPath()).toURI());

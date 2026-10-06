@@ -1,6 +1,5 @@
 package net.ice.curio.library.stb;
 
-import net.ice.heirloom.Lifecycle;
 import net.ice.heirloom.io.resource.Resource;
 import org.lwjgl.system.MemoryStack;
 import org.tinylog.Logger;
@@ -10,7 +9,7 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.stb.STBImage.*;
 
-public class Bitmap implements Lifecycle {
+public class Bitmap {
 
     private final int width;
     private final int height;
@@ -49,7 +48,6 @@ public class Bitmap implements Lifecycle {
         this.resource = Resource.EMPTY;
     }
 
-    @Override
     public void cleanup() {
         stbi_image_free(data);
     }

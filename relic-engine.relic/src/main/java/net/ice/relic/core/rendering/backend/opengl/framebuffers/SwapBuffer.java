@@ -1,11 +1,14 @@
 package net.ice.relic.core.rendering.backend.opengl.framebuffers;
 
+import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.ARBDirectStateAccess.*;
+import static org.lwjgl.opengl.GL30C.*;
+import static org.lwjgl.opengl.GL32C.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
 
 public class SwapBuffer {
 
@@ -14,7 +17,13 @@ public class SwapBuffer {
 
 	private final int handle;
 
+	public SwapBuffer(Vector2i size) {
+		this(size.x, size.y);
+	}
+
 	public SwapBuffer(int width, int height) {
+		while(glGetError() != GL_NO_ERROR) {}
+
 		if(width == 0 || height == 0) {
 			this.swapTexture = 0;
 			this.depthTexture = 0;
@@ -36,7 +45,6 @@ public class SwapBuffer {
 		glTextureParameteri(depthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		glNamedFramebufferTexture(handle, GL_COLOR_ATTACHMENT0, swapTexture, 0);
-
 		glNamedFramebufferTexture(handle, GL_DEPTH_ATTACHMENT, depthTexture, 0);
 
 		try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -52,7 +60,6 @@ public class SwapBuffer {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-
 	public void bind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, handle);
 	}
@@ -61,14 +68,13 @@ public class SwapBuffer {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	public void bindTextures(int inxex) {
-		glBindTextureUnit(inxex, swapTexture);
+	public void bindTextures(int index) {
+		glBindTextureUnit(index, swapTexture);
 	}
 
 	public void assertComplete() {
 		int status = glCheckNamedFramebufferStatus(handle, GL_FRAMEBUFFER);
 		switch (status) {
-
 			case GL_FRAMEBUFFER_UNDEFINED -> throw new RuntimeException("Specified framebuffer is the default read or draw framebuffer, but the default framebuffer does not exist.");
 			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT -> throw new RuntimeException("Framebuffer attachment points are framebuffer incomplete.");
 			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT  -> throw new RuntimeException("Framebuffer does not have at least one image attached to it.");

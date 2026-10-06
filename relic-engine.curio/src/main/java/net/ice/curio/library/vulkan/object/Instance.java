@@ -1,10 +1,10 @@
 package net.ice.curio.library.vulkan.object;
 
+import net.ice.curio.config.RendererConfig;
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.library.vulkan.utils.DebugUtils;
-import net.ice.curio.window.backend.vulkan.VulkanWindow;
-import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.glfw.GLFWVulkan;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 import org.tinylog.Logger;
@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
+import static org.lwjgl.sdl.SDLVulkan.SDL_Vulkan_GetInstanceExtensions;
 import static org.lwjgl.vulkan.EXTDebugUtils.vkCreateDebugUtilsMessengerEXT;
 import static org.lwjgl.vulkan.EXTDebugUtils.vkDestroyDebugUtilsMessengerEXT;
 import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK13.VK_API_VERSION_1_3;
 
-public class Instance implements Lifecycle {
+public class Instance {
 
 	private final VkInstance vkInstance;
 
@@ -39,7 +40,12 @@ public class Instance implements Lifecycle {
             ValidationLayers validationLayers = new ValidationLayers(stack);
 
             PointerBuffer requiredLayers = validationLayers.getRequiredLayers(stack);
-            PointerBuffer glfwExtensions = VulkanWindow.getExtensions();
+
+            PointerBuffer windowExtensions = switch(RendererConfig.getWindowBackend()) {
+				case GLFW -> GLFWVulkan.glfwGetRequiredInstanceExtensions();
+                case SDL -> SDL_Vulkan_GetInstanceExtensions();
+
+            };
 
             List<String> additionalExtensions = new ArrayList<>();
 
@@ -48,7 +54,7 @@ public class Instance implements Lifecycle {
                 additionalExtensions.add(EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
             }
 
-            PointerBuffer requiredExtensions = getRequiredExtensions(stack, glfwExtensions, additionalExtensions);
+            PointerBuffer requiredExtensions = getRequiredExtensions(stack, windowExtensions, additionalExtensions);
 
             VkInstanceCreateInfo instanceCreateInfo = VkInstanceCreateInfo.calloc(stack)
                     .sType(VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
@@ -77,7 +83,6 @@ public class Instance implements Lifecycle {
     }
 
 
-    @Override
     public void cleanup() {
         Logger.info("VulkanInstance: Destroying Instance.");
         debugUtils.cleanup(this);

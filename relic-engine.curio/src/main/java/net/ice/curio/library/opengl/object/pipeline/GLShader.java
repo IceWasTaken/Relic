@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.lwjgl.opengl.ARBComputeShader.GL_COMPUTE_SHADER;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
-import static org.lwjgl.opengl.GL43.GL_COMPUTE_SHADER;
 
 public class GLShader extends Shader {
 

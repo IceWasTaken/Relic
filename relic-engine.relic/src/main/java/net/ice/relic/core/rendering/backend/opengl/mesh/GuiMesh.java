@@ -2,21 +2,17 @@ package net.ice.relic.core.rendering.backend.opengl.mesh;
 
 import imgui.ImDrawData;
 import imgui.ImGui;
-import net.ice.curio.graphics.enums.BufferAccess;
-import net.ice.curio.graphics.enums.BufferFlags;
 import net.ice.curio.graphics.memory.Fence;
 import net.ice.curio.library.opengl.object.GLFence;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.curio.library.opengl.wrapper.enums.Usage;
 
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
-
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL45.*;
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_COHERENT_BIT;
+import static org.lwjgl.opengl.ARBBufferStorage.GL_MAP_PERSISTENT_BIT;
+import static org.lwjgl.opengl.GL11C.GL_FLOAT;
+import static org.lwjgl.opengl.GL11C.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL30C.GL_MAP_WRITE_BIT;
+import static org.lwjgl.opengl.GL30C.glBindVertexArray;
 
 public class GuiMesh {
 

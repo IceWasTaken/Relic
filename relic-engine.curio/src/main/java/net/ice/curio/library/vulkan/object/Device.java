@@ -1,7 +1,6 @@
 package net.ice.curio.library.vulkan.object;
 
 import net.ice.curio.library.vulkan.VulkanContext;
-import net.ice.heirloom.Lifecycle;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
@@ -17,7 +16,7 @@ import java.util.Set;
 import static net.ice.curio.library.vulkan.utils.VulkanUtils.checkVulkan;
 import static org.lwjgl.vulkan.VK10.*;
 
-public class Device implements Lifecycle {
+public class Device {
 
     public static final Set<String> REQUIRED_EXTENSIONS = PhysicalDevice.REQUIRED_EXTENSIONS;
     public static final Set<String> OPTIONAL_EXTENSIONS = Set.of(
@@ -99,7 +98,6 @@ public class Device implements Lifecycle {
         return extensions;
     }
 
-    @Override
     public void cleanup() {
         Logger.debug("Device: Destroying Device.");
         vkDestroyDevice(vkDevice, null);

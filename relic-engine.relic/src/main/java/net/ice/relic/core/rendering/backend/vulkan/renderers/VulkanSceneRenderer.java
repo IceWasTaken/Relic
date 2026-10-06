@@ -13,7 +13,6 @@ import net.ice.curio.library.shaderc.ShaderCompiler;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.library.vulkan.object.*;
 import net.ice.curio.library.vulkan.utils.VulkanUtils;
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.ecs.component.components.TransformComponent;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
@@ -40,7 +39,7 @@ import static org.lwjgl.vulkan.VK10.VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 import static org.lwjgl.vulkan.VK10.VK_IMAGE_LAYOUT_UNDEFINED;
 import static org.lwjgl.vulkan.VK13.*;
 
-public class VulkanSceneRenderer implements Lifecycle {
+public class VulkanSceneRenderer {
 
 	private static final String VERTEX_SHADER_FILE = "resources/relic/data/rendering/vulkan/scene.vert";
 	private static final String FRAGMENT_SHADER_FILE = "resources/relic/data/rendering/vulkan/scene.frag";
@@ -242,7 +241,6 @@ public class VulkanSceneRenderer implements Lifecycle {
 		}
 	}
 
-	@Override
 	public void cleanup() {
 	}
 }

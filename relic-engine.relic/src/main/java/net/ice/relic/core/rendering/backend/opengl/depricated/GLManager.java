@@ -1,6 +1,5 @@
 package net.ice.relic.core.rendering.backend.opengl.depricated;
 
-import net.ice.heirloom.Lifecycle;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.Animation;
@@ -17,7 +16,8 @@ import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 
-public class GLManager implements Lifecycle {
+@Deprecated
+public class GLManager {
 
     //private VertexArrayObject staticArrayObject;
     //private VertexArrayObject animationArrayObject;

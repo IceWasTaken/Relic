@@ -10,9 +10,11 @@ import java.time.ZoneId;
 import java.util.Locale;
 
 import static net.ice.curio.system.enums.OSArchitecture.*;
+import static org.lwjgl.opengl.ARBFramebufferNoAttachments.*;
+import static org.lwjgl.opengl.ARBShaderStorageBufferObject.*;
 import static org.lwjgl.opengl.GL11.glGetIntegerv;
+import static org.lwjgl.opengl.GL41C.*;
 import static org.lwjgl.opengl.GL42.GL_MAX_IMAGE_UNITS;
-import static org.lwjgl.opengl.GL43.*;
 
 
 public class SystemInfo {

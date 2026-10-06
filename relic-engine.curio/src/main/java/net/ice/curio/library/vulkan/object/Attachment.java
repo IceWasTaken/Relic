@@ -51,7 +51,7 @@ public class Attachment {
 
 	public void cleanup(VulkanContext ctx) {
 		imageView.cleanup(ctx);
-		image.cleanup();
+		image.cleanup(ctx);
 	}
 
 	public ImageView getImageView() {
