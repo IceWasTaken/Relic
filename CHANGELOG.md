@@ -1,6 +1,30 @@
 # Changelog
 ### Thought the version history in README.md was getting too long. Any update after 0.6.1 will be found here.
 
+## 0.6.4
+> Basic particle system & rendering (October 8th, 2026)
+
+### Relic
+* Created GLParticleRenderer.java - What it sounds like. Renders particles.
+* Created GLSwapRenderer.java - Swaps framebuffer to main framebuffer
+* Created Particle.java - Holds a particle (is anyone ever going to read this shit?)
+* Created ParticleSystem.java - Handler for lifecycle of a particle object
+* Created PhysicsUtil.java - Utility for physics related methods (i mean, really, does anyone need these comments to know what this class is for?)
+* Modified BufferManager.java - Now checks to see if instances/materials have changed before re-buffering data
+* Modified GLLightRenderer.java - Now uses GLPipeline system, draws into its own framebuffer now
+* Modified Relic.java - Bump version
+
+### Curio
+* Modified GLTexture.java - Now checks if RenderDoc is installed before generating bindless handles
+* Modified GLFramebuffer.java - Added wrapped method for glBlitNamedFramebuffer, added GraphicsContext field
+* Modified GLPipeline.java - Added new constructor with default params, now checks shader status and throws error if not correct
+* Modified Window.java - New abstract method for getting window scale
+* Modified WindowAttribute.java - Added enums for framebuffer Stencil & Depth bit count
+
+### Other
+* Created particle.vert & particle.frag
+---
+
 ## 0.6.3
 > Change to OpenGL core 4.2; Create new NIO buffer types for Vec2i/2f/3f (October 6th, 2026)
 

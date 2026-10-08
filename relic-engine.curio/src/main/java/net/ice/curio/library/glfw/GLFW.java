@@ -1,5 +1,6 @@
 package net.ice.curio.library.glfw;
 
+import net.ice.curio.system.memory.Vector2fBuffer;
 import net.ice.curio.system.memory.Vector2iBuffer;
 import org.lwjgl.system.Checks;
 
@@ -29,6 +30,14 @@ public class GLFW {
 		}
 
 		nglfwGetMonitorPos(window, buff.memAddress(0), buff.memAddress(4));
+	}
+
+	public static void glfwGetWindowContentScale(long window, Vector2fBuffer buff) {
+		if(Checks.CHECKS){
+			buff.checkSafe(2);
+		}
+
+		nglfwGetWindowContentScale(window, buff.memAddress(0), buff.memAddress(4));
 	}
 
 

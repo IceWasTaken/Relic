@@ -15,6 +15,7 @@ import net.ice.curio.window.Window;
 import net.ice.curio.window.enums.WindowAttribute;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.util.renderdoc.RenderDoc;
 import org.tinylog.Logger;
 
 import static org.lwjgl.opengl.GL11C.*;
@@ -39,8 +40,12 @@ public class OpenGLContext extends GraphicsContext {
         SystemInfo.logGLInfo();
 
         checkCapability(capabilities.OpenGL42, "OpenGL backend requires an OpenGL 4.2 capable context");
-        checkCapability(capabilities.GL_ARB_gpu_shader_int64, "OpenGL backend requires GL_ARB_gpu_shader_int64 extension");
-        checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
+
+        if(!usingRenderDoc()) {
+            checkCapability(capabilities.GL_ARB_gpu_shader_int64, "OpenGL backend requires GL_ARB_gpu_shader_int64 extension");
+            checkCapability(capabilities.GL_ARB_bindless_texture, "OpenGL backend requires GL_ARB_bindless_texture extension");
+        }
+
         checkCapability(capabilities.GL_ARB_texture_filter_anisotropic, "OpenGL backend requires GL_ARB_texture_filter_anisotropic extension");
         checkCapability(capabilities.GL_ARB_direct_state_access, "OpenGL backend requires GL_ARB_direct_state_access extension");
         checkCapability(capabilities.GL_ARB_clip_control, "OpenGL backend requires GL_ARB_clip_control extension");
@@ -86,6 +91,7 @@ public class OpenGLContext extends GraphicsContext {
     @Override
     public Texture createTexture(Bitmap bitmap) {
         return new GLTexture(
+                this,
                 samplers.SAMPLER_TRILINEAR_FILTERING,
                 bitmap
         );

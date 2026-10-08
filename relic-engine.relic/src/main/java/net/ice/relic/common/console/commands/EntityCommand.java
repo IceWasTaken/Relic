@@ -11,7 +11,7 @@ import net.ice.relic.core.ecs.component.components.TransformComponent;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import org.tinylog.Logger;
 
 import java.lang.reflect.Field;

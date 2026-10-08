@@ -1,7 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.graphics.object.Viewport;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.QuadMesh;

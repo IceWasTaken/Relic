@@ -3,7 +3,6 @@ package net.ice.relic.core.rendering.backend.opengl.renderers;
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.pipeline.framebuffer.GLFramebuffer;
 import net.ice.curio.library.opengl.object.pipeline.GLPipeline;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.buffer.GLCommandBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -26,6 +25,7 @@ public class GLSceneRenderer {
                 graphicsContext,
                 "scene",
                 new GLFramebuffer(
+                        graphicsContext,
                         graphicsContext.getCurio().getWindow().getFramebufferSize(),
                         GL_TEXTURE_2D,
                         4,

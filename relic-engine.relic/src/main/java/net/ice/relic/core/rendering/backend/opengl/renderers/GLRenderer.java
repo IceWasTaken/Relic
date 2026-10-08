@@ -1,17 +1,17 @@
-package net.ice.relic.core.rendering.backend.opengl;
+package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.Curio;
 import net.ice.curio.graphics.Renderer;
 import net.ice.relic.RelicApplication;
 import net.ice.relic.core.ecs.entity.Entity;
 
+import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
-import net.ice.relic.core.rendering.backend.opengl.renderers.*;
 import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_OUTPUT;
 import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_OUTPUT_SYNCHRONOUS;
 
@@ -25,9 +25,11 @@ public class GLRenderer extends Renderer {
 
     private final BufferManager bufferManager;
 
-    private final GLSceneRenderer sceneRenderer;
-    private final GLShadowRenderer shadowRenderer;
-    private final GLLightRenderer lightRenderer;
+    final GLSceneRenderer sceneRenderer;
+    final GLShadowRenderer shadowRenderer;
+    final GLLightRenderer lightRenderer;
+    final GLParticleRenderer particleRenderer;
+    final GLSwapRenderer swapRenderer;
 
     private final GLPostRenderer postRenderer;
     private final GLDebugRenderer visualizeRenderer;
@@ -45,6 +47,8 @@ public class GLRenderer extends Renderer {
         this.sceneRenderer = new GLSceneRenderer(graphicsContext);
         this.shadowRenderer = new GLShadowRenderer(graphicsContext);
         this.lightRenderer = new GLLightRenderer(graphicsContext);
+        this.particleRenderer = new GLParticleRenderer(graphicsContext);
+        this.swapRenderer = new GLSwapRenderer(graphicsContext);
 
         this.postRenderer = new GLPostRenderer(this);
         this.visualizeRenderer = new GLDebugRenderer(graphicsContext);
@@ -66,6 +70,8 @@ public class GLRenderer extends Renderer {
         sceneRenderer.init();
         shadowRenderer.init();
         lightRenderer.init();
+        particleRenderer.init();
+        swapRenderer.init();
 
         postRenderer.init();
 
@@ -75,15 +81,17 @@ public class GLRenderer extends Renderer {
 
     @Override
     public void render() {
+
         bufferManager.update();
 
-        glViewport(0, 0, curio.getWindow().getFramebufferSize().x, curio.getWindow().getFramebufferSize().y);
+        Vector2i fbSize = curio.getWindow().getFramebufferSize();
+        glViewport(0, 0, fbSize.x, fbSize.y);
 
         sceneRenderer.render(this);
         shadowRenderer.render(this);
-
         lightRenderer.render(this);
-
+        particleRenderer.render(this.getApplication().getParticleSystem(), relicApplication.getClock().getDeltaTime(), this);
+        swapRenderer.render(this);
         //postRenderer.render();
 
         glViewport(0, 0, curio.getWindow().getFramebufferSize().x, curio.getWindow().getFramebufferSize().y);
@@ -113,6 +121,7 @@ public class GLRenderer extends Renderer {
         this.sceneRenderer.resize(width, height);
         this.lightRenderer.resize(width, height);
         this.postRenderer.resize(width, height);
+        this.swapRenderer.resize(width, height);
     }
 
     @Override
@@ -124,24 +133,8 @@ public class GLRenderer extends Renderer {
         return shadowBuffer;
     }
 
-    public GLSceneRenderer getSceneRenderer() {
-        return sceneRenderer;
-    }
-
-    public SwapBuffer getSwapBuffer() {
-        return swapBuffer;
-    }
-
     public RelicApplication getApplication() {
         return relicApplication;
-    }
-
-    public GLShadowRenderer getShadowRenderer() {
-        return shadowRenderer;
-    }
-
-    public GLPostRenderer getPostRenderer() {
-        return postRenderer;
     }
 
     public BufferManager getBufferManager() {

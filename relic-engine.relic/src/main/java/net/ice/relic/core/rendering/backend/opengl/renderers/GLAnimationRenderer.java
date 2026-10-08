@@ -4,7 +4,6 @@ import net.ice.curio.graphics.memory.Struct;
 import net.ice.curio.graphics.memory.StructType;
 import net.ice.curio.graphics.object.Viewport;
 import net.ice.curio.library.opengl.object.GLBuffer;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 

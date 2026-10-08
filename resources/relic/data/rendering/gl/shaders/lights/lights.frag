@@ -5,7 +5,7 @@ const int DEBUG_SHADOWS = 0;
 const float PI = 3.1459265359;
 
 layout(location = 0) in vec2 inTextureCoord;
-out vec4 outFragColor;
+layout(location = 0) out vec4 outFragColor;
 
 struct Light {
     vec3 position;

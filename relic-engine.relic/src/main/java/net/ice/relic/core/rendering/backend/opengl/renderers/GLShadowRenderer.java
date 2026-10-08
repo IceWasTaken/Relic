@@ -11,7 +11,6 @@ import net.ice.curio.graphics.object.pipeline.raster.RasterizationState;
 import net.ice.curio.library.opengl.object.GLViewport;
 import net.ice.curio.library.opengl.object.pipeline.GLPipeline;
 import net.ice.relic.core.Shadows;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.buffer.GLCommandBuffer;
 
 import org.joml.Matrix4f;

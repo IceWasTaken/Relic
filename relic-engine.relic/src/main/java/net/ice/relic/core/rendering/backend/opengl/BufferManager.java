@@ -6,12 +6,15 @@ import net.ice.relic.core.model.mesh.Mesh;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
 import net.ice.relic.core.rendering.backend.opengl.buffer.*;
+import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BufferManager {
+
+	public static boolean SHOULD_UPDATE_BUFFERS = false;
 
 	private final InstanceBuffer instanceBuffer;
 	private final GLCommandBuffer staticCommandBuffer;
@@ -57,13 +60,17 @@ public class BufferManager {
 			Entity entity = entityLoadingQueue.pollFirst();
 			long start = System.nanoTime();
 
-			Model model;
-			if((model = entity.getComponent(ModelComponent.class).getModel()) != null) {
+			ModelComponent modelComponent = entity.getComponent(ModelComponent.class);
+			if(modelComponent != null) {
+				Model model = modelComponent.getModel();
 				meshBuffer.resizeIfNeeded(model);
 				if (!loadedModels.contains(model)) {
 					loadedModelInfos.put(model, loadModel(model));
 				}
 				loadedModelInfos.get(model).newInstance();
+				SHOULD_UPDATE_BUFFERS = true;
+			} else {
+				return;
 			}
 
 			long time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
@@ -74,9 +81,13 @@ public class BufferManager {
 			}
 		}
 
-		staticCommandBuffer.update();
 		sceneInfoBuffer.update(glRenderer.getApplication().getCurrentScene());
-		instanceBuffer.update(glRenderer.getApplication().getMaterialCache());
+
+		if(SHOULD_UPDATE_BUFFERS) {
+			staticCommandBuffer.update();
+			instanceBuffer.update(glRenderer.getApplication().getMaterialCache());
+			SHOULD_UPDATE_BUFFERS = false;
+		}
 	}
 
 	private BufferedModel loadModel(Model model) {

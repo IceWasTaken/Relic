@@ -4,7 +4,6 @@ import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.library.opengl.object.VertexArrayObject;
 import net.ice.curio.library.opengl.object.GLBuffer;
 import net.ice.heirloom.color.RGBColor;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.scene.Scene;
@@ -87,14 +86,16 @@ public class GLDebugRenderer {
 			drawCube(light.getPosition());
 		}
 
-
+//		for(Particle particle : scene.getApplication().getParticleSystem().getParticles()) {
+//			uniforms.setUniform("color", particle.getColor().div().vec3f());
+//			drawCube(particle.getPosition());
+//		}
 
 		glEnable(GL_DEPTH_TEST);
 		uniforms.setUniform("color", visibleColor.div().vec3f());
 		for(Light light : scene.getLights()) {
 			drawCube(light.getPosition());
 		}
-
 
 		glBindVertexArray(0);
 		shaderProgram.unbind();

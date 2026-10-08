@@ -13,6 +13,7 @@ import net.ice.curio.system.memory.Vector2iBuffer;
 import net.ice.curio.window.Window;
 import net.ice.curio.window.enums.WindowAttribute;
 import net.ice.heirloom.event.EventManager;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.sdl.SDLInit;
 import org.lwjgl.sdl.SDLVideo;
@@ -137,6 +138,12 @@ public class SDLWindow extends Window {
 		return shouldClose;
 	}
 
+	@Override
+	public Vector2f getWindowScale() {
+		float scale = SDL_GetWindowDisplayScale(windowHandle);
+		return new Vector2f(scale, scale);
+	}
+
 	public Vector2i updateWindowSize() {
 		try(Vector2iBuffer buffer = new Vector2iBuffer()) {
 			SDL.SDL_GetWindowSize(windowHandle, buffer);
@@ -185,6 +192,8 @@ public class SDLWindow extends Window {
 			case CONTEXT_VERSION_MINOR -> SDL_GL_CONTEXT_MINOR_VERSION;
 			case CONTEXT_PROFILE -> SDL_GL_CONTEXT_PROFILE_MASK;
 			case CONTEXT_DEBUG -> SDL_GL_CONTEXT_DEBUG_FLAG;
+			case DEPTH_BITS -> SDL_GL_DEPTH_SIZE;
+			case STENCIL_BITS -> SDL_GL_STENCIL_SIZE;
 		};
 	}
 }

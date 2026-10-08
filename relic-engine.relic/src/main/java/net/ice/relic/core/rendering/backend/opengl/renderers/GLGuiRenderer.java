@@ -5,12 +5,10 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.type.ImInt;
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.library.opengl.OpenGLContext;
-import net.ice.curio.library.opengl.object.resource.GLSamplers;
 import net.ice.curio.library.opengl.object.resource.GLTexture;
 import net.ice.curio.library.stb.Bitmap;
 import net.ice.heirloom.event.EventManager;
 import net.ice.relic.core.gui.Gui;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.depricated.GLShaderProgram;
 import net.ice.relic.core.rendering.backend.opengl.mesh.GuiMesh;
@@ -68,8 +66,9 @@ public class GLGuiRenderer {
 
         imGuiIO.setDisplaySize(context.getCurio().getWindow().getWindowSize().x, context.getCurio().getWindow().getWindowSize().y);
         imGuiIO.setDisplayFramebufferScale(context.getCurio().getWindow().getFramebufferSize().x, context.getCurio().getWindow().getFramebufferSize().y);
+        //imGuiIO.setFontGlobalScale(context.getCurio().getWindow().getWindowScale().x);
 
-        buildFontAtlas();
+        buildFontAtlas(context.getCurio().getWindow().getWindowSize().x);
 
         imGuiGl3.init("version 330 core");
     }
@@ -130,12 +129,25 @@ public class GLGuiRenderer {
         shaderProgram.unbind();
     }
 
-    private void buildFontAtlas() {
-        ImFontAtlas fontAtlas = ImGui.getIO().getFonts();
+    private void buildFontAtlas(float scale) {
+        ImGuiIO io = ImGui.getIO();
+
+//        io.getFonts().clear();
+//        ImFontConfig config = new ImFontConfig();
+//        config.setOversampleH(1);
+//        config.setOversampleV(1);
+//        config.setPixelSnapH(true);
+//        config.setRasterizerMultiply(1.0f);
+//
+//
+//        ImFont font = io.getFonts().addFontFromFileTTF("resources/relic/assets/fonts/ProggyClean.ttf", 10, config);
+//        io.getFonts().build();
+
         ImInt width = new ImInt();
         ImInt height = new ImInt();
-        ByteBuffer buf = fontAtlas.getTexDataAsRGBA32(width, height);
+        ByteBuffer buf = io.getFonts().getTexDataAsRGBA32(width, height);
         texture = new GLTexture(
+                context,
                 context.getSamplers().SAMPLER_UI,
                 new Bitmap(width.get(), height.get(), 4, buf)
         );

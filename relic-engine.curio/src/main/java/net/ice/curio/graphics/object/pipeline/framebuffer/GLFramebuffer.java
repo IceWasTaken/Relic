@@ -1,5 +1,6 @@
 package net.ice.curio.graphics.object.pipeline.framebuffer;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import org.joml.Vector2i;
 import org.lwjgl.system.MemoryStack;
 
@@ -18,11 +19,14 @@ public class GLFramebuffer {
 	private final int handle;
 	private final int target;
 
-	public GLFramebuffer(Vector2i size, int target, int texCount, int format) {
-		this(size.x, size.y, target, texCount, format);
+	private final GraphicsContext context;
+
+	public GLFramebuffer(GraphicsContext context, Vector2i size, int target, int texCount, int format) {
+		this(context, size.x, size.y, target, texCount, format);
 	}
 
-	public GLFramebuffer(int width, int height, int target, int texCount, int format) {
+	public GLFramebuffer(GraphicsContext context, int width, int height, int target, int texCount, int format) {
+		this.context = context;
 		this.textures = new int[texCount];
 		this.handle = glCreateFramebuffers();
 		this.format = format;
@@ -66,6 +70,22 @@ public class GLFramebuffer {
 		glBindFramebuffer(GL_FRAMEBUFFER, handle);
 	}
 
+	public void bind(int target) {
+		glBindFramebuffer(target, handle);
+	}
+
+	public void blit(GLFramebuffer source, int mask, int filter) {
+		Vector2i fbSize = context.getWindow().getFramebufferSize();
+		glBlitNamedFramebuffer(
+				source.handle, handle,
+				0, 0,
+				fbSize.x, fbSize.y,
+				0, 0,
+				fbSize.x, fbSize.y,
+				mask, filter
+		);
+	}
+
 	public void clear() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
@@ -78,7 +98,7 @@ public class GLFramebuffer {
 
 	public GLFramebuffer resize(int width, int height) {
 		cleanup();
-		return new GLFramebuffer(width, height, target, textures.length, format);
+		return new GLFramebuffer(context, width, height, target, textures.length, format);
 	}
 
 	public void assertComplete() {
@@ -97,5 +117,9 @@ public class GLFramebuffer {
 			}
 			default -> throw new RuntimeException("[GLFramebuffer]: Unknown framebuffer status: " + status);
 		}
+	}
+
+	public int[] getTextures() {
+		return textures;
 	}
 }

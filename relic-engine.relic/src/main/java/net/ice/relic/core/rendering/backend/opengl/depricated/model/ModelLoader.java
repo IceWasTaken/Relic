@@ -30,6 +30,8 @@ public class ModelLoader {
 
     public static final int MAX_BONES = 150;
 
+    public static boolean SHOULD_UPDATE_BUFFERS = false;
+
     private static long modelLoadStartTime;
 
     private final TextureCache textureCache;
@@ -223,6 +225,7 @@ public class ModelLoader {
         modelCache.addModel(model);
 
         Logger.info("[ModelLoader] Loaded Model '{}' in {}ms", resource.getFromFileSystem().getName(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - modelLoadStartTime));
+        SHOULD_UPDATE_BUFFERS = true;
         return model;
     }
 

@@ -75,6 +75,9 @@ public class GLPipeline extends Pipeline {
 		glLinkProgram(shaderProgram);
 		glValidateProgram(shaderProgram);
 
+		if(glGetProgrami(shaderProgram, GL_VALIDATE_STATUS) != GL_TRUE) {
+			throw new RuntimeException();
+		}
 
 		shaders.forEach(shader -> glDetachShader(shaderProgram, shader.getShaderHandle()));
 		shaders.forEach(shader -> glDeleteShader(shader.getShaderHandle()));
@@ -104,6 +107,22 @@ public class GLPipeline extends Pipeline {
 				PrimitiveType.TRIANGLE,
 				RasterizationState.DEFAULT,
 				DepthState.DEFAULT,
+				new GLViewport(
+						new Vector2i(0),
+						context.getCurio().getWindow().getFramebufferSize(),
+						reverseZ
+				)
+		);
+	}
+
+	public GLPipeline(GraphicsContext context, String programPath, GLFramebuffer framebuffer, DepthState depthState, boolean reverseZ) {
+		this(
+				context,
+				programPath,
+				framebuffer,
+				PrimitiveType.TRIANGLE,
+				RasterizationState.DEFAULT,
+				depthState,
 				new GLViewport(
 						new Vector2i(0),
 						context.getCurio().getWindow().getFramebufferSize(),

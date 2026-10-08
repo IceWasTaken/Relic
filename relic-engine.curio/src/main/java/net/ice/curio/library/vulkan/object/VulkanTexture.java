@@ -29,20 +29,20 @@ public class VulkanTexture extends Texture {
     //private final ImageView imageView;
 
 
-    public VulkanTexture(VulkanContext vulkanContext, String id, Bitmap bitmap, ImageFormat format) {
-        super(bitmap);
+    public VulkanTexture(VulkanContext context, String id, Bitmap bitmap, ImageFormat format) {
+        super(context, bitmap);
 
         this.id = id;
         this.recordedTransition = false;
         this.transparent = bitmap.isTransparent();
 
-        createStagingBuffer(vulkanContext, bitmap.getData());
+        createStagingBuffer(context, bitmap.getData());
 
         //copied straight from GLTexture.java
         int levels = (int) Math.floor(log2(Math.max(width, height))) + 1;
 
         this.image = new VulkanImage(
-                vulkanContext,
+                context,
                 new Image.ImageInfo()
                         .width(bitmap.getWidth())
                         .height(bitmap.getHeight())

@@ -2,10 +2,12 @@ package net.ice.relic.core.rendering.backend.opengl.renderers;
 
 import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.Viewport;
+import net.ice.curio.graphics.object.pipeline.depth.CompareFunction;
+import net.ice.curio.graphics.object.pipeline.depth.DepthState;
+import net.ice.curio.graphics.object.pipeline.framebuffer.GLFramebuffer;
 import net.ice.curio.library.opengl.object.pipeline.GLPipeline;
 import net.ice.relic.core.ShadowData;
 import net.ice.relic.core.Shadows;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
 import net.ice.curio.library.opengl.object.Uniforms;
 import net.ice.relic.core.rendering.backend.opengl.mesh.QuadMesh;
 import net.ice.relic.core.scene.Scene;
@@ -15,27 +17,39 @@ import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL14.GL_FUNC_ADD;
 import static org.lwjgl.opengl.GL14.glBlendEquation;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.lwjgl.opengl.GL30.*;
 
 public class GLLightRenderer {
 
     private QuadMesh quadMesh;
-    private Viewport viewport;
-
     private GLPipeline pipeline;
 
     private final GraphicsContext graphicsContext;
 
     public GLLightRenderer(GraphicsContext graphicsContext) {
         this.graphicsContext = graphicsContext;
-        this.viewport = graphicsContext.createViewport(
-                graphicsContext.getCurio().getWindow().getFramebufferSize()
-        );
     }
 
     public void init() {
-        this.pipeline = new GLPipeline(graphicsContext, "lights", null, true);
+        this.pipeline = new GLPipeline(
+                graphicsContext,
+                "lights",
+                new GLFramebuffer(
+                        graphicsContext,
+                        graphicsContext.getCurio().getWindow().getFramebufferSize(),
+                        GL_TEXTURE_2D,
+                        1,
+                        GL_RGBA16F
+                ),
+                new DepthState(
+                        false,
+                        false,
+                        CompareFunction.ALWAYS,
+                        false,
+                        false
+                ),
+                true
+        );
 
         Uniforms uniforms = pipeline.getUniforms();
 
@@ -63,23 +77,22 @@ public class GLLightRenderer {
     }
 
     public void render(GLRenderer renderer) {
+        glClearColor(0, 0, 0, 1);
+
         Uniforms uniforms = pipeline.getUniforms();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        GLPipeline scenePipeline = renderer.getSceneRenderer().getPipeline();
-
+        Scene scene = renderer.getApplication().getCurrentScene();
+        GLPipeline scenePipeline = renderer.sceneRenderer.getPipeline();
         pipeline.bindPipeline();
 
-        Scene scene = renderer.getApplication().getCurrentScene();
         updateLights(scene);
         updateShadows(renderer);
-        viewport.bind();
+
         glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_ONE, GL_ONE);
 
+        scenePipeline.getFramebuffer().ifPresent(glFramebuffer -> pipeline.getFramebuffer().get().blit(glFramebuffer, GL_DEPTH_BUFFER_BIT, GL_NEAREST));
         scenePipeline.getFramebuffer().ifPresent((fb) -> fb.bindTextures(0));
         renderer.getShadowBuffer().bindTextureArray(4);
 
@@ -91,11 +104,10 @@ public class GLLightRenderer {
 
         quadMesh.getMeshVAO().bind();
         glDrawElements(GL_TRIANGLES, quadMesh.getVertexCount(), GL_UNSIGNED_INT, 0);
-        //glEnable(GL_FRAMEBUFFER_SRGB);
     }
 
     public void resize(int width, int height) {
-        viewport.resize(width, height);
+        pipeline.resize(width, height);
     }
 
     private void updateLights(Scene scene) {
@@ -116,7 +128,7 @@ public class GLLightRenderer {
         Uniforms uniforms = pipeline.getUniforms();
 
         int index = 0;
-        for(ShadowData shadowData : renderer.getShadowRenderer().getShadows().getShadowData()) {
+        for(ShadowData shadowData : renderer.shadowRenderer.getShadows().getShadowData()) {
             String prefix = uniforms.formatUniform("shadows", index);
             uniforms.setUniform(prefix + ".shadowProjectionMatrix", shadowData.getProjViewMatrix());
             uniforms.setUniform(prefix + ".splitDistance", new Vector4f(shadowData.getSplitDistance()));
@@ -124,4 +136,7 @@ public class GLLightRenderer {
         }
     }
 
+    public GLPipeline getPipeline() {
+        return pipeline;
+    }
 }

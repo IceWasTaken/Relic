@@ -9,6 +9,9 @@ import net.ice.curio.library.stb.Bitmap;
 import net.ice.curio.library.vulkan.VulkanContext;
 import net.ice.curio.window.Window;
 import org.joml.Vector2i;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.util.renderdoc.RenderDoc;
 
 public abstract class GraphicsContext {
 
@@ -21,6 +24,11 @@ public abstract class GraphicsContext {
 
     protected GraphicsContext(Curio curio) {
         this.curio = curio;
+
+    }
+
+    public boolean usingRenderDoc() {
+        return curio.getApplicationProperties().hasArgument("renderdoc");
     }
 
     public abstract Viewport createViewport(int width, int height);
@@ -47,6 +55,9 @@ public abstract class GraphicsContext {
 
     public Curio getCurio() {
         return curio;
+    }
+    public Window getWindow() {
+        return curio.getWindow();
     }
 
 

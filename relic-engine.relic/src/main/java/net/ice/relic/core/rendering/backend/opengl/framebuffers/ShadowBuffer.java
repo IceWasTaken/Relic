@@ -1,6 +1,6 @@
 package net.ice.relic.core.rendering.backend.opengl.framebuffers;
 
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL30.*;

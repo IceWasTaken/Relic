@@ -23,4 +23,5 @@ public class SDL {
 		}
 		return nSDL_GetWindowSize(window,size.memAddress(0), size.memAddress(4));
 	}
+
 }

@@ -20,7 +20,8 @@ import net.ice.relic.core.Timer;
 import net.ice.relic.core.cache.MaterialCache;
 import net.ice.relic.core.cache.ModelCache;
 import net.ice.relic.core.cache.TextureCache;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.particle.ParticleSystem;
+import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import net.ice.relic.core.rendering.backend.vulkan.VulkanRenderer;
 import net.ice.relic.core.scene.Scene;
 import org.joml.Vector2f;
@@ -52,6 +53,8 @@ public abstract class RelicApplication extends Application {
     protected final TextureCache textureCache;
     protected final MaterialCache materialCache;
 
+    protected final ParticleSystem particleSystem;
+
     protected abstract void init(RelicApplication application);
     protected abstract void update(RelicApplication application);
     protected abstract void render(RelicApplication application);
@@ -72,6 +75,8 @@ public abstract class RelicApplication extends Application {
         this.modelCache = new ModelCache();
         this.textureCache = new TextureCache(curio.getGraphicsContext());
         this.materialCache = new MaterialCache();
+
+        this.particleSystem = new ParticleSystem();
     }
 
     public void run() {
@@ -289,4 +294,7 @@ public abstract class RelicApplication extends Application {
         return modelCache;
     }
 
+    public ParticleSystem getParticleSystem() {
+        return particleSystem;
+    }
 }

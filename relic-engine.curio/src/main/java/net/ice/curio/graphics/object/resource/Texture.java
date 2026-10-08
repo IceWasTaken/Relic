@@ -1,5 +1,6 @@
 package net.ice.curio.graphics.object.resource;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.library.stb.Bitmap;
 
 public abstract class Texture {
@@ -8,11 +9,13 @@ public abstract class Texture {
     protected final int height;
 
     protected final Bitmap image;
+    protected final GraphicsContext context;
 
     public abstract void cleanup();
     public abstract long getHandle();
 
-    protected Texture(Bitmap image) {
+    protected Texture(GraphicsContext context, Bitmap image) {
+        this.context = context;
         this.image = image;
         this.width = image.getWidth();
         this.height = image.getHeight();

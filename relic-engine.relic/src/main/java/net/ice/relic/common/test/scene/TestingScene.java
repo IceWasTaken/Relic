@@ -10,7 +10,7 @@ import net.ice.relic.core.ecs.component.components.TransformComponent;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
@@ -18,7 +18,6 @@ import org.joml.Random;
 import org.joml.Vector3f;
 
 import static org.lwjgl.assimp.Assimp.aiProcess_PreTransformVertices;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
 
 public class TestingScene extends Scene {
 
@@ -27,6 +26,7 @@ public class TestingScene extends Scene {
     }
 
     private int lastCubeCount = 0;
+    private Entity particleSource;
 
     @Override
     protected void sceneInit() {
@@ -49,6 +49,9 @@ public class TestingScene extends Scene {
         sponzaEntity1.addComponent(new TransformComponent().setPosition(0, 0, 20));
         sponzaEntity1.addComponent(new ModelComponent(sponzaModel));
         sponzaModel.getEntities().add(sponzaEntity1);
+
+        this.particleSource = createEntity("particleSource");
+        particleSource.addComponent(new TransformComponent().setPosition(0, 10, 0));
 
 //        Entity cube = createEntity("cube");
 //        cube.addComponent(new TransformComponent());
@@ -84,6 +87,10 @@ public class TestingScene extends Scene {
             ((GLRenderer) getApplication().getRenderer()).getBufferManager().loadEntity(cube);
 
             lastCubeCount++;
+        }
+
+        if(Input.isKeyDown(Key.KEY_G)) {
+            application.getParticleSystem().respawn(entities.get(2), new Vector3f(0, 1, 0));
         }
     }
 

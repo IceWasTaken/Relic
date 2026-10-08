@@ -4,12 +4,12 @@ import net.ice.curio.config.RendererConfig;
 import net.ice.curio.config.enums.BackendType;
 import net.ice.curio.input.Input;
 import net.ice.curio.input.enums.MouseButton;
-import net.ice.heirloom.application.ApplicationProperties;
 import net.ice.heirloom.Version;
+import net.ice.heirloom.application.ApplicationProperties;
 import net.ice.relic.RelicApplication;
 import net.ice.relic.common.test.scene.TestingScene;
 import net.ice.relic.core.ecs.entity.Entity;
-import net.ice.relic.core.rendering.backend.opengl.GLRenderer;
+import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import net.ice.relic.core.scene.Camera;
 import net.ice.relic.core.scene.Scene;
 import net.ice.relic.core.scene.light.Light;
@@ -52,7 +52,7 @@ public class OpenGLTest extends RelicApplication {
     protected void update(RelicApplication application) {
         Scene scene = application.getCurrentScene();
         float moveSpeed = application.getClock().getDeltaTime() * 4f;
-        moveSpeed = Input.isKeyDown(KEY_LEFT) ? moveSpeed * 2 : moveSpeed;
+        moveSpeed = Input.isKeyDown(KEY_LEFT_SHIFT) ? moveSpeed * 2 : moveSpeed;
         Camera camera = scene.getCamera();
 
         if (Input.isKeyDown(KEY_W)) {

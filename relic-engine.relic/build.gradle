@@ -55,7 +55,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'net.ice.relic.common.test.VulkanTest'
+    mainClass = 'net.ice.relic.common.test.OpenGLTest'
 }
 
 jar {
@@ -81,6 +81,10 @@ tasks.named('jar') {
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.named('run', JavaExec) {
+    workingDir = System.getProperty("user.dir")
 }
 
 tasks.register('buildAgent', Jar) {

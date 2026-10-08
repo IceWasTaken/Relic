@@ -1,7 +1,9 @@
 package net.ice.curio.library.opengl.object.resource;
 
+import net.ice.curio.graphics.context.GraphicsContext;
 import net.ice.curio.graphics.object.resource.Texture;
 import net.ice.curio.library.stb.Bitmap;
+import org.lwjgl.opengl.GLCapabilities;
 import org.tinylog.Logger;
 
 import static org.lwjgl.opengl.ARBBindlessTexture.*;
@@ -13,11 +15,10 @@ public class GLTexture extends Texture {
     private final int textureID;
     private final long textureHandle;
 
-    public GLTexture(GLSamplers.GLSampler sampler, Bitmap bitmap) {
-        super(bitmap);
+    public GLTexture(GraphicsContext context, GLSamplers.GLSampler sampler, Bitmap bitmap) {
+        super(context, bitmap);
 
         while(glGetError() != GL_NO_ERROR);
-
 
         this.textureID = glCreateTextures(GL_TEXTURE_2D);
         int width = bitmap.getWidth();
@@ -32,21 +33,25 @@ public class GLTexture extends Texture {
 
         bitmap.cleanup();
 
-        this.textureHandle = glGetTextureSamplerHandleARB(textureID, sampler.getHandle());
-        if (textureHandle == 0L) {
-            Logger.error("[GLTexture]: Failed to get bindless handle for texture.");
-            return;
-        }
+        if(!context.usingRenderDoc()) {
+            this.textureHandle = glGetTextureSamplerHandleARB(textureID, sampler.getHandle());
+            if (textureHandle == 0L) {
+                Logger.error("[GLTexture]: Failed to get bindless handle for texture.");
+                return;
+            }
 
-        glMakeTextureHandleResidentARB(textureHandle);
+            glMakeTextureHandleResidentARB(textureHandle);
 
-        if(!glIsTextureHandleResidentARB(textureHandle)) {
-            Logger.error("[GLTexture]: Texture handle not resident: {}");
-        }
+            if(!glIsTextureHandleResidentARB(textureHandle)) {
+                Logger.error("[GLTexture]: Texture handle not resident: {}");
+            }
 
-        int error;
-        if((error = glGetError()) != GL_NO_ERROR) {
-            throw new RuntimeException("[GLTexture]: Encountered error while creating texture: " + error);
+            int error;
+            if((error = glGetError()) != GL_NO_ERROR) {
+                throw new RuntimeException("[GLTexture]: Encountered error while creating texture: " + error);
+            }
+        } else {
+            textureHandle = 0;
         }
     }
 

@@ -5,6 +5,7 @@ import net.ice.curio.config.RendererConfig;
 import net.ice.curio.library.glfw.GLFWWindow;
 import net.ice.curio.library.sdl.video.SDLWindow;
 import net.ice.curio.window.enums.WindowAttribute;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.vulkan.VkInstance;
 
@@ -24,6 +25,8 @@ public abstract class Window {
 
     public abstract Vector2i getWindowSize();
     public abstract Vector2i getFramebufferSize();
+
+    public abstract Vector2f getWindowScale();
 
     public abstract void attribute(WindowAttribute attribute, int value);
     public void attribute(WindowAttribute attribute, boolean value) {

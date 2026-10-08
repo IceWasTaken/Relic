@@ -2,6 +2,7 @@ package net.ice.relic.core.ecs.component.components;
 
 import net.ice.relic.core.ecs.component.Component;
 import net.ice.relic.core.ecs.component.Editable;
+import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -23,6 +24,8 @@ public class TransformComponent extends Component {
 
 	@Override
 	public void update() {
+		BufferManager.SHOULD_UPDATE_BUFFERS = true;
+
 		transformationMatrix
 				.identity()
 				.translate(position)

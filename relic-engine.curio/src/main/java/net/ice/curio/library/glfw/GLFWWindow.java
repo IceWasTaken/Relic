@@ -12,10 +12,12 @@ import net.ice.curio.library.glfw.enums.GLFWPlatform;
 import net.ice.curio.library.glfw.enums.GLFWWindowHint;
 import net.ice.curio.library.glfw.enums.GLFWWindowHintValues;
 import net.ice.curio.library.glfw.events.*;
+import net.ice.curio.system.memory.Vector2fBuffer;
 import net.ice.curio.system.memory.Vector2iBuffer;
 import net.ice.curio.window.Window;
 import net.ice.curio.window.enums.WindowAttribute;
 import net.ice.heirloom.event.EventManager;
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryUtil;
@@ -258,6 +260,14 @@ public class GLFWWindow extends Window {
     }
 
     @Override
+    public Vector2f getWindowScale() {
+        try(Vector2fBuffer buffer = new Vector2fBuffer()) {
+            GLFW.glfwGetWindowContentScale(windowHandle, buffer);
+            return buffer.get();
+        }
+    }
+
+    @Override
     public boolean shouldResizeWindow() {
         if (windowResized) {
             this.windowResized = false;
@@ -302,6 +312,8 @@ public class GLFWWindow extends Window {
 	        case CONTEXT_VERSION_MINOR -> GLFW_CONTEXT_VERSION_MINOR;
 	        case CONTEXT_PROFILE -> GLFW_OPENGL_PROFILE;
 			case CONTEXT_DEBUG -> GLFW_CONTEXT_DEBUG;
+			case DEPTH_BITS -> GLFW_DEPTH_BITS;
+	        case STENCIL_BITS -> GLFW_STENCIL_BITS;
         };
     }
 

@@ -3,7 +3,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'application'
 }
 
 String lwjglNatives;
@@ -47,6 +46,9 @@ dependencies {
 
     implementation "io.github.spair:imgui-java-app:${imguiVersion}"
     runtimeOnly "io.github.spair:imgui-java-app:${imguiVersion}"
+
+    implementation "org.lwjgl:lwjgl-renderdoc"
+
 
     implementation 'org.tinylog:tinylog-api:2.8.0'
     implementation 'org.tinylog:tinylog-impl:2.8.0'

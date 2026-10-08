@@ -2,7 +2,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id 'java'
-    id 'application'
 }
 
 String lwjglNatives = "";
@@ -15,6 +14,8 @@ if(Os.isFamily(Os.FAMILY_WINDOWS)) {
 
 group = 'net.ice.artifact'
 version = '0.0.1'
+
+
 
 repositories {
     mavenCentral()
