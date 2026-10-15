@@ -1,6 +1,7 @@
 package net.ice.curio.library.opengl.object;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.tinylog.Logger;
@@ -129,11 +130,17 @@ public final class GLBuffer {
         used += 8;
     }
 
+    public void putVec2f(int pos, Vector2f value) {
+        putFloat(pos, value.x);
+        putFloat(pos + 4, value.y);
+    }
+
     public void putVec3f(int pos, Vector3f value) {
         putFloat(pos, value.x);
         putFloat(pos + 4, value.y);
         putFloat(pos + 8, value.z);
     }
+
     public void putVec4f(int pos, Vector4f value) {
         putFloat(pos, value.x);
         putFloat(pos + 4, value.y);
@@ -227,6 +234,14 @@ public final class GLBuffer {
         float[] arr = new float[16];
         matrix.get(arr);
         putFloat(arr);
+    }
+
+    public float readFloat(int pos) {
+        return mapping.getFloat(pos);
+    }
+
+    public int readInt(int pos) {
+        return mapping.getInt(pos);
     }
 
     public void position(int position) {

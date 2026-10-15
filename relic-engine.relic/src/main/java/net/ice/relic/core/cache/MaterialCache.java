@@ -4,6 +4,7 @@ import net.ice.relic.core.model.material.Material;
 import org.tinylog.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MaterialCache {
@@ -13,7 +14,7 @@ public class MaterialCache {
     private final List<Material> materialList;
 
     public MaterialCache() {
-        materialList = new ArrayList<>();
+        materialList = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void addMaterial(Material material) {

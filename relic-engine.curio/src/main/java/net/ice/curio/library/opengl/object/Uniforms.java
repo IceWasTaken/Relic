@@ -2,6 +2,7 @@ package net.ice.curio.library.opengl.object;
 
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,12 +43,20 @@ public class Uniforms {
         uniformMap.put(uniformName, uniformLocation);
     }
 
-    private int getUniformLocation(String uniformName) {
+    private int getUniformLocation(String uniformName, boolean firstTry) {
         Integer location = uniformMap.get(uniformName);
-        if (location == null) {
-            throw new RuntimeException("Could not find: " + uniformName + " in map.");
+        if (location == null && !firstTry) {
+            throw new RuntimeException("Could not find uniform: " + uniformName + " in map.");
+        } else if(location == null && firstTry) {
+            Logger.error("Could not find uniform '{}' in map. Attempting to find and cache location.", uniformName);
+            createUniform(uniformName);
+            return getUniformLocation(uniformName, false);
         }
         return location;
+    }
+
+    private int getUniformLocation(String uniformName) {
+        return getUniformLocation(uniformName, true);
     }
 
     public void setUniform(String uniformName, Matrix4f value) {

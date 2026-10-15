@@ -1,5 +1,7 @@
 package net.ice.relic.core.ecs.component;
 
+import net.ice.relic.core.ecs.entity.Entity;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Component {
@@ -7,9 +9,13 @@ public abstract class Component {
 
     private boolean active;
 
-    public abstract void update();
+    public abstract void update(Entity entity, float deltaTime);
 
     public Component() {
+    }
+
+    public void update() {
+
     }
 
     public static <T extends Component> int getType(Class<T> clazz) {

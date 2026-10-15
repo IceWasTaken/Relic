@@ -122,4 +122,8 @@ public class GLFramebuffer {
 	public int[] getTextures() {
 		return textures;
 	}
+
+	public int getDepthTexture() {
+		return depthTexture;
+	}
 }

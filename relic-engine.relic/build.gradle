@@ -28,8 +28,7 @@ dependencies {
     implementation "org.lwjgl:lwjgl"
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
 
-    implementation "org.lwjgl:lwjgl-glfw"
-    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+
 
     implementation "org.lwjgl:lwjgl-opengl"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"

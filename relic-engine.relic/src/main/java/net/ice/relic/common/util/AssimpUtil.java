@@ -1,6 +1,7 @@
 package net.ice.relic.common.util;
 
 import net.ice.heirloom.color.RGBColor;
+import org.joml.Vector3f;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -155,6 +156,10 @@ public class AssimpUtil {
     }
     private static boolean isInternalTexture(String path) {
         return path.startsWith("*");
+    }
+
+    public static Vector3f aiVec3ToVec3(AIVector3D aiVector3D) {
+        return new Vector3f(aiVector3D.x(), aiVector3D.y(), aiVector3D.z());
     }
 
 

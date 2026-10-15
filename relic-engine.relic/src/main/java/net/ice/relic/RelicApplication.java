@@ -53,7 +53,7 @@ public abstract class RelicApplication extends Application {
     protected final TextureCache textureCache;
     protected final MaterialCache materialCache;
 
-    protected final ParticleSystem particleSystem;
+    protected ParticleSystem particleSystem;
 
     protected abstract void init(RelicApplication application);
     protected abstract void update(RelicApplication application);
@@ -76,7 +76,6 @@ public abstract class RelicApplication extends Application {
         this.textureCache = new TextureCache(curio.getGraphicsContext());
         this.materialCache = new MaterialCache();
 
-        this.particleSystem = new ParticleSystem();
     }
 
     public void run() {
@@ -109,6 +108,8 @@ public abstract class RelicApplication extends Application {
         textureCache.init();
         clock.init();
         changeState(LOADING);
+
+        this.particleSystem = ParticleSystem.getInstance();
 
         init(this);
     }

@@ -1,6 +1,7 @@
 package net.ice.relic.core.model.mesh;
 
 import net.ice.curio.library.opengl.object.GLBuffer;
+import net.ice.relic.core.physics.AABB;
 
 public class MeshData {
 
@@ -14,9 +15,22 @@ public class MeshData {
     private final float[] weights;
     private final int[] boneIndices;
 
+    private AABB aabb;
+
     private int materialIndex;
 
-    public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights, int materialIndex) {
+    public MeshData(
+            float[] vertices,
+            float[] normals,
+            float[] tangents,
+            float[] bitangents,
+            float[] textureCoords,
+            int[] indices,
+            int[] boneIndices,
+            float[] weights,
+            AABB aabb,
+            int materialIndex
+    ) {
         this.positions = vertices;
         this.normals = normals;
         this.tangents = tangents;
@@ -25,11 +39,22 @@ public class MeshData {
         this.textureCoords = textureCoords;
         this.indices = indices;
         this.boneIndices = boneIndices;
+        this.aabb = aabb;
         this.materialIndex = 0;
     }
 
-    public MeshData(float[] vertices, float[] normals, float[] tangents, float[] bitangents, float[] textureCoords, int[] indices, int[] boneIndices, float[] weights) {
-        this(vertices, normals, tangents, bitangents, textureCoords, indices, boneIndices, weights, 0);
+    public MeshData(
+            float[] vertices,
+            float[] normals,
+            float[] tangents,
+            float[] bitangents,
+            float[] textureCoords,
+            int[] indices,
+            int[] boneIndices,
+            AABB aabb,
+            float[] weights
+    ) {
+        this(vertices, normals, tangents, bitangents, textureCoords, indices, boneIndices, weights, aabb, 0);
     }
 
     public int getMeshSize() {
@@ -106,5 +131,7 @@ public class MeshData {
         return weights;
     }
 
-
+    public AABB getAabb() {
+        return aabb;
+    }
 }

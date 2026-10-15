@@ -46,18 +46,16 @@ public class GLParticleRenderer {
 	}
 
 	public void init() {
-		this.shaderProgram = new GLShaderProgram("particle");
+		this.shaderProgram = new GLShaderProgram("particle_render");
 		this.uniforms = new Uniforms(shaderProgram.getProgramID());
 
 		uniforms.createUniform("viewMatrix");
 		uniforms.createUniform("projectionMatrix");
 		uniforms.createUniform("cameraRight");
 		uniforms.createUniform("cameraUp");
-		uniforms.createUniform("billboardPos");
 		uniforms.createUniform("billboardSize");
-		uniforms.createUniform("color");
-		uniforms.createUniform("life");
 		uniforms.createUniform("sprite");
+		uniforms.createUniform("index");
 
 		this.vertexArray = new VertexArrayObject();
 		this.vertexBuffer = new GLBuffer(particle_quad.length * 4L, GL_MAP_WRITE_BIT);
@@ -79,35 +77,34 @@ public class GLParticleRenderer {
 		this.vertexBuffer.unmap();
 	}
 
-	public void render(ParticleSystem particleSystem, float delta, GLRenderer renderer) {
+	public void render(GLRenderer renderer) {
 		shaderProgram.bind();
 
-		particleSystem.updateParticles(delta);
+		ParticleSystem particleSystem = ParticleSystem.getInstance();
 
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_GREATER);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glDepthMask(false);
 
-		for(Particle particle : particleSystem.getParticles()) {
-			if(particle.getLife() > 0.0f) {
-				Matrix4f viewMatrix = renderer.getApplication().getCurrentScene().getCamera().getViewMatrix();
+		for (int i = 0; i < particleSystem.getParticleCount(); i++) {
+			Matrix4f viewMatrix = renderer.getApplication().getCurrentScene().getCamera().getViewMatrix();
 
-				uniforms.setUniform("projectionMatrix", renderer.getApplication().getCurrentScene().getMatrix().getProjMatrix());
-				uniforms.setUniform("viewMatrix", renderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
-				uniforms.setUniform("cameraRight", new Vector3f(viewMatrix.get(0, 0), viewMatrix.get(1, 0), viewMatrix.get(2, 0)));
-				uniforms.setUniform("cameraUp", new Vector3f(viewMatrix.get(0, 1), viewMatrix.get(1, 1), viewMatrix.get(2, 1)));
-				uniforms.setUniform("billboardPos", particle.getPosition());
-				uniforms.setUniform("billboardSize", new Vector2f(1, 1));
-				uniforms.setUniform("color", Colors.BLUE.getRGBColor().div().vec4f());
-				uniforms.setUniform("life", particle.getLife());
-				uniforms.setUniform("sprite", 0);
+			uniforms.setUniform("projectionMatrix", renderer.getApplication().getCurrentScene().getMatrix().getProjMatrix());
+			uniforms.setUniform("viewMatrix", renderer.getApplication().getCurrentScene().getCamera().getViewMatrix());
+			uniforms.setUniform("cameraRight", new Vector3f(viewMatrix.get(0, 0), viewMatrix.get(1, 0), viewMatrix.get(2, 0)));
+			uniforms.setUniform("cameraUp", new Vector3f(viewMatrix.get(0, 1), viewMatrix.get(1, 1), viewMatrix.get(2, 1)));
 
-				int id = ((GLTexture) sprite).getTextureHandle();
-				glBindTextureUnit(0, id);
+			uniforms.setUniform("index", i);
+			uniforms.setUniform("billboardSize", new Vector2f(1, 1));
+			uniforms.setUniform("sprite", 0);
 
-				vertexArray.bind();
-				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-				vertexArray.unbind();
-			}
+			int id = ((GLTexture) sprite).getTextureHandle();
+			glBindTextureUnit(0, id);
+
+			vertexArray.bind();
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+			vertexArray.unbind();
 		}
 
 		glDepthMask(true);

@@ -1,6 +1,45 @@
 # Changelog
 ### Thought the version history in README.md was getting too long. Any update after 0.6.1 will be found here.
 
+## 0.6.5
+> Improved particles, basic physics (October 15th, 2026)
+
+### Issues
+* Fixed #39 - "Particles ignoring depth testing"
+* Implemented #37 - "Compute Shader particles"
+
+### Relic
+* Create AABB.java - Basic AABB (Axis Aligned Bounding Box) class. Holds vectors defining a starting position, ending position, scale (in local space) 
+* Create GLParticleCompute.java - Compute dispatcher for handling particle life & basic collisions with the scene based on depth & normals
+* Create particle.comp - Calculates particle life, position, velocity, etc
+* Create PhysicsComponent.java - Component holding velocity and mass of an object
+* Create PhysicsWorld.java - Handler for physics-based objects, 
+* Modify GLParticleRenderer.java - Modified to render based on info kept in an SSBO and supplied by GLParticleCompute.java
+* Modify ParticleEmitterComponent.java - Emits particles. That's it
+* Modify PhysicsUtil.java - Adds public Vector3f(s) for UP, NORTH, EAST, etc directions. Add method for getting a vector in the relative direction of one of mentioned vectors
+* Modify ParticleSystem.java - Now a handler for buffering data into particle SSBO
+* Modify AssimpUtil.java - Added utility method for converting AiVector3f to normal Vector3f
+* Modify Component.java - Add parameters to update function, and add an option update method without parameters
+* Modify build.gradle - Remove GLFW dependency (handled by Curio)
+* Modify GLDebugRenderer - Debug render AABB(s)
+* Modify MaterialCache.java - Changed 'materialList' to a synchronized array list
+* Modify MeshData.java - Added AABB field
+* Modify ModelLoader.java - No longer uses Future<Material> and instead relies on indices and a ConcurrentHashMap for threaded material generation
+* Modify Particle.java - Remove update method; its functionality is now handled by particle.comp
+* Modify Relic.java - Bump version
+
+### Curio
+* Modify GLBuffer.java - Add method for getting and setting Vector2f(s)
+* Modify GLFramebuffer.java - Add getter for the depth texture
+* Modify Uniforms.java - Now attempts once to find the uniform location if it is not found in the map (in the case Uniforms#createUniform is forgotten)
+
+### Other
+* Modify README.md - Remove GLFW dependency from Relic
+
+
+
+---
+
 ## 0.6.4
 > Basic particle system & rendering (October 8th, 2026)
 
