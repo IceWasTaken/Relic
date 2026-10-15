@@ -1,6 +1,7 @@
 package net.ice.relic.core.ecs.component.components.rendering;
 
 import net.ice.relic.core.ecs.component.Component;
+import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
 
 public class ModelComponent extends Component {
@@ -20,7 +21,7 @@ public class ModelComponent extends Component {
 	}
 
 	@Override
-	public void update() {
+	public void update(Entity entity, float deltaTime) {
 
 	}
 }

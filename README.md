@@ -18,7 +18,6 @@ Contains 3 main modules:
   - Curio
   - Heirloom
   - LWJGL
-    - GLFW
     - OpenGL
     - Vulkan
     - Shaderc

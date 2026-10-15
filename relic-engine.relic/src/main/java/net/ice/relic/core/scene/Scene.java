@@ -51,7 +51,7 @@ public abstract class Scene {
         this.ambientLight = new AmbientLight().setIntensity(0.1f).setColor(Colors.WHITE.getRGBColor());
         this.lights = new ArrayList<>();
 
-        lights.add(new Light(new Vector3f(0, -1.0f,0), true, 8, Colors.WHITE.getRGBColor()));
+        lights.add(new Light(new Vector3f(0, -1.0f,0), true, 1, Colors.WHITE.getRGBColor()));
     }
 
     public void init() {

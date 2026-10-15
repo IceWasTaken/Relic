@@ -8,6 +8,7 @@ import net.ice.relic.core.cache.TextureCache;
 import net.ice.relic.core.model.material.Material;
 import net.ice.relic.core.model.mesh.MeshData;
 import net.ice.relic.core.model.Model;
+import net.ice.relic.core.physics.AABB;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.lwjgl.PointerBuffer;
@@ -26,11 +27,10 @@ public class ModelLoader {
 
     public static final int DEFAULT_FLAGS = aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices |
             aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights |
-            aiProcess_GenBoundingBoxes;
+            aiProcess_GenBoundingBoxes | aiProcess_OptimizeMeshes;
 
     public static final int MAX_BONES = 150;
 
-    public static boolean SHOULD_UPDATE_BUFFERS = false;
 
     private static long modelLoadStartTime;
 
@@ -167,36 +167,31 @@ public class ModelLoader {
 
         PointerBuffer aiMeshes = aiScene.mMeshes();
 
-        List<Material> materials = new ArrayList<>();
+        Map<Integer, Material> materials = new ConcurrentHashMap<>();
         List<MeshData> meshDataList = new ArrayList<>();
         List<Bone> boneList = new ArrayList<>();
 
-        List<Future<Material>> materialFutureList = new ArrayList<>();
+        AIMaterial[] aiMaterials = new AIMaterial[numMaterials];
+        for (int i = 0; i < numMaterials; i++) {
+            aiMaterials[i] = AIMaterial.createSafe(aiScene.mMaterials().get(i));
+        }
+
         try(ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             for (int i = 0; i < numMaterials; i++) {
                 final int id = i;
-                materialFutureList.add(executor.submit(() ->
-                        processMaterial(
-                                AIMaterial.createSafe(aiScene.mMaterials().get(id)),
-                                resource
-                        )
-                ));
-
+                final AIMaterial aiMaterial = aiMaterials[i];
+                executor.submit(() -> {
+                            Material m = processMaterial(aiMaterial, resource);
+                            materialCache.addMaterial(m);
+                            materials.put(id, m);
+                            return m;
+                        });
             }
         }
 
-		for (Future<Material> materialFuture : materialFutureList) {
-            try {
-                Material material = materialFuture.get();
-
-                materialCache.addMaterial(material);
-                materials.add(material);
-                material.createTextures(textureCache);
-			} catch (ExecutionException | InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-
-		}
+        for (int i = 0; i < numMaterials; i++) {
+            materials.get(i).createTextures(textureCache);
+        }
 
 		for (int i = 0; i < numMeshes; i++) {
             AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
@@ -225,7 +220,6 @@ public class ModelLoader {
         modelCache.addModel(model);
 
         Logger.info("[ModelLoader] Loaded Model '{}' in {}ms", resource.getFromFileSystem().getName(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - modelLoadStartTime));
-        SHOULD_UPDATE_BUFFERS = true;
         return model;
     }
 
@@ -317,6 +311,8 @@ public class ModelLoader {
 
 
     private static MeshData processMesh(AIMesh aiMesh, List<Bone> boneList) {
+        Logger.debug("[ModelLoader] Processing Mesh '{}'", aiMesh.mName().dataString());
+
         float[] vertices = processAIVectorBuffer(aiMesh.mVertices());
         float[] normals = processAIVectorBuffer(aiMesh.mNormals());
         float[] tangents = processAIVectorBufferBackup(aiMesh.mTangents(), normals);
@@ -331,8 +327,7 @@ public class ModelLoader {
             textCoords = new float[numElements];
         }
 
-        return new MeshData(vertices, normals, tangents, bitangents, textCoords, indices, animMeshData.boneIds,
-                animMeshData.weights);
+        return new MeshData(vertices, normals, tangents, bitangents, textCoords, indices, animMeshData.boneIds, AABB.fromAIAABB(aiMesh.mAABB()), animMeshData.weights);
     }
 
     public record AnimMeshData(float[] weights, int[] boneIds) {

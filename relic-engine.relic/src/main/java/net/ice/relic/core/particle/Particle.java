@@ -21,14 +21,11 @@ public class Particle{
 		this.life = life;
 	}
 
-	public void update(float deltaTime) {
-		life -= deltaTime;
-
-		if(life > 0.0f) {
-			velocity.y -= 20f * deltaTime; //gravity
-			position.add(new Vector3f(velocity).mul(deltaTime));
-			color = color.darker();
-		}
+	public Particle() {
+		this.position = new Vector3f();
+		this.velocity = new Vector3f();
+		this.color = new RGBColor(0,0,0);
+		this.life = 1.0f;
 	}
 
 	public float getLife() {
@@ -45,6 +42,26 @@ public class Particle{
 
 	public Vector3f getVelocity() {
 		return velocity;
+	}
+
+	public void setVelocity(Vector3f velocity) {
+		this.velocity = velocity;
+	}
+
+	public void setPosition(Vector3f position) {
+		this.position = position;
+	}
+
+	public void setScale(Vector2f scale) {
+		this.scale = scale;
+	}
+
+	public void setLife(float life) {
+		this.life = life;
+	}
+
+	public void setColor(RGBColor color) {
+		this.color = color;
 	}
 
 	@Override

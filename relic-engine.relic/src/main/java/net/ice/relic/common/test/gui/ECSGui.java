@@ -60,7 +60,7 @@ public class ECSGui extends GuiWindow {
 					text(field.getName());
 					if(field.getType() == Vector3f.class && field.getName().equals("position")) {
 						try {
-							editPos(component, field, 0.1f);
+							editPos(entity, component, field, 0.1f);
 						} catch (Exception e) {
 							throw new RuntimeException("Failed to set value of field: " + field.getName(), e);
 						}
@@ -75,7 +75,7 @@ public class ECSGui extends GuiWindow {
 		return !oldVec.equals(newVec);
 	}
 
-	private void editPos(Component component, Field field, float speed) throws IllegalAccessException {
+	private void editPos(Entity entity, Component component, Field field, float speed) throws IllegalAccessException {
 		field.setAccessible(true);
 
 		Vector3f currPos = (Vector3f) field.get(component);
@@ -100,7 +100,7 @@ public class ECSGui extends GuiWindow {
 
 		if(changed) {
 			field.set(component, new Vector3f(x[0], y[0], z[0]));
-			component.update();
+			component.update(entity, 0.0f);
 		}
 	}
 

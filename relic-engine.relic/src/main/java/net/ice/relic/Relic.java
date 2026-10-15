@@ -4,7 +4,7 @@ import net.ice.heirloom.Version;
 
 public final class Relic {
 
-	private static final Version RELIC_VERSION = new Version(0, 6, 4);
+	private static final Version RELIC_VERSION = new Version(0, 6, 5);
 
 	public Relic() {
 

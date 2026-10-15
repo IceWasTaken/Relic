@@ -2,6 +2,7 @@ package net.ice.relic.core.ecs.component.components;
 
 import net.ice.relic.core.ecs.component.Component;
 import net.ice.relic.core.ecs.component.Editable;
+import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -20,10 +21,17 @@ public class TransformComponent extends Component {
 
 	private Matrix4f transformationMatrix = new Matrix4f();
 
+
+
 	public TransformComponent() {}
 
 	@Override
 	public void update() {
+		update(null, 0);
+	}
+
+	@Override
+	public void update(Entity entity, float deltaTime) {
 		BufferManager.SHOULD_UPDATE_BUFFERS = true;
 
 		transformationMatrix

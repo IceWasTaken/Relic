@@ -6,10 +6,13 @@ import net.ice.heirloom.color.Colors;
 import net.ice.heirloom.io.resource.Resource;
 import net.ice.relic.RelicApplication;
 import net.ice.relic.common.test.gui.DebugGui;
+import net.ice.relic.core.ecs.component.components.PhysicsComponent;
 import net.ice.relic.core.ecs.component.components.TransformComponent;
 import net.ice.relic.core.ecs.component.components.rendering.ModelComponent;
+import net.ice.relic.core.ecs.component.components.rendering.ParticleEmitterComponent;
 import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.model.Model;
+import net.ice.relic.core.physics.PhysicsWorld;
 import net.ice.relic.core.rendering.backend.opengl.renderers.GLRenderer;
 import net.ice.relic.core.rendering.backend.opengl.depricated.model.ModelLoader;
 import net.ice.relic.core.scene.Scene;
@@ -51,7 +54,8 @@ public class TestingScene extends Scene {
         sponzaModel.getEntities().add(sponzaEntity1);
 
         this.particleSource = createEntity("particleSource");
-        particleSource.addComponent(new TransformComponent().setPosition(0, 10, 0));
+        particleSource.addComponent(new TransformComponent().setPosition(0, 5, 0));
+        particleSource.addComponent(new ParticleEmitterComponent());
 
 //        Entity cube = createEntity("cube");
 //        cube.addComponent(new TransformComponent());
@@ -76,12 +80,11 @@ public class TestingScene extends Scene {
             cube.addComponent(
                     new TransformComponent()
                             .setPosition(
-                                    random.nextInt(100),
-                                    random.nextInt(100),
-                                    random.nextInt(100)
-                            )
+                                    0, 25, 0
+                            ).setScale(0.1f, 0.1f, 0.1f)
             );
             cube.addComponent(new ModelComponent(companionCube));
+            cube.addComponent(new PhysicsComponent());
             companionCube.getEntities().add(cube);
 
             ((GLRenderer) getApplication().getRenderer()).getBufferManager().loadEntity(cube);
@@ -89,8 +92,13 @@ public class TestingScene extends Scene {
             lastCubeCount++;
         }
 
-        if(Input.isKeyDown(Key.KEY_G)) {
-            application.getParticleSystem().respawn(entities.get(2), new Vector3f(0, 1, 0));
+        PhysicsWorld.processPhysics(this, deltaTime);
+
+        for(Entity entity : getEntities()) {
+            ParticleEmitterComponent component;
+            if((component = entity.getComponent(ParticleEmitterComponent.class)) != null) {
+                component.update(entity, deltaTime);
+            }
         }
     }
 

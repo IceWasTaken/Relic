@@ -8,6 +8,7 @@ import net.ice.relic.core.ecs.entity.Entity;
 import net.ice.relic.core.rendering.backend.opengl.BufferManager;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.ShadowBuffer;
 import net.ice.relic.core.rendering.backend.opengl.framebuffers.SwapBuffer;
+import net.ice.relic.core.scene.Scene;
 import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -28,6 +29,7 @@ public class GLRenderer extends Renderer {
     final GLSceneRenderer sceneRenderer;
     final GLShadowRenderer shadowRenderer;
     final GLLightRenderer lightRenderer;
+    final GLParticleCompute particleCompute;
     final GLParticleRenderer particleRenderer;
     final GLSwapRenderer swapRenderer;
 
@@ -47,6 +49,7 @@ public class GLRenderer extends Renderer {
         this.sceneRenderer = new GLSceneRenderer(graphicsContext);
         this.shadowRenderer = new GLShadowRenderer(graphicsContext);
         this.lightRenderer = new GLLightRenderer(graphicsContext);
+        this.particleCompute = new GLParticleCompute(graphicsContext);
         this.particleRenderer = new GLParticleRenderer(graphicsContext);
         this.swapRenderer = new GLSwapRenderer(graphicsContext);
 
@@ -70,6 +73,7 @@ public class GLRenderer extends Renderer {
         sceneRenderer.init();
         shadowRenderer.init();
         lightRenderer.init();
+        particleCompute.init();
         particleRenderer.init();
         swapRenderer.init();
 
@@ -81,7 +85,6 @@ public class GLRenderer extends Renderer {
 
     @Override
     public void render() {
-
         bufferManager.update();
 
         Vector2i fbSize = curio.getWindow().getFramebufferSize();
@@ -90,7 +93,8 @@ public class GLRenderer extends Renderer {
         sceneRenderer.render(this);
         shadowRenderer.render(this);
         lightRenderer.render(this);
-        particleRenderer.render(this.getApplication().getParticleSystem(), relicApplication.getClock().getDeltaTime(), this);
+        particleCompute.render(this);
+        particleRenderer.render(this);
         swapRenderer.render(this);
         //postRenderer.render();
 
@@ -139,6 +143,10 @@ public class GLRenderer extends Renderer {
 
     public BufferManager getBufferManager() {
         return bufferManager;
+    }
+
+    public Scene getCurrentScene() {
+        return relicApplication.getCurrentScene();
     }
 
     public record AnimMeshDrawData(Entity entity, int bindingPoseOffset, int weightsOffset) { }

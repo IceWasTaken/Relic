@@ -8,5 +8,5 @@ uniform mat4 viewMatrix;
 
 void main() {
     vec4 worldPos = centerPos * vec4(inPos, 1);
-    gl_Position = projectionMatrix * viewMatrix * worldPos;
+    gl_Position = (projectionMatrix * viewMatrix * worldPos);
 }
