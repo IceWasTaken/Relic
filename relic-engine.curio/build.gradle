@@ -50,8 +50,8 @@ dependencies {
     implementation "org.lwjgl:lwjgl-renderdoc"
 
 
-    implementation 'org.tinylog:tinylog-api:2.8.0'
-    implementation 'org.tinylog:tinylog-impl:2.8.0'
+    implementation 'org.tinylog:tinylog-api:2.8.1'
+    implementation 'org.tinylog:tinylog-impl:2.8.1'
 
     implementation "org.joml:joml:${jomlVersion}"
 }
